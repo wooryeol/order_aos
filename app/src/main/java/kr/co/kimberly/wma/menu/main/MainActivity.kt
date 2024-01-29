@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
         adapter.dataList = list
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = GridLayoutManager(mActivity, 3)
-        mBinding.recyclerview.addItemDecoration(GridSpacingItemDecoration(spanCount = 3, spacing = 10f.fromDpToPx()))
+        mBinding.recyclerview.addItemDecoration(GridSpacingItemDecoration(spanCount = 3, spacing = 16f.fromDpToPx()))
     }
 
     private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
