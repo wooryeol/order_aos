@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "kr.co.kimberly.wma"
-        minSdk = 30
+        minSdk = 28
         targetSdk = 34
         versionCode = 20240126
         versionName = "1.0.0"
