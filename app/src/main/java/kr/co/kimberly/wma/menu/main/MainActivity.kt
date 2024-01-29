@@ -21,11 +21,5 @@ class MainActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
-
-        Handler(Looper.getMainLooper()).postDelayed(Runnable {
-            val i = Intent(mContext, MainActivity::class.java)
-            startActivity(i)
-            finish()
-        }, 1000)
     }
 }

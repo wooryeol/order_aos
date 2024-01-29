@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">유한킴벌리</string>
+
+    <!-- 공통 -->
+    <string name="copyright">Copyrightⓒ유한킴벌리 Corp. All Rights Reserved.</string>
+
+    <!-- Login -->
+    <string name="msg01">더 나은 생활을 향한 믿음!</string>
+    <string name="setting">환경설정</string>
+    <string name="etId">아이디</string>
+    <string name="etPw">비밀번호</string>
+    <string name="chkId">아이디 저장</string>
+    <string name="loginBtn">로그인</string>
+    <string name="wma">WMA</string>
+    <string name="mobileVer">Mobile 1.0</string>
+    <string name="appVer">ver 1.1.2</string>
 </resources>
