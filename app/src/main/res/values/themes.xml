@@ -11,4 +11,12 @@
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
+
+    <style name="CustomRadioButton" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/color_1D6DE5</item>
+    </style>
+
+    <style name="CustomCheckBox" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/color_103C7E</item>
+    </style>
 </resources>

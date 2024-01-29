@@ -1,6 +1,19 @@
 <resources>
     <string name="app_name">유한킴벌리</string>
 
+    <!--환경설정-->
+    <string name="settingTitle01">대리점</string>
+    <string name="settingTitleHint01">대리점코드를 입력해주세요.</string>
+    <string name="settingTitle02">장비선택</string>
+    <string name="settingScanner">스캐너</string>
+    <string name="settingPrint">프린트</string>
+    <string name="settingIsUsed">사용여부</string>
+    <string name="settingTitle03">이름</string>
+    <string name="settingTitle04">주소</string>
+    <string name="settingTitle05">프린터</string>
+    <string name="settingTitleHint02">페어링된 장치에서 선택하세요.</string>
+    <string name="searchDevices">Search Devices</string>
+
     <!-- 공통 -->
     <string name="copyright">Copyrightⓒ유한킴벌리 Corp. All Rights Reserved.</string>
 
