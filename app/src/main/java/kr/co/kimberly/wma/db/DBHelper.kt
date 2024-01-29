@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteDatabase.CursorFactory
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import kr.co.kimberly.wma.model.OrderTempList
+import kr.co.kimberly.wma.model.OrderTempListModel
 
 class DBHelper(
     context: Context?,
@@ -48,16 +48,16 @@ class DBHelper(
         onCreate(db)
     }
 
-    val savedOrderList : List<OrderTempList>
+    val savedOrderList : List<OrderTempListModel>
         @SuppressLint("Range", "Recycle")
         get() {
-            val list = ArrayList<OrderTempList>()
+            val list = ArrayList<OrderTempListModel>()
             val selectedQueryHandler = "SELECT * FROM $TABLE_NAME"
             val db = this.writableDatabase
             val cursor = db.rawQuery(selectedQueryHandler, null)
             if (cursor.moveToFirst()){
                 do {
-                    val data = OrderTempList()
+                    val data = OrderTempListModel()
                     data.idx = cursor.getInt(cursor.getColumnIndex(COL_IDX))
                     data.itemName = cursor.getString(cursor.getColumnIndex(COL_ITEMNAME))
                     data.itemCode = cursor.getString(cursor.getColumnIndex(COL_ITEMCODE))
@@ -76,7 +76,7 @@ class DBHelper(
             return list
         }
 
-    fun addData(data: OrderTempList) {
+    fun addData(data: OrderTempListModel) {
         val db = this.writableDatabase
         val values = ContentValues()
         values.put(COL_IDX, data.idx)
@@ -94,7 +94,7 @@ class DBHelper(
         Log.d("test log", "데이터 저장 성공")
     }
 
-    fun updateData(data: OrderTempList): Int{
+    fun updateData(data: OrderTempListModel): Int{
         val db = this.writableDatabase
         val values = ContentValues()
         values.put(COL_IDX, data.idx)
@@ -110,7 +110,7 @@ class DBHelper(
         return db.update(TABLE_NAME, values, "$COL_IDX=?", arrayOf(arrayOf(data.idx).toString()))
     }
 
-    fun deleteData(data: OrderTempList){
+    fun deleteData(data: OrderTempListModel){
         val db = this.writableDatabase
 
         db.delete(TABLE_NAME, "$COL_ITEMCODE=?", arrayOf(arrayOf(data.idx).toString()))

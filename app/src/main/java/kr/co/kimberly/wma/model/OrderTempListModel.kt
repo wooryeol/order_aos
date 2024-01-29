@@ -2,7 +2,7 @@ package kr.co.kimberly.wma.model
 
 import java.io.Serializable
 
-class OrderTempList(
+class OrderTempListModel(
     var idx: Int,
     var itemName: String,
     var itemCode: String,
