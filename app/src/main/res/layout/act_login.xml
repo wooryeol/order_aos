@@ -72,6 +72,7 @@
             android:layout_marginTop="40dp"
             android:layout_marginHorizontal="16dp"
             android:orientation="vertical">
+
             <EditText
                 android:id="@+id/etId"
                 android:layout_width="match_parent"
@@ -80,15 +81,15 @@
                 android:background="@drawable/et_round"
                 android:drawableStart="@drawable/ic_id"
                 android:drawablePadding="8dp"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
                 android:hint="@string/etId"
                 android:imeOptions="actionNext"
                 android:inputType="textUri"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp"
                 android:textColor="@color/black"
                 android:textColorHint="@color/color_B1B4BB"
                 android:textCursorDrawable="@drawable/color_cursor"
-                android:textSize="16dp"/>
+                android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/etPw"
