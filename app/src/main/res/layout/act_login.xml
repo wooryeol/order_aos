@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -86,6 +87,7 @@
                 android:inputType="textUri"
                 android:textColor="@color/black"
                 android:textColorHint="@color/color_B1B4BB"
+                android:textCursorDrawable="@drawable/color_cursor"
                 android:textSize="16dp"/>
 
             <EditText
@@ -102,6 +104,7 @@
                 android:inputType="textUri"
                 android:textColor="@color/black"
                 android:textColorHint="@color/color_B1B4BB"
+                android:textCursorDrawable="@drawable/color_cursor"
                 android:textSize="16dp"/>
 
             <LinearLayout

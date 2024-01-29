@@ -14,4 +14,17 @@
     <string name="wma">WMA</string>
     <string name="mobileVer">Mobile 1.0</string>
     <string name="appVer">ver 1.1.2</string>
+
+    <!-- Main -->
+    <string name="exit">실행종료</string>
+    <string name="notice">공지사항</string>
+    <string name="menu01">주문등록</string>
+    <string name="menu02">수금관리</string>
+    <string name="menu03">반품등록</string>
+    <string name="menu04">전표조회</string>
+    <string name="menu05">원장조회</string>
+    <string name="menu06">재고조회</string>
+    <string name="menu07">매대관리</string>
+    <string name="menu08">구매요청</string>
+    <string name="menu09">기준정보</string>
 </resources>

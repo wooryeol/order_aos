@@ -2,9 +2,13 @@ package kr.co.kimberly.wma.menu.login
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActLoginBinding
+import kr.co.kimberly.wma.menu.main.MainActivity
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var mBinding: ActLoginBinding
@@ -18,5 +22,11 @@ class LoginActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+
+        mBinding.btLogin.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                startActivity(Intent(mContext, MainActivity::class.java))
+            }
+        })
     }
 }
