@@ -7,12 +7,15 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.MainMenuAdapter
 import kr.co.kimberly.wma.custom.GridSpacingItemDecoration
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActMainBinding
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.model.MainMenuModel
 
 class MainActivity : AppCompatActivity() {
@@ -44,6 +47,12 @@ class MainActivity : AppCompatActivity() {
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = GridLayoutManager(mActivity, 3)
         mBinding.recyclerview.addItemDecoration(GridSpacingItemDecoration(spanCount = 3, spacing = 16f.fromDpToPx()))
+
+        mBinding.settingBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                startActivity(Intent(mContext, SettingActivity::class.java))
+            }
+        })
     }
 
     private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
