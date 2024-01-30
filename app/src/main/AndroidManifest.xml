@@ -22,20 +22,30 @@
             </intent-filter>
         </activity>
 
+        <!-- 로그인 화면 -->
         <activity
             android:name=".menu.login.LoginActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
+        <!-- 메인 화면 -->
         <activity
             android:name=".menu.main.MainActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
+        <!-- 환경 설정 -->
         <activity
             android:name=".menu.setting.SettingActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+
+        <!-- 주문등록 -->
+        <activity
+            android:name=".menu.order.OrderRegActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />

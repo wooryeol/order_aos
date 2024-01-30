@@ -40,4 +40,13 @@
     <string name="menu07">매대관리</string>
     <string name="menu08">구매요청</string>
     <string name="menu09">기준정보</string>
+
+    <!-- 주문등록 -->
+    <string name="account">거래처</string>
+    <string name="accountHint">거래처를 검색해 주세요</string>
+    <string name="productName">제품명</string>
+    <string name="productNameHint">제품명을 검색해 주세요</string>
+    <string name="searchResult">검색된 제품명</string>
+    <string name="box">BOX</string>
+    <string name="unit price">BOX</string>
 </resources>
