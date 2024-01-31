@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.MainMenuAdapter
+import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.GridSpacingItemDecoration
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActMainBinding
@@ -32,15 +33,15 @@ class MainActivity : AppCompatActivity() {
         mActivity = this
 
         val list = ArrayList<MainMenuModel>()
-        list.add(MainMenuModel(R.drawable.menu01, getString(R.string.menu01)))
-        list.add(MainMenuModel(R.drawable.menu02, getString(R.string.menu02)))
-        list.add(MainMenuModel(R.drawable.menu03, getString(R.string.menu03)))
-        list.add(MainMenuModel(R.drawable.menu04, getString(R.string.menu04)))
-        list.add(MainMenuModel(R.drawable.menu05, getString(R.string.menu05)))
-        list.add(MainMenuModel(R.drawable.menu06, getString(R.string.menu06)))
-        list.add(MainMenuModel(R.drawable.menu07, getString(R.string.menu07)))
-        list.add(MainMenuModel(R.drawable.menu08, getString(R.string.menu08)))
-        list.add(MainMenuModel(R.drawable.menu09, getString(R.string.menu09)))
+        list.add(MainMenuModel(R.drawable.menu01, getString(R.string.menu01), Define.MENU01))
+        list.add(MainMenuModel(R.drawable.menu02, getString(R.string.menu02), Define.MENU02))
+        list.add(MainMenuModel(R.drawable.menu03, getString(R.string.menu03), Define.MENU03))
+        list.add(MainMenuModel(R.drawable.menu04, getString(R.string.menu04), Define.MENU04))
+        list.add(MainMenuModel(R.drawable.menu05, getString(R.string.menu05), Define.MENU05))
+        list.add(MainMenuModel(R.drawable.menu06, getString(R.string.menu06), Define.MENU06))
+        list.add(MainMenuModel(R.drawable.menu07, getString(R.string.menu07), Define.MENU07))
+        list.add(MainMenuModel(R.drawable.menu08, getString(R.string.menu08), Define.MENU08))
+        list.add(MainMenuModel(R.drawable.menu09, getString(R.string.menu09), Define.MENU09))
 
         val adapter = MainMenuAdapter(mContext, mActivity)
         adapter.dataList = list

@@ -13,7 +13,9 @@ import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.databinding.CellMeinMenuBinding
+import kr.co.kimberly.wma.menu.order.OrderRegActivity
 import kr.co.kimberly.wma.model.MainMenuModel
 import java.text.SimpleDateFormat
 import java.util.ArrayList
@@ -32,6 +34,10 @@ class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapte
             binding.menuName.text = itemModel.menuName
 
             itemView.setOnClickListener {
+                if(itemModel.type == Define.MENU01) {
+                    val intent = Intent(itemView.context, OrderRegActivity::class.java)
+                    itemView.context.startActivity(intent)
+                }
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
                 intent.putExtra(Define.UNIQUE, itemModel.name)
                 intent.putExtra(Define.D_COUNT, binding.dCount.text.toString())
