@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">유한킴벌리</string>
 
     <!--환경설정-->
@@ -13,6 +13,16 @@
     <string name="settingTitle05">프린터</string>
     <string name="settingTitleHint02">페어링된 장치에서 선택하세요.</string>
     <string name="searchDevices">Search Devices</string>
+    <string name="bluetoothDevices">Bluetooth Devices</string>
+    <string name="printDevices">Print Devices</string>
+    <string name="pairing">pairing...</string>
+    <string name="requestBluetooth">블루투스 등록 요청</string>
+    <string name="register">을(를) 등록하려면</string>
+    <string name="pin">해당 디바이스의 PIN을 입력하세요:</string>
+    <string name="pinHint">(0000 또는 1234를 입력해보세요)</string>
+    <string name="pinCheckBox">문자 또는 기호가 포함된 PIN</string>
+    <string name="pinAdvice">다른 디바이스에도 PIN을 입력하세요</string>
+
 
     <!-- 공통 -->
     <string name="copyright">Copyrightⓒ유한킴벌리 Corp. All Rights Reserved.</string>
@@ -27,6 +37,8 @@
     <string name="wma">WMA</string>
     <string name="mobileVer">Mobile 1.0</string>
     <string name="appVer">ver 1.1.2</string>
+    <string name="confirm">확인</string>
+    <string name="cancel">취소</string>
 
     <!-- Main -->
     <string name="exit">실행종료</string>
