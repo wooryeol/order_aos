@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:paddingHorizontal="16dp"
     android:paddingBottom="16dp"
+    android:background="@drawable/popup_round"
     android:orientation="vertical">
 
     <TextView
@@ -17,92 +18,98 @@
         android:text="@string/requestBluetooth"
         tools:ignore="SpUsage" />
 
-    <TextView
-        android:id="@+id/deviceName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/color_1A1A1A"
-        android:textStyle="bold"
-        android:textSize="13dp"
-        android:layout_marginTop="12dp"
-        tools:ignore="SpUsage" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/color_1A1A1A"
-        android:textSize="13dp"
-        android:layout_marginTop="4dp"
-        android:text="@string/register"
-        tools:ignore="SpUsage" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/color_4C4F54"
-        android:textSize="13dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/pin"
-        tools:ignore="SpUsage" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:textSize="16dp"
-        android:background="@drawable/et_round"
-        android:paddingVertical="10dp"
-        android:paddingHorizontal="12dp"
-        android:layout_marginTop="8dp"
-        android:imeOptions="actionDone"
-        android:inputType="text"
-        tools:ignore="Autofill,LabelFor,SpUsage,TextFields" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/color_7E828B"
-        android:textSize="12dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/pinHint"
-        tools:ignore="SpUsage" />
-    
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="16dp">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/checkBoxPin"
+        <TextView
+            android:id="@+id/deviceName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:theme="@style/CustomCheckBox"/>
+            android:textColor="@color/color_1A1A1A"
+            android:textStyle="bold"
+            android:textSize="13dp"
+            android:layout_marginTop="12dp"
+            tools:ignore="SpUsage" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/color_1A1A1A"
-            android:textSize="14dp"
-            android:text="@string/pinCheckBox"
+            android:textSize="13dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/register"
             tools:ignore="SpUsage" />
 
-    </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_4C4F54"
+            android:textSize="13dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/pin"
+            tools:ignore="SpUsage" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/color_7E828B"
-        android:textSize="12dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/pinAdvice"
-        tools:ignore="SpUsage" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textSize="16dp"
+            android:background="@drawable/et_round_c9cbd0"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="12dp"
+            android:layout_marginTop="8dp"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            tools:ignore="Autofill,LabelFor,SpUsage,TextFields" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_7E828B"
+            android:textSize="12dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/pinHint"
+            tools:ignore="SpUsage" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="16dp">
+
+            <CheckBox
+                android:id="@+id/checkBoxPin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/CustomCheckBox"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_1A1A1A"
+                android:textSize="14dp"
+                android:text="@string/pinCheckBox"
+                tools:ignore="SpUsage" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_7E828B"
+            android:textSize="12dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/pinAdvice"
+            tools:ignore="SpUsage" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="40dp">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/cancelBtn"

@@ -3,6 +3,8 @@ package kr.co.kimberly.wma.custom.popup
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -25,6 +27,7 @@ class PopupPairingDevice(context: Context, activity: Activity) {
             1 -> {
                 scannerBinding = PopupPairingScannerBinding.inflate(LayoutInflater.from(mContext))
                 mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 mDialog.setContentView(scannerBinding!!.root)
                 mDialog.setCancelable(false)
 
@@ -34,11 +37,15 @@ class PopupPairingDevice(context: Context, activity: Activity) {
                 Handler(Looper.getMainLooper()).postDelayed(Runnable {
                     mDialog.dismiss()
                 }, 3000)
+
+                mDialog.show()
+                mDialog.window?.setLayout(960, 720)
             }
 
             2 -> {
                 printerBinding = PopupParingPrinterBinding.inflate(LayoutInflater.from(mContext))
                 mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                 mDialog.setContentView(printerBinding!!.root)
                 mDialog.setCancelable(false)
 
@@ -55,9 +62,10 @@ class PopupPairingDevice(context: Context, activity: Activity) {
                 printerBinding!!.checkBoxPin.setOnClickListener{
                     Log.d("wooryeol", "체크 버튼이 클릭되었습니다.")
                 }
+
+                mDialog.show()
+                mDialog.window?.setLayout(960, 1344)
             }
         }
-
-        mDialog.show()
     }
 }

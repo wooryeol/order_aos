@@ -1,19 +1,16 @@
 package kr.co.kimberly.wma.menu.setting
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
-import kr.co.kimberly.wma.adapter.SearchDevicesAdapter
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
 import kr.co.kimberly.wma.databinding.ActSettingBinding
 import kr.co.kimberly.wma.model.DevicesModel
@@ -44,10 +41,15 @@ class SettingActivity : AppCompatActivity() {
         mContext = this
         mActivity = this
 
+        // 헤더의 바코드 아이콘 없애기
+        mBinding.header.scanBtn.visibility = View.GONE
+
         searchDevices()
+        showPairedDevices()
     }
 
-    fun showPairedDevices() {
+    private fun showPairedDevices() {
+        pairedList.add(DevicesModel("KDC200[02070260]", "00:19:01:31:4E:91", true))
         pairedList.add(DevicesModel("KDC200[02070260]", "00:19:01:31:4E:91", true))
 
         val adapter = PairedDevicesAdapter(mContext, mActivity)
@@ -91,12 +93,20 @@ class SettingActivity : AppCompatActivity() {
             when(view.id) {
                 R.id.radioScanner ->
                     if (checked) {
+                        // 뷰의 맨 앞으로 보내서 사용자가 클릭하기 쉽도록
+                        view.bringToFront()
+                        // 각 항목을 선택하면 테두리 색 변경
+                        mBinding.radioScannerBox.setBackgroundResource(R.drawable.et_round_1d6de5)
+                        mBinding.radioPrintBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
                         isRadioChecked = 1
                         mBinding.radioPrint.isChecked = false
                         Log.d("wooryeol", "스캐너가 체크 되었습니다.")
                     }
                 R.id.radioPrint ->
                     if (checked) {
+                        view.bringToFront()
+                        mBinding.radioPrintBox.setBackgroundResource(R.drawable.et_round_1d6de5)
+                        mBinding.radioScannerBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
                         isRadioChecked = 2
                         mBinding.radioScanner.isChecked = false
                         Log.d("wooryeol", "프린터가 체크 되었습니다.")
