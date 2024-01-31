@@ -39,7 +39,8 @@
             android:layout_gravity="center"
             android:text="@string/msg01"
             android:textSize="18dp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="@color/color_7E828B"/>
 
         <LinearLayout
             android:layout_width="match_parent"
