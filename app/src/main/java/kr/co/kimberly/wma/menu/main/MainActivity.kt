@@ -15,6 +15,8 @@ import kr.co.kimberly.wma.adapter.MainMenuAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.GridSpacingItemDecoration
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupNotice
+import kr.co.kimberly.wma.custom.popup.PopupNotification
 import kr.co.kimberly.wma.databinding.ActMainBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.model.MainMenuModel
@@ -54,6 +56,12 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(mContext, SettingActivity::class.java))
             }
         })
+
+        val popupNotice = PopupNotice(mContext, "테스트 팝업 입니다.")
+        popupNotice.show()
+
+        val popupNotification = PopupNotification(mContext, "테스트 공지사항 팝업 입니다.")
+        popupNotification.show()
     }
 
     private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
