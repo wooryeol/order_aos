@@ -27,6 +27,13 @@ class OrderRegActivity : AppCompatActivity() {
         mContext = this
         mActivity = this
 
+        mBinding.header.headerTitle.text = getString(R.string.menu01)
+        mBinding.bottom.bottomTitle.text = getString(R.string.orderApproval)
+
+        mBinding.header.backBtn.setOnClickListener {
+            finish()
+        }
+
         val list = ArrayList<OrderRegModel>()
         for(i: Int in 1..10) {
             list.add(OrderRegModel("(34870) 하기스프리미어 3공 100/1", "10", "0", "9,999,999원", "240", "9,999,999,999원"))

@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="56dp">
+    android:layout_height="56dp"
+    android:background="@color/white">
     <ImageButton
-        android:id="@+id/header_button"
+        android:id="@+id/backBtn"
         android:layout_width="60dp"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
