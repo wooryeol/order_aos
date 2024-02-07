@@ -3,6 +3,8 @@ package kr.co.kimberly.wma.custom.popup
 import android.app.Activity
 import android.app.Dialog
 import android.content.res.Resources
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,6 +21,7 @@ class PopupSearchDevices(private val mContext: AppCompatActivity, private val mA
     fun show() {
         mBinding = PopupSearchDevicesBinding.inflate(mContext.layoutInflater)
         mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         mDialog.setContentView(mBinding.root)
         mDialog.setCancelable(false)
 
@@ -35,6 +38,7 @@ class PopupSearchDevices(private val mContext: AppCompatActivity, private val mA
         }
 
         mDialog.show()
+        mDialog.window?.setLayout(960, 1344)
     }
 
     private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()

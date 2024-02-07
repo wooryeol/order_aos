@@ -3,9 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="2dp"
-    android:paddingBottom="50dp"
-    android:background="@color/color_F6F9FE"
+    android:padding="12dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginHorizontal="16dp"
+    android:background="@drawable/rv_round_f6f9fe"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
@@ -40,7 +41,6 @@
             android:layout_height="wrap_content"
             android:textSize="16dp"
             android:textColor="@color/color_1A1A1A"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="4dp"
             app:layout_constraintStart_toEndOf="@id/deviceWrapper"
             app:layout_constraintTop_toTopOf="parent"
@@ -53,7 +53,6 @@
             android:layout_height="wrap_content"
             android:textSize="16dp"
             android:textColor="@color/color_1A1A1A"
-            android:layout_marginBottom="16dp"
             app:layout_constraintStart_toEndOf="@id/deviceWrapper"
             app:layout_constraintTop_toBottomOf="@id/deviceName"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -71,12 +70,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:ignore="HardcodedText,SpUsage" />
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/color_DBDCDF"
-        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

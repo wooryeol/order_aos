@@ -3,13 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="16dp"
-    android:layout_height="wrap_content">
+    android:background="@drawable/popup_round"
+    android:layout_height="500dp">
     
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="16dp"
         android:text="@string/bluetoothDevices"
         android:textColor="@color/color_1A1A1A"
         android:textSize="20dp"
@@ -20,6 +21,7 @@
         android:id="@+id/closeBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="16dp"
         android:src="@drawable/close"
         android:background="@color/trans"
         android:layout_alignParentEnd="true"
@@ -27,9 +29,10 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
-        android:layout_marginTop="36dp"
+        android:paddingHorizontal="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_below="@id/title"
         />
 
 </RelativeLayout>

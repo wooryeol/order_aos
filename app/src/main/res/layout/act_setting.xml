@@ -7,39 +7,9 @@
     android:background="@color/trans"
     tools:context=".menu.setting.SettingActivity">
 
-    <!--header-->
-    <RelativeLayout
+    <include
         android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageButton
-            android:id="@+id/header_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/arrow_back_ios"
-            android:background="@color/trans"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/header_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/setting"
-            android:textColor="@color/black"
-            android:textSize="18dp"
-            android:textStyle="bold"
-            tools:ignore="SpUsage" />
-
-    </RelativeLayout>
+        layout="@layout/layout_header"/>
 
     <LinearLayout
         android:id="@+id/body"
@@ -69,7 +39,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
-                android:background="@drawable/et_round"
+                android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:imeOptions="actionDone"
@@ -102,19 +72,19 @@
                     android:layout_marginEnd="23dp"
                     tools:ignore="SpUsage" />
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/radioScannerBox"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="40dp"
                     android:orientation="horizontal"
-                    android:background="@drawable/et_round"
+                    android:background="@drawable/et_round_c9cbd0"
                     android:padding="8dp"
                     android:layout_marginEnd="12dp">
 
                     <RadioButton
                         android:id="@+id/radioScanner"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:onClick="onRadioButtonClicked"
                         android:theme="@style/CustomRadioButton"/>
@@ -123,9 +93,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/settingScanner"
+                        android:layout_marginStart="30dp"
+                        android:layout_centerVertical="true"
+
                         android:textColor="@color/black"/>
 
-                </LinearLayout>
+                </RelativeLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -158,19 +131,19 @@
                     android:layout_marginEnd="23dp"
                     tools:ignore="SpUsage" />
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/radioPrintBox"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="40dp"
                     android:orientation="horizontal"
-                    android:background="@drawable/et_round"
+                    android:background="@drawable/et_round_c9cbd0"
                     android:padding="8dp"
                     android:layout_marginEnd="12dp">
 
                     <RadioButton
                         android:id="@+id/radioPrint"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:onClick="onRadioButtonClicked"
                         android:theme="@style/CustomRadioButton"/>
@@ -179,9 +152,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/settingPrint"
+                        android:layout_marginStart="30dp"
+                        android:layout_centerVertical="true"
                         android:textColor="@color/black"/>
 
-                </LinearLayout>
+                </RelativeLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -247,7 +222,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
-                android:background="@drawable/et_round"
+                android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:hint="@string/settingTitleHint02"
@@ -273,7 +248,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
-                android:background="@drawable/et_round"
+                android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:hint="@string/settingTitleHint02"
@@ -320,7 +295,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
-                android:background="@drawable/et_round"
+                android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:hint="@string/settingTitleHint02"
@@ -346,7 +321,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
-                android:background="@drawable/et_round"
+                android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:hint="@string/settingTitleHint02"
@@ -362,7 +337,7 @@
         android:layout_height="1dp"
         android:background="@color/color_DBDCDF"
         app:layout_constraintTop_toBottomOf="@id/printerBox"
-        android:layout_marginVertical="20dp"
+        android:layout_marginTop="16dp"
         android:layout_marginHorizontal="16dp"
         android:orientation="horizontal" />
 
@@ -370,8 +345,7 @@
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/bottomDivideLine"/>
+        app:layout_constraintTop_toBottomOf="@id/bottomDivideLine" />
 
     <Button
         android:id="@+id/searchDeviceBtn"
@@ -382,10 +356,8 @@
         android:textColor="@color/trans"
         android:textStyle="bold"
         android:textSize="16dp"
-        android:layout_marginTop="20dp"
         android:background="@color/color_1D6DE5"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:ignore="SpUsage" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
