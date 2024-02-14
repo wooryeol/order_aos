@@ -23,11 +23,15 @@
     <string name="pinCheckBox">문자 또는 기호가 포함된 PIN</string>
     <string name="pinAdvice">다른 디바이스에도 PIN을 입력하세요</string>
 
+
     <!-- 공통 -->
     <string name="copyright">Copyrightⓒ유한킴벌리 Corp. All Rights Reserved.</string>
-
-    <!-- 팝업 -->
-    <string name="notification">[공지사항]</string>
+    <string name="account">거래처</string>
+    <string name="accountHint">거래처를 검색해주세요</string>
+    <string name="search">검색</string>
+    <string name="yes">예</string>
+    <string name="no">아니요</string>
+    <string name="orderApproval">주문승인</string>
 
     <!-- Login -->
     <string name="msg01">더 나은 생활을 향한 믿음!</string>
@@ -56,8 +60,6 @@
     <string name="menu09">기준정보</string>
 
     <!-- 주문등록 -->
-    <string name="account">거래처</string>
-    <string name="accountHint">거래처를 검색해 주세요</string>
     <string name="productName">제품명</string>
     <string name="productNameHint">제품명을 검색해 주세요</string>
     <string name="searchResult">검색된 제품명</string>
@@ -65,6 +67,49 @@
     <string name="each">낱개</string>
     <string name="unitPrice">단가</string>
     <string name="addOrder">제품추가</string>
-    <string name="search">검색</string>
-    <string name="orderApproval">주문승인</string>
+
+    <!-- 수금관리 -->
+    <string name="collectRegi">수금등록</string>
+    <string name="searchDate">조회일자</string>
+    <string name="searchDateHint">날짜를 선택해주세요.</string>
+    <string name="searchNothing">조회 결과가 없습니다.</string>
+    <string name="uncollected">미수금</string>
+    <string name="collectedDate">최종수금일</string>
+    <string name="totalAmount">최종수금액</string>
+    <string name="cash">현금</string>
+    <string name="note">어음</string>
+    <string name="both">현금+어음</string>
+    <string name="cashAmount">현금결제금액</string>
+    <string name="type">어음종류</string>
+    <string name="noteHint">결제방법을 선택해주세요.</string>
+    <string name="promissory">약속(일반)어음</string>
+    <string name="listed">약속(상장)어음</string>
+    <string name="householdCheck">가계수표</string>
+    <string name="currentCheck">당좌수표</string>
+    <string name="noteAmount">어음결제금액</string>
+    <string name="noteNumber">어음번호</string>
+    <string name="publishBy">발급기관</string>
+    <string name="publishDate">발행일</string>
+    <string name="expireDate">만기일</string>
+    <string name="accountSending">주문전송 : </string>
+    <string name="paymentType">결제방법 : </string>
+    <string name="payAmount">결제금액 : </string>
+    <string name="sendingComment">위와 같이 수금 등록을 하시겠습니까?</string>
+    <string name="sendingSuccess">수금전표가 저장되었습니다.</string>
+    <string name="SuccessComment">명세서 출력을 원하시면 프린터 전원을 켜신 후\n인쇄 버튼을 누르세요.</string>
+    <string name="printQuantity">인쇄수량</string>
+    <string name="print">인쇄</string>
+    <string name="receiptPrint">거래명세서 출력</string>
+    <string name="printDone">인쇄가 완료되었습니다.</string>
+    <string name="doneComment">메인 메뉴로 이동을 원하시면 \'예\'를,\n재발행을 원하시면 \'아니오\'를 누르세요.</string>
+    <string name="remark">비고</string>
+
+    <!-- 재고조회 -->
+    <string name="branchHouse">대리점창고</string>
+    <string name="branchHouseHint">대리점 창고를 선택해주세요.</string>
+    <string name="error">조회내력이 없습니다.</string>
+    <string name="box02">BOX:</string>
+    <string name="each02">낱개:</string>
+    <string name="total">총:</string>
+
 </resources>

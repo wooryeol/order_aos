@@ -87,7 +87,7 @@
             android:textSize="16dp"
             android:drawableStart="@drawable/ic_setting_blue"
             android:drawablePadding="6dp"
-            android:background="@drawable/bt_round02"/>
+            android:background="@drawable/bt_round_b1b4bb"/>
 
         <Button
             android:layout_width="0dp"
@@ -101,7 +101,7 @@
             android:textSize="16dp"
             android:drawableStart="@drawable/ic_notice"
             android:drawablePadding="6dp"
-            android:background="@drawable/bt_round02"/>
+            android:background="@drawable/bt_round_b1b4bb"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -3,25 +3,17 @@ package kr.co.kimberly.wma.adapter
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.Outline
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
-import android.view.animation.AnimationUtils
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.databinding.CellMeinMenuBinding
+import kr.co.kimberly.wma.menu.inventory.InventoryActivity
+import kr.co.kimberly.wma.menu.collect.CollectManageActivity
 import kr.co.kimberly.wma.menu.order.OrderRegActivity
 import kr.co.kimberly.wma.model.MainMenuModel
-import java.text.SimpleDateFormat
 import java.util.ArrayList
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapter<MainMenuAdapter.ViewHolder>() {
     var dataList: List<MainMenuModel> = ArrayList()
@@ -34,10 +26,30 @@ class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapte
             binding.menuName.text = itemModel.menuName
 
             itemView.setOnClickListener {
-                if(itemModel.type == Define.MENU01) {
+                val intent: Intent? =  when(itemModel.type) {
+                    Define.MENU01 -> {
+                        Intent(itemView.context, OrderRegActivity::class.java)
+                    }
+                    Define.MENU02 -> {
+                        Intent(itemView.context, CollectManageActivity::class.java)
+                    }
+                    Define.MENU06 -> {
+                        Intent(itemView.context, InventoryActivity::class.java)
+                    }
+                    else -> null
+                }
+                intent?.let {
+                    itemView.context.startActivity(it)
+                }
+                /*if(itemModel.type == Define.MENU01) {
                     val intent = Intent(itemView.context, OrderRegActivity::class.java)
                     itemView.context.startActivity(intent)
                 }
+
+                if (itemModel.type == Define.MENU02) {
+                    val intent = Intent(itemView.context, CollectActivity::class.java)
+                    itemView.context.startActivity(intent)
+                }*/
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
                 intent.putExtra(Define.UNIQUE, itemModel.name)
                 intent.putExtra(Define.D_COUNT, binding.dCount.text.toString())

@@ -24,6 +24,8 @@ class PopupSearchDevices(private val mContext: AppCompatActivity, private val mA
         mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         mDialog.setContentView(mBinding.root)
         mDialog.setCancelable(false)
+        val height = Resources.getSystem().displayMetrics.heightPixels * 0.5
+        mDialog.window?.setLayout(960, height.toInt())
 
         SettingActivity.searchedList.add(DevicesModel("KDC200[02070260]", "00:19:01:31:4E:91", false))
 
@@ -38,7 +40,6 @@ class PopupSearchDevices(private val mContext: AppCompatActivity, private val mA
         }
 
         mDialog.show()
-        mDialog.window?.setLayout(960, 1344)
     }
 
     private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
