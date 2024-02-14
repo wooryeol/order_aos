@@ -37,7 +37,7 @@ class CollectManageActivity : AppCompatActivity() {
         // 헤더 설정 변경
         mBinding.header.headerTitle.text = getString(R.string.menu02)
         mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
-        mBinding.header.headerButton.setOnClickListener {
+        mBinding.header.backBtn.setOnClickListener {
             Utils.moveToPage(mContext, MainActivity(), false)
         }
 

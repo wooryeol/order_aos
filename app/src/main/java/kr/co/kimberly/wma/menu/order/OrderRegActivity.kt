@@ -27,7 +27,7 @@ class OrderRegActivity : AppCompatActivity() {
         mActivity = this
 
         mBinding.header.headerTitle.text = getString(R.string.menu01)
-        mBinding.bottom.bottomTitle.text = getString(R.string.orderApproval)
+        mBinding.bottom.bottomButton.text = getString(R.string.orderApproval)
 
         mBinding.header.backBtn.setOnClickListener {
             finish()

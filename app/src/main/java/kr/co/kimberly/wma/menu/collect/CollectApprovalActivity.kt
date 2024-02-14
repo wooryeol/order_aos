@@ -29,7 +29,7 @@ class CollectApprovalActivity : AppCompatActivity() {
         // 헤더 및 바텀 설정
         mBinding.header.headerTitle.text = getString(R.string.orderApproval)
         mBinding.header.scanBtn.visibility = View.GONE
-        mBinding.header.headerButton.setOnClickListener {
+        mBinding.header.backBtn.setOnClickListener {
             Utils.moveToPage(mContext, MainActivity(), false)
         }
 

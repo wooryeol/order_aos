@@ -45,7 +45,7 @@ class SettingActivity : AppCompatActivity() {
 
         // 헤더 설정 변경
         mBinding.header.scanBtn.visibility = View.GONE
-        mBinding.header.headerButton.setOnClickListener {
+        mBinding.header.backBtn.setOnClickListener {
             Utils.moveToPage(mContext, MainActivity(), false)
         }
 

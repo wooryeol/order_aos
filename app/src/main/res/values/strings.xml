@@ -32,6 +32,7 @@
     <string name="yes">예</string>
     <string name="no">아니요</string>
     <string name="orderApproval">주문승인</string>
+    <string name="notification">[공지사항]</string>
 
     <!-- Login -->
     <string name="msg01">더 나은 생활을 향한 믿음!</string>
