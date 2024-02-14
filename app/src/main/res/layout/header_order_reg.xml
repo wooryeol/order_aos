@@ -22,31 +22,22 @@
             android:textSize="15dp"/>
 
         <RelativeLayout
+            android:id="@+id/accountArea"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical">
-            <EditText
+            <TextView
+                android:id="@+id/accountName"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
                 android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
-                android:imeOptions="actionDone"
-                android:inputType="text"
-                android:hint="@string/settingTitleHint01"
+                android:text="@string/accountHint"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
-            <ImageButton
-                android:id="@+id/btAccountEmpty"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:layout_centerHorizontal="true"
-                android:background="@color/trans"
-                android:src="@drawable/ic_empty" />
         </RelativeLayout>
     </LinearLayout>
 
@@ -97,7 +88,7 @@
         </RelativeLayout>
 
         <Button
-            android:id="@+id/btLogin"
+            android:id="@+id/btSearch"
             android:layout_width="56dp"
             android:layout_height="40dp"
             android:text="@string/search"
