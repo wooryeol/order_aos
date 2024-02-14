@@ -8,16 +8,24 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Kimberly_aos"
-        tools:targetApi="31"
-        tools:ignore="DataExtractionRules">
+        tools:ignore="DataExtractionRules"
+        tools:targetApi="31">
         <activity
-            android:name=".menu.collect.CollectActivity"
+            android:name=".menu.inventory.InventoryActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".menu.collect.CollectApprovalActivity"
+            android:exported="false" />
+        <activity
+            android:name=".menu.collect.CollectManageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".menu.collect.CollectRegiActivity"
+            android:exported="false" />
         <activity
             android:name=".menu.splash.SplashActivity"
-            android:screenOrientation="portrait"
             android:exported="true"
+            android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,23 +37,17 @@
             android:name=".menu.login.LoginActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
-
-        <!-- 메인 화면 -->
+            tools:ignore="LockedOrientationActivity" /> <!-- 메인 화면 -->
         <activity
             android:name=".menu.main.MainActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
-
-        <!-- 환경 설정 -->
+            tools:ignore="LockedOrientationActivity" /> <!-- 환경 설정 -->
         <activity
             android:name=".menu.setting.SettingActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
-
-        <!-- 주문등록 -->
+            tools:ignore="LockedOrientationActivity" /> <!-- 주문등록 -->
         <activity
             android:name=".menu.order.OrderRegActivity"
             android:exported="false"

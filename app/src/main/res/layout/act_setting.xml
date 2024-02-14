@@ -86,7 +86,7 @@
                         android:id="@+id/radioScanner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:onClick="onRadioButtonClicked"
+                        android:onClick="onSettingActRadioButtonClicked"
                         android:theme="@style/CustomRadioButton"/>
 
                     <TextView
@@ -145,7 +145,7 @@
                         android:id="@+id/radioPrint"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:onClick="onRadioButtonClicked"
+                        android:onClick="onSettingActRadioButtonClicked"
                         android:theme="@style/CustomRadioButton"/>
 
                     <TextView
@@ -345,19 +345,11 @@
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/bottomDivideLine" />
+        app:layout_constraintTop_toBottomOf="@id/bottomDivideLine"
+        app:layout_constraintBottom_toTopOf="@id/bottom"/>
 
-    <Button
-        android:id="@+id/searchDeviceBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="@string/searchDevices"
-        android:textColor="@color/trans"
-        android:textStyle="bold"
-        android:textSize="16dp"
-        android:background="@color/color_1D6DE5"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="SpUsage" />
+    <include
+        android:id="@+id/bottom"
+        layout="@layout/layout_bottom" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

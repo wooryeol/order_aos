@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/popup_round"
+    android:padding="16dp"
+    android:gravity="center"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <TextView
+        android:id="@+id/promissory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/promissory"
+        android:textColor="@color/color_1A1A1A"
+        android:layout_marginBottom="15dp"
+        android:clickable="true"
+        tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:id="@+id/divideLine01"
+        android:layout_below="@id/promissory"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_DBDCDF"
+        android:layout_marginHorizontal="2dp"
+        android:orientation="horizontal" />
+
+    <TextView
+        android:id="@+id/listed"
+        android:layout_below="@id/divideLine01"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/listed"
+        android:textColor="@color/color_1A1A1A"
+        android:layout_marginVertical="15dp"
+        android:clickable="true"
+        tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:id="@+id/divideLine02"
+        android:layout_below="@id/listed"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_DBDCDF"
+        android:layout_marginHorizontal="2dp"
+        android:orientation="horizontal" />
+
+    <TextView
+        android:id="@+id/householdCheck"
+        android:layout_below="@id/divideLine02"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/householdCheck"
+        android:textColor="@color/color_1A1A1A"
+        android:layout_marginVertical="15dp"
+        android:clickable="true"
+        tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        android:id="@+id/divideLine03"
+        android:layout_below="@id/householdCheck"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_DBDCDF"
+        android:layout_marginHorizontal="2dp"
+        android:orientation="horizontal" />
+
+    <TextView
+        android:id="@+id/currentCheck"
+        android:layout_below="@id/divideLine03"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/currentCheck"
+        android:textColor="@color/color_1A1A1A"
+        android:layout_marginTop="15dp"
+        android:clickable="true"
+        tools:ignore="HardcodedText" />
+
+</RelativeLayout>

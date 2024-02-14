@@ -11,8 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
 import kr.co.kimberly.wma.databinding.ActSettingBinding
+import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.model.DevicesModel
 
 class SettingActivity : AppCompatActivity() {
@@ -41,8 +43,11 @@ class SettingActivity : AppCompatActivity() {
         mContext = this
         mActivity = this
 
-        // 헤더의 바코드 아이콘 없애기
+        // 헤더 설정 변경
         mBinding.header.scanBtn.visibility = View.GONE
+        mBinding.header.headerButton.setOnClickListener {
+            Utils.moveToPage(mContext, MainActivity(), false)
+        }
 
         searchDevices()
         showPairedDevices()
@@ -65,8 +70,8 @@ class SettingActivity : AppCompatActivity() {
     }
 
     private fun searchDevices(){
-        mBinding.searchDeviceBtn.setOnClickListener {
-            onRadioButtonClicked(mBinding.radioGroup)
+        mBinding.bottom.bottomButton.setOnClickListener {
+            onSettingActRadioButtonClicked(mBinding.radioGroup)
             when (isRadioChecked) {
                 1 -> {
                     val dlg = PopupSearchDevices(this, mActivity)
@@ -85,7 +90,7 @@ class SettingActivity : AppCompatActivity() {
         }
     }
 
-    fun onRadioButtonClicked(view: View): Int {
+    fun onSettingActRadioButtonClicked(view: View): Int {
 
         if (view is RadioButton) {
             val checked = view.isChecked
