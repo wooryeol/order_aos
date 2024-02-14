@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/popup_round"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:layout_above="@id/comment"
+        android:src="@drawable/error"/>
+
+    <TextView
+        android:id="@+id/comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/error"
+        android:textSize="16dp"
+        android:gravity="center"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        tools:ignore="HardcodedText,SpUsage" />
+
+    <Button
+        android:layout_below="@id/comment"
+        android:id="@+id/cancel"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/confirm"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:textColor="@color/color_4C4F54"
+        android:background="@drawable/bt_round_b1b4bb"
+        tools:ignore="SpUsage" />
+
+
+</RelativeLayout>
