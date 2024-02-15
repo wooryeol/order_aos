@@ -41,6 +41,4 @@ class PopupSearchDevices(private val mContext: AppCompatActivity, private val mA
 
         mDialog.show()
     }
-
-    private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 }

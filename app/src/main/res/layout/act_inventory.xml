@@ -34,7 +34,7 @@
                 tools:ignore="SpUsage" />
 
             <Button
-                android:id="@+id/uncollected"
+                android:id="@+id/selectStorageBtn"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"

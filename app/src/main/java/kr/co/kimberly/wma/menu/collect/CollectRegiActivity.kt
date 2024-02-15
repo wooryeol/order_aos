@@ -27,13 +27,13 @@ class CollectRegiActivity : AppCompatActivity() {
     private var both = false
 
     @SuppressLint("HandlerLeak")
-   private val handler = object : Handler() {
+    private val handler = object : Handler() {
        override fun handleMessage(msg: Message) {
            super.handleMessage(msg)
            val value = msg.obj as String
            handleValueFromDialog(value)
        }
-   }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

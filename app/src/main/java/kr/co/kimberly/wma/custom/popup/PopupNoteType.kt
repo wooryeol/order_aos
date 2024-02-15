@@ -59,6 +59,4 @@ class PopupNoteType(private val mContext: AppCompatActivity, private val mActivi
             mDialog.dismiss()
         }
     }
-
-    private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 }
