@@ -3,9 +3,12 @@ package kr.co.kimberly.wma.common
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Point
 import android.os.Build
 import android.os.Handler
+import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.Window
 import android.view.WindowManager
 
@@ -27,6 +30,9 @@ object Utils {
         }
     }
 
+    /**
+     * 다이얼로그 사이즈 변경
+     */
     fun dialogResize(context: Context, window: Window?) {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val width = 1.0f
@@ -48,6 +54,10 @@ object Utils {
 
             window?.setLayout(x, y)
         }
+    }
+
+    fun dpToPx(context: Context, dp: Float): Float {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
     }
 
 }
