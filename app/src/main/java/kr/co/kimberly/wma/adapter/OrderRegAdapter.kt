@@ -2,12 +2,14 @@ package kr.co.kimberly.wma.adapter
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
+import kr.co.kimberly.wma.custom.popup.PopupMessage
 import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
@@ -91,8 +93,21 @@ class OrderRegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapt
 
             binding.btAddOrder.setOnClickListener(object: OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
-                    popupProductPriceHistory.show()
+                    // val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
+                    // popupProductPriceHistory.show()
+                    val popupMessage = PopupMessage(binding.root.context, "테스트 글자1테스트 글자1테스트 글자1테스트 글자1", "테스트 글자2", "테스트 글자3")
+
+                    popupMessage.itemClickListener = object: PopupMessage.ItemClickListener {
+                        override fun onCancelClick() {
+                            Log.d("tttt", "취소 클릭함")
+                        }
+
+                        override fun onOkClick() {
+                            Log.d("tttt", "확인 클릭함")
+                        }
+                    }
+
+                    popupMessage.show()
                 }
             })
         }
