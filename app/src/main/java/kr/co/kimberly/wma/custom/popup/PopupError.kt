@@ -7,7 +7,9 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.view.Window
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.PopupNoticeBinding
 import kr.co.kimberly.wma.databinding.PopupOrderSendBinding
@@ -21,17 +23,19 @@ class PopupError(private val mContext: AppCompatActivity, private val mActivity:
 
     fun show() {
         mBinding = PopupNoticeBinding.inflate(mContext.layoutInflater)
-        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        mDialog.setContentView(mBinding.root)
-        mDialog.setCancelable(false)
-        mDialog.show()
 
-        val height = Resources.getSystem().displayMetrics.heightPixels * 0.28
-        mDialog.window?.setLayout(960, height.toInt())
+        mDialog.setCancelable(false)
+        mDialog.setContentView(mBinding.root)
+
+        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        mDialog.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+        mBinding.tvMsg.text = mContext.getString(R.string.error)
 
         mBinding.btConfirm.setOnClickListener {
             mDialog.dismiss()
         }
+
+        mDialog.show()
     }
 }

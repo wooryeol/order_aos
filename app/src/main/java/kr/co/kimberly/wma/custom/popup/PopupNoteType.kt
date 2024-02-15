@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.view.Window
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import kr.co.kimberly.wma.databinding.PopupNoteTypeBinding
 
@@ -18,14 +19,17 @@ class PopupNoteType(private val mContext: AppCompatActivity, private val mActivi
 
     fun show() {
         mBinding = PopupNoteTypeBinding.inflate(mContext.layoutInflater)
-        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        mDialog.setCancelable(false)
         mDialog.setContentView(mBinding.root)
-        mDialog.setCancelable(true)
-        mDialog.show()
-        val height = Resources.getSystem().displayMetrics.heightPixels * 0.3
-        mDialog.window?.setLayout(960, height.toInt())
+        // mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+
+        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        mDialog.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
         setupTextViewClickListeners()
+
+        mDialog.show()
     }
 
     private fun setupTextViewClickListeners() {
@@ -52,7 +56,6 @@ class PopupNoteType(private val mContext: AppCompatActivity, private val mActivi
         }
 
         mBinding.currentCheck.setOnClickListener {
-            /*returnNoteType(mBinding.currentCheck.text.toString())*/
             val type = mBinding.currentCheck.text.toString()
             message.obj = type
             mHandler.sendMessage(message)
