@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:padding="40dp"
-    android:background="@drawable/popup_round"
+    android:background="@drawable/ll_round_white"
     android:orientation="vertical">
 
     <ImageView

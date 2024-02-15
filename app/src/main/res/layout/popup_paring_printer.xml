@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:paddingHorizontal="16dp"
     android:paddingBottom="16dp"
-    android:background="@drawable/popup_round"
+    android:background="@drawable/ll_round_white"
     android:orientation="vertical">
 
     <TextView

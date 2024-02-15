@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/popup_round"
+    android:background="@drawable/ll_round_white"
     android:layout_height="wrap_content">
     
     <TextView
