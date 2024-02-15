@@ -82,7 +82,7 @@ class OrderRegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapt
                 override fun onSingleClick(v: View) {
                     val popupSearchResult = PopupSearchResult(binding.root.context)
                     popupSearchResult.onItemSelect = {
-                        binding.accountName.text = it.name
+                        binding.searchResult.text = it.name
                     }
                     popupSearchResult.show()
                 }

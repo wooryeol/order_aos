@@ -106,6 +106,7 @@
         android:background="@color/color_DBDCDF"/>
 
     <TextView
+        android:id="@+id/searchResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
