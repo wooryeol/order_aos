@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
+import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderOrderRegBinding
@@ -85,6 +86,13 @@ class OrderRegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapt
                         binding.searchResult.text = it.name
                     }
                     popupSearchResult.show()
+                }
+            })
+
+            binding.btAddOrder.setOnClickListener(object: OnSingleClickListener() {
+                override fun onSingleClick(v: View) {
+                    val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
+                    popupProductPriceHistory.show()
                 }
             })
         }

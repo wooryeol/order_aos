@@ -8,26 +8,28 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
-import kr.co.kimberly.wma.adapter.SearchResultAdapter
+import kr.co.kimberly.wma.adapter.ProductPriceHistoryAdapter
 import kr.co.kimberly.wma.common.Utils
-import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
+import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.databinding.PopupAccountSearchBinding
+import kr.co.kimberly.wma.databinding.PopupProductPriceHistoryBinding
 import kr.co.kimberly.wma.model.AccountSearchModel
+import kr.co.kimberly.wma.model.ProductPriceHistoryModel
 import kr.co.kimberly.wma.model.SearchResultModel
 
-class PopupSearchResult(mContext: Context): Dialog(mContext) {
-    private lateinit var mBinding: PopupSearchResultBinding
+class PopupProductPriceHistory(mContext: Context): Dialog(mContext) {
+    private lateinit var mBinding: PopupProductPriceHistoryBinding
 
     private var context = mContext
 
-    var onItemSelect: ((SearchResultModel) -> Unit)? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = PopupSearchResultBinding.inflate(layoutInflater)
+        mBinding = PopupProductPriceHistoryBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         initViews()
@@ -41,26 +43,30 @@ class PopupSearchResult(mContext: Context): Dialog(mContext) {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
-        val list = ArrayList<SearchResultModel>()
-        for(i: Int in 1..15) {
-            list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
+        val list = ArrayList<ProductPriceHistoryModel>()
+        for(i: Int in 1..100) {
+            list.add(ProductPriceHistoryModel("2024/01/14", "${i}원"))
         }
 
-        val adapter = SearchResultAdapter(context)
+        val adapter = ProductPriceHistoryAdapter(context)
         adapter.dataList = list
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(context)
 
         if(list.size > 10) {
             Utils.dialogResize(context, window)
+
+            val layoutParams = mBinding.recyclerview.layoutParams
+            val height = 350f
+            layoutParams.height = Utils.dpToPx(context, height).toInt()
+            mBinding.recyclerview.layoutParams = layoutParams
         }
 
-        adapter.itemClickListener = object: SearchResultAdapter.ItemClickListener {
-            override fun onItemClick(item: SearchResultModel) {
-                onItemSelect?.invoke(item)
-                hideDialog()
+        mBinding.btConfirm.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+               hideDialog()
             }
-        }
+        })
     }
 
     fun hideDialog() {
