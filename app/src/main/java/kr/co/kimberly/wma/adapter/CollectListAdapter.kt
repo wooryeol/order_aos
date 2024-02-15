@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.combine
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.custom.popup.PopupPairingDevice
-import kr.co.kimberly.wma.databinding.CellCollectListBinding
-import kr.co.kimberly.wma.databinding.CellPairedDevicesListBinding
+import kr.co.kimberly.wma.databinding.CellCollectBinding
+import kr.co.kimberly.wma.databinding.CellPairedDevicesBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.model.AccountModel
 import kr.co.kimberly.wma.model.DevicesModel
@@ -22,7 +22,7 @@ class CollectListAdapter(context: Context, activity: Activity): RecyclerView.Ada
     var mContext = context
     var mActivity = activity
 
-    inner class ViewHolder(private val binding: CellCollectListBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: CellCollectBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: AccountModel) {
 
@@ -36,7 +36,7 @@ class CollectListAdapter(context: Context, activity: Activity): RecyclerView.Ada
         parent: ViewGroup,
         viewType: Int
     ): CollectListAdapter.ViewHolder {
-        val binding = CellCollectListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = CellCollectBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 

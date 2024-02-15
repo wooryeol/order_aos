@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.flow.combine
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.custom.popup.PopupPairingDevice
-import kr.co.kimberly.wma.databinding.CellCollectListBinding
-import kr.co.kimberly.wma.databinding.CellInventoryListBinding
-import kr.co.kimberly.wma.databinding.CellPairedDevicesListBinding
+import kr.co.kimberly.wma.databinding.CellCollectBinding
+import kr.co.kimberly.wma.databinding.CellInventoryBinding
+import kr.co.kimberly.wma.databinding.CellPairedDevicesBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.model.AccountModel
 import kr.co.kimberly.wma.model.DevicesModel
@@ -24,7 +24,7 @@ class InventoryListAdapter(context: Context, activity: Activity): RecyclerView.A
     var mContext = context
     var mActivity = activity
 
-    inner class ViewHolder(private val binding: CellInventoryListBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: CellInventoryBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: InventoryModel) {
 
@@ -39,7 +39,7 @@ class InventoryListAdapter(context: Context, activity: Activity): RecyclerView.A
         parent: ViewGroup,
         viewType: Int
     ): InventoryListAdapter.ViewHolder {
-        val binding = CellInventoryListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = CellInventoryBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 

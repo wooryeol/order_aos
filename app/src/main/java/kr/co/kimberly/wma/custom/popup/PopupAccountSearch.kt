@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.PopupAccountSearchBinding
 import kr.co.kimberly.wma.model.AccountSearchModel
 import kr.co.kimberly.wma.model.SearchResultModel
@@ -40,7 +41,7 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
         val list = ArrayList<AccountSearchModel>()
-        for(i: Int in 1..20) {
+        for(i: Int in 1..100) {
             list.add(AccountSearchModel("(000018) 신림마트 [${i}원]"))
         }
 
@@ -50,7 +51,7 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
         mBinding.recyclerview.layoutManager = LinearLayoutManager(context)
 
         if(list.size > 10) {
-            dialogResize()
+            Utils.dialogResize(context, window)
         }
 
         adapter.itemClickListener = object: AccountSearchAdapter.ItemClickListener {
@@ -64,29 +65,6 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
     fun hideDialog() {
         if (isShowing) {
             dismiss()
-        }
-    }
-
-    private fun dialogResize() {
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val width = 1.0f
-        val height = 0.7f
-
-        if (Build.VERSION.SDK_INT < 30) {
-            val display = windowManager.defaultDisplay
-            val size = Point()
-            display.getSize(size)
-
-            val x = (size.x * width).toInt()
-            val y = (size.y * height).toInt()
-
-            window?.setLayout(x, y)
-        } else {
-            val rect = windowManager.currentWindowMetrics.bounds
-            val x = (rect.width() * width).toInt()
-            val y = (rect.height() * height).toInt()
-
-            window?.setLayout(x, y)
         }
     }
 }

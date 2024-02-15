@@ -95,7 +95,7 @@
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="16dp"
-            android:background="@drawable/round_103c7e"
+            android:background="@drawable/bt_round_103c7e"
             style="?android:attr/borderlessButtonStyle"/>
     </LinearLayout>
 
@@ -205,7 +205,7 @@
         android:textColor="@color/white"
         android:textStyle="bold"
         android:textSize="16dp"
-        android:background="@drawable/round_103c7e"
+        android:background="@drawable/bt_round_103c7e"
         style="?android:attr/borderlessButtonStyle"/>
 
 </LinearLayout>

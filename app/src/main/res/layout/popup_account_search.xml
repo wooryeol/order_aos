@@ -69,7 +69,7 @@
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:textSize="16dp"
-                android:background="@drawable/round_1d6de5"
+                android:background="@drawable/bt_round_1d6de5"
                 style="?android:attr/borderlessButtonStyle"/>
         </LinearLayout>
 

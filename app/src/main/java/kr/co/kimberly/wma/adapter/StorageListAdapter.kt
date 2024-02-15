@@ -7,7 +7,7 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kr.co.kimberly.wma.databinding.CellStorageListBinding
+import kr.co.kimberly.wma.databinding.CellStorageBinding
 import java.util.ArrayList
 
 class StorageListAdapter(context: Context, activity: Activity, private val onItemClick: (String) -> Unit): RecyclerView.Adapter<StorageListAdapter.ViewHolder>() {
@@ -17,7 +17,7 @@ class StorageListAdapter(context: Context, activity: Activity, private val onIte
     var mActivity = activity
 
 
-    inner class ViewHolder(private val binding: CellStorageListBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: CellStorageBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: String) {
             binding.storageName.text = itemModel
@@ -36,7 +36,7 @@ class StorageListAdapter(context: Context, activity: Activity, private val onIte
         parent: ViewGroup,
         viewType: Int
     ): StorageListAdapter.ViewHolder {
-        val binding = CellStorageListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = CellStorageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
