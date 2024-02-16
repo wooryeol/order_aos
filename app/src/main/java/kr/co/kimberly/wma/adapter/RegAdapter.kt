@@ -2,22 +2,20 @@ package kr.co.kimberly.wma.adapter
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
-import kr.co.kimberly.wma.custom.popup.PopupMessage
 import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
-import kr.co.kimberly.wma.databinding.HeaderOrderRegBinding
+import kr.co.kimberly.wma.databinding.HeaderRegBinding
 import kr.co.kimberly.wma.model.OrderRegModel
 import java.util.ArrayList
 
-class OrderRegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
     var dataList: List<OrderRegModel> = ArrayList()
 
@@ -36,7 +34,7 @@ class OrderRegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapt
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
-            TYPE_HEADER -> HeaderViewHolder(HeaderOrderRegBinding.inflate(inflater, parent, false))
+            TYPE_HEADER -> HeaderViewHolder(HeaderRegBinding.inflate(inflater, parent, false))
             else -> ViewHolder(CellOrderRegBinding.inflate(inflater, parent, false))
         }
     }
@@ -69,7 +67,7 @@ class OrderRegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapt
         }
     }
 
-    class HeaderViewHolder(private val binding: HeaderOrderRegBinding) : RecyclerView.ViewHolder(binding.root) {
+    class HeaderViewHolder(private val binding: HeaderRegBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind() {
             binding.accountArea.setOnClickListener(object: OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
