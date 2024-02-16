@@ -35,27 +35,49 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- 로그인 화면 -->
+        </activity>
+
+        <!-- 로그인 화면 -->
         <activity
             android:name=".menu.login.LoginActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" /> <!-- 메인 화면 -->
+            tools:ignore="LockedOrientationActivity" />
+
+        <!-- 메인 화면 -->
         <activity
             android:name=".menu.main.MainActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" /> <!-- 환경 설정 -->
+            tools:ignore="LockedOrientationActivity" />
+
+        <!-- 환경 설정 -->
         <activity
             android:name=".menu.setting.SettingActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" /> <!-- 주문등록 -->
+            tools:ignore="LockedOrientationActivity" />
+
+        <!-- 주문등록 -->
         <activity
             android:name=".menu.order.OrderRegActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
-    </application>
 
+        <!-- 반품등록 -->
+        <activity
+            android:name=".menu.return.ReturnRegActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+
+        <!-- 인쇄(옵션 선택) 화면 -->
+        <activity
+            android:name=".menu.printer.PrinterOptionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+
+    </application>
 </manifest>

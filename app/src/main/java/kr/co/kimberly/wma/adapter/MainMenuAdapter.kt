@@ -12,6 +12,7 @@ import kr.co.kimberly.wma.databinding.CellMeinMenuBinding
 import kr.co.kimberly.wma.menu.inventory.InventoryActivity
 import kr.co.kimberly.wma.menu.collect.CollectManageActivity
 import kr.co.kimberly.wma.menu.order.OrderRegActivity
+import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
 import kr.co.kimberly.wma.model.MainMenuModel
 import java.util.ArrayList
 
@@ -27,13 +28,16 @@ class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapte
 
             itemView.setOnClickListener {
                 val intent: Intent? =  when(itemModel.type) {
-                    Define.MENU01 -> {
+                    Define.MENU01 -> { // 주문등록
                         Intent(itemView.context, OrderRegActivity::class.java)
                     }
-                    Define.MENU02 -> {
+                    Define.MENU02 -> { // 수금관리
                         Intent(itemView.context, CollectManageActivity::class.java)
                     }
-                    Define.MENU06 -> {
+                    Define.MENU03 -> { // 반품조회
+                        Intent(itemView.context, ReturnRegActivity::class.java)
+                    }
+                    Define.MENU06 -> { // 재고조회
                         Intent(itemView.context, InventoryActivity::class.java)
                     }
                     else -> null

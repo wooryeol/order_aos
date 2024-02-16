@@ -1,4 +1,4 @@
-package kr.co.kimberly.wma.menu.order
+package kr.co.kimberly.wma.menu.`return`
 
 import android.app.Activity
 import android.content.Context
@@ -12,24 +12,24 @@ import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.RegAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupMessage
-import kr.co.kimberly.wma.databinding.ActOrderRegBinding
+import kr.co.kimberly.wma.databinding.ActReturnRegBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.model.OrderRegModel
 
-class OrderRegActivity : AppCompatActivity() {
-    private lateinit var mBinding: ActOrderRegBinding
+class ReturnRegActivity : AppCompatActivity() {
+    private lateinit var mBinding: ActReturnRegBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = ActOrderRegBinding.inflate(layoutInflater)
+        mBinding = ActReturnRegBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         mContext = this
         mActivity = this
 
-        mBinding.header.headerTitle.text = getString(R.string.menu01)
+        mBinding.header.headerTitle.text = getString(R.string.menu04)
         mBinding.bottom.bottomButton.text = getString(R.string.orderApproval)
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {

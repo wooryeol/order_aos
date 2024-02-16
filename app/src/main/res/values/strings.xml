@@ -23,7 +23,6 @@
     <string name="pinCheckBox">문자 또는 기호가 포함된 PIN</string>
     <string name="pinAdvice">다른 디바이스에도 PIN을 입력하세요</string>
 
-
     <!-- 공통 -->
     <string name="copyright">Copyrightⓒ유한킴벌리 Corp. All Rights Reserved.</string>
     <string name="account">거래처</string>
@@ -33,6 +32,9 @@
     <string name="no">아니요</string>
     <string name="orderApproval">주문승인</string>
     <string name="notification">[공지사항]</string>
+    <string name="printerOption">인쇄방식</string>
+    <string name="printerMenuOption">메뉴별</string>
+    <string name="printerIntegratedOption">통합</string>
 
     <!-- Login -->
     <string name="msg01">더 나은 생활을 향한 믿음!</string>
@@ -69,6 +71,7 @@
     <string name="unitPrice">단가</string>
     <string name="addOrder">제품추가</string>
     <string name="productPriceHistory">제품단가이력</string>
+    <string name="orderRegSendingSuccess">주문전표가 저장되었습니다.</string>
 
     <!-- 수금관리 -->
     <string name="collectRegi">수금등록</string>
