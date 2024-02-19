@@ -60,6 +60,7 @@ class SlipInquiryActivity : AppCompatActivity() {
 
         val adapter = CollectListAdapter(mContext, mActivity)
         adapter.dataList = collectList
+        adapter.isSlipAct = true // 전표조회에서 진입했다는 걸 알려줌
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
 
