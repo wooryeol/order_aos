@@ -109,6 +109,14 @@
     <string name="doneComment">메인 메뉴로 이동을 원하시면 \'예\'를,\n재발행을 원하시면 \'아니오\'를 누르세요.</string>
     <string name="remark">비고</string>
 
+    <!-- 반품등록 -->
+    <string name="radioOption01">주문전표</string>
+    <string name="radioOption02">반품전표</string>
+    <string name="slipNumber">전표번호 :&#160;</string>
+    <string name="slipAccount">거래처 :&#160;</string>
+    <string name="modify">수정</string>
+    <string name="delete">삭제</string>
+
     <!-- 재고조회 -->
     <string name="branchHouse">대리점창고</string>
     <string name="branchHouseHint">대리점 창고를 선택해주세요.</string>
