@@ -32,4 +32,11 @@
         <!-- <item name="android:datePickerStyle">@style/MyDatePickerStyle</item> -->
     </style>
 
+    <style name="CustomDatepicker">
+        <item name="android:textSize" tools:ignore="SpUsage">20dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/color_1A1A1A</item>
+
+    </style>
+
 </resources>

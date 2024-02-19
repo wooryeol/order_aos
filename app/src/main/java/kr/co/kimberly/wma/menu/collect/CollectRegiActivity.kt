@@ -68,6 +68,9 @@ class CollectRegiActivity : AppCompatActivity() {
         mBinding.publishDateText.setOnClickListener {
             datePickerDialog.showDatePickerDialog(mBinding.publishDateText)
         }
+
+        //현금 선택 화면이 먼저 보이도록
+        mBinding.cash.isChecked = true
     }
 
     private fun handleValueFromDialog(value: String) {

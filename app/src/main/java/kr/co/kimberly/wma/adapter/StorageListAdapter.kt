@@ -24,10 +24,6 @@ class StorageListAdapter(context: Context, activity: Activity, private val onIte
             binding.storageName.text = itemModel
 
             itemView.setOnClickListener {
-                /*val message = android.os.Message.obtain()
-                val type = binding.storageName.text.toString()
-                message.obj = type
-                mHandler.sendMessage(message)*/
                 onItemClick(binding.storageName.text.toString())
             }
         }

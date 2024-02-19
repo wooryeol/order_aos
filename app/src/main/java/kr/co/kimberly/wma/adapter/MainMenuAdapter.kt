@@ -11,6 +11,8 @@ import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.databinding.CellMeinMenuBinding
 import kr.co.kimberly.wma.menu.inventory.InventoryActivity
 import kr.co.kimberly.wma.menu.collect.CollectManageActivity
+import kr.co.kimberly.wma.menu.information.InformationActivity
+import kr.co.kimberly.wma.menu.ledger.LedgerActivity
 import kr.co.kimberly.wma.menu.order.OrderRegActivity
 import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
 import kr.co.kimberly.wma.menu.slip.SlipInquiryActivity
@@ -41,8 +43,14 @@ class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapte
                     Define.MENU04 -> { // 전표조회
                         Intent(itemView.context, SlipInquiryActivity::class.java)
                     }
+                    Define.MENU04 -> { // 전표조회
+                        Intent(itemView.context, LedgerActivity::class.java)
+                    }
                     Define.MENU06 -> { // 재고조회
                         Intent(itemView.context, InventoryActivity::class.java)
+                    }
+                    Define.MENU09 -> { // 기준정보
+                        Intent(itemView.context, InformationActivity::class.java)
                     }
                     else -> null
                 }
