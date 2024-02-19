@@ -7,10 +7,10 @@
                 android:color="@color/color_B1B4BB"/>
             <solid android:color="@color/white"/>
             <corners
-                android:bottomRightRadius="8dp"
-                android:bottomLeftRadius="8dp"
-                android:topLeftRadius="8dp"
-                android:topRightRadius="8dp"/>
+                android:bottomRightRadius="4dp"
+                android:bottomLeftRadius="4dp"
+                android:topLeftRadius="4dp"
+                android:topRightRadius="4dp"/>
         </shape>
     </item>
 
@@ -19,19 +19,19 @@
             <item>
                 <shape android:shape="rectangle">
                     <solid android:color="@color/color_B1B4BB"/>
-                    <corners android:bottomRightRadius="8dp"
-                        android:bottomLeftRadius="8dp"
-                        android:topLeftRadius="8dp"
-                        android:topRightRadius="8dp"/>
+                    <corners android:bottomRightRadius="4dp"
+                        android:bottomLeftRadius="4dp"
+                        android:topLeftRadius="4dp"
+                        android:topRightRadius="4dp"/>
                 </shape>
             </item>
             <item>
                 <shape android:shape="rectangle">
                     <solid android:color="@color/opacity"/>
-                    <corners android:bottomRightRadius="8dp"
-                        android:bottomLeftRadius="8dp"
-                        android:topLeftRadius="8dp"
-                        android:topRightRadius="8dp"/>
+                    <corners android:bottomRightRadius="4dp"
+                        android:bottomLeftRadius="4dp"
+                        android:topLeftRadius="4dp"
+                        android:topRightRadius="4dp"/>
                 </shape>
             </item>
         </layer-list>

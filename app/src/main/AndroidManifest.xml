@@ -69,6 +69,13 @@
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
+        <!-- 전표조회 -->
+        <activity
+            android:name=".menu.slip.SlipInquiryActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+
         <!-- 인쇄(옵션 선택) 화면 -->
         <activity
             android:name=".menu.printer.PrinterOptionActivity"
