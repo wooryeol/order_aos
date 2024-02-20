@@ -49,4 +49,7 @@ dependencies {
 
     // 권한
     implementation("io.github.ParkSangGwon:tedpermission-normal:3.3.0")
+
+    // 이미지 전체화면
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
 }

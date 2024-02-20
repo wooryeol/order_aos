@@ -17,6 +17,10 @@ import android.util.TypedValue
 import android.view.Window
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import androidx.core.content.FileProvider
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 object Utils {
@@ -120,4 +124,25 @@ object Utils {
         m.setRotate(degrees, bitmap.width.toFloat() / 2, bitmap.height.toFloat() / 2)
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
     }
+
+    fun saveBitmapToFile(context: Context, bitmap: Bitmap): Uri? {
+        val fileName = "temp_image" // 임시 파일 이름
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val byteArray = stream.toByteArray()
+        try {
+            val file = File(context.cacheDir, fileName)
+            file.createNewFile()
+            FileOutputStream(file).apply {
+                write(byteArray)
+                flush()
+                close()
+            }
+            return FileProvider.getUriForFile(context, Define.fileProvider, file)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
 }

@@ -153,7 +153,13 @@
 
         <!-- 매대관리 -->
         <activity
-            android:name=".menu.store.StoreManagmentActivity"
+            android:name=".menu.store.StoreManagementActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
+        <!-- 이미지 전체 화면-->
+        <activity
+            android:name=".menu.store.ImgFullActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />

@@ -12,6 +12,7 @@ object Define {
     const val MENU09 = "menu09"
 
     const val fileProvider = "kr.co.kimberly.wma.fileprovider"
+    const val provider = "kr.co.kimberly.wma.provider"
 
     const val REQUEST_ENABLE_BT = 100
 }

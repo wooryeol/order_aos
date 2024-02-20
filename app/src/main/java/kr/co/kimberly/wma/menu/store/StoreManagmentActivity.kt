@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,11 +18,13 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import androidx.core.graphics.drawable.toBitmap
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.common.Utils.saveBitmapToFile
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupAddImage
@@ -35,11 +38,11 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class StoreManagmentActivity : AppCompatActivity() {
+class StoreManagementActivity : AppCompatActivity() {
     private lateinit var mBinding: ActStoreManagementBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
-    private lateinit var cameraResultLauncher: ActivityResultLauncher<Intent>;
+    private lateinit var cameraResultLauncher: ActivityResultLauncher<Intent>
     private lateinit var galleryResultLauncher: ActivityResultLauncher<String>
 
     private var isAddImgSw = 0 // 0일 경우 before 1일 경우 after
@@ -86,6 +89,30 @@ class StoreManagmentActivity : AppCompatActivity() {
                     mBinding.accountName.text = it.name
                 }
                 popupAccountSearch.show()
+            }
+        })
+
+        mBinding.beforeImg.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val bitmap = (mBinding.beforeImg.drawable as BitmapDrawable).bitmap
+                val imageUri = saveBitmapToFile(mContext, bitmap)
+                imageUri?.let {
+                    val intent = Intent(mContext, ImgFullActivity::class.java)
+                    intent.putExtra("image", it.toString())
+                    startActivity(intent)
+                }
+            }
+        })
+
+        mBinding.afterImg.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val bitmap = (mBinding.afterImg.drawable as BitmapDrawable).bitmap
+                val imageUri = saveBitmapToFile(mContext, bitmap)
+                imageUri?.let {
+                    val intent = Intent(mContext, ImgFullActivity::class.java)
+                    intent.putExtra("image", it.toString())
+                    startActivity(intent)
+                }
             }
         })
 
@@ -227,6 +254,7 @@ class StoreManagmentActivity : AppCompatActivity() {
     private fun addImageView(uri: Uri) {
         val exifInterface = Utils.getOrientationOfImage(mContext, uri)
         val bitmap = Utils.getRotatedBitmap(Utils.uriToBitmap(mActivity, uri), exifInterface.toFloat())
+        Log.d("testtest", "bitmap ===> $bitmap")
 
         if (bitmap != null) {
             if (isAddImgSw == 0) {
