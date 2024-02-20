@@ -17,8 +17,9 @@ import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
 import kr.co.kimberly.wma.model.AccountSearchModel
 import kr.co.kimberly.wma.model.SearchResultModel
+import java.util.ArrayList
 
-class PopupSearchResult(mContext: Context): Dialog(mContext) {
+class PopupSearchResult(mContext: Context, val list: ArrayList<SearchResultModel>): Dialog(mContext) {
     private lateinit var mBinding: PopupSearchResultBinding
 
     private var context = mContext
@@ -40,11 +41,6 @@ class PopupSearchResult(mContext: Context): Dialog(mContext) {
         // corner radius 가 보이지 않음
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-
-        val list = ArrayList<SearchResultModel>()
-        for(i: Int in 1..15) {
-            list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
-        }
 
         val adapter = SearchResultAdapter(context)
         adapter.dataList = list

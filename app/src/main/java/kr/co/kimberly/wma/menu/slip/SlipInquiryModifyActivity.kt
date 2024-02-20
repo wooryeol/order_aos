@@ -9,10 +9,9 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.adapter.RegAdapter
 import kr.co.kimberly.wma.adapter.SlipInquiryModifyAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupMessage
+import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.ActOrderRegBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.model.OrderRegModel
@@ -41,9 +40,9 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
 
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupMessage = PopupMessage(mContext, "주문 전송", "거래처 : (000018) 신림마트 [0원]\n총금액: 9,999,999원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : (000018) 신림마트 [0원]\n총금액: 9,999,999원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
 
-                popupMessage.itemClickListener = object: PopupMessage.ItemClickListener {
+                popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                     override fun onCancelClick() {
                         Log.d("tttt", "취소 클릭함")
                     }
@@ -53,15 +52,15 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
                     }
                 }
 
-                popupMessage.show()
+                popupDoubleMessage.show()
             }
         })
 
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupMessage = PopupMessage(mContext, "주문 전송", "거래처 : (000018) 신림마트 [0원]\n총금액: 9,999,999원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : (000018) 신림마트 [0원]\n총금액: 9,999,999원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
 
-                popupMessage.itemClickListener = object: PopupMessage.ItemClickListener {
+                popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                     override fun onCancelClick() {
                         Log.d("tttt", "취소 클릭함")
                     }
@@ -71,7 +70,7 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
                     }
                 }
 
-                popupMessage.show()
+                popupDoubleMessage.show()
             }
         })
 

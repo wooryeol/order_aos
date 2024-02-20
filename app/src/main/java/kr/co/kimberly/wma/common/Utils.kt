@@ -4,13 +4,20 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.graphics.Point
+import android.media.ExifInterface
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.Window
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
+import java.io.IOException
 
 object Utils {
 
@@ -63,4 +70,54 @@ object Utils {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
     }
 
+    /**
+     * URI를 Bitmap으로 변환
+     */
+    fun uriToBitmap(activity: Activity, uri: Uri): Bitmap? {
+        return try {
+            activity.contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    /**
+     * 이미지 회전 정보 가져오는 함수
+     */
+    fun getOrientationOfImage(context: Context, uri: Uri): Int {
+        // uri -> inputStream
+        val inputStream = context.contentResolver.openInputStream(uri)
+        val exif: ExifInterface? = try {
+            ExifInterface(inputStream!!)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return -1
+        }
+        inputStream.close()
+
+        // 회전된 각도 알아내기
+        val orientation = exif?.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        if (orientation != -1) {
+            when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> return 90
+                ExifInterface.ORIENTATION_ROTATE_180 -> return 180
+                ExifInterface.ORIENTATION_ROTATE_270 -> return 270
+            }
+        }
+        return 0
+    }
+
+    /**
+     * 이미지 회전 시키는 함수
+     */
+    fun getRotatedBitmap(bitmap: Bitmap?, degrees: Float): Bitmap? {
+        if (bitmap == null) return null
+        if (degrees == 0F) return bitmap
+        val m = Matrix()
+        m.setRotate(degrees, bitmap.width.toFloat() / 2, bitmap.height.toFloat() / 2)
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
+    }
 }

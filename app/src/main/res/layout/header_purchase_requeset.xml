@@ -27,7 +27,7 @@
             android:layout_height="40dp"
             android:layout_marginStart="16dp">
             <TextView
-                android:id="@+id/accountName"
+                android:id="@+id/sapCode"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/et_round_c9cbd0"
@@ -59,11 +59,13 @@
             android:textSize="15dp"/>
 
         <RelativeLayout
+            android:id="@+id/addressArea"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical">
             <TextView
+                android:id="@+id/address"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/et_round_c9cbd0"

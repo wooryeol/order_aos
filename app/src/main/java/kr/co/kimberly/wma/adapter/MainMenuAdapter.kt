@@ -17,6 +17,7 @@ import kr.co.kimberly.wma.menu.order.OrderRegActivity
 import kr.co.kimberly.wma.menu.purchase.PurchaseRequestActivity
 import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
 import kr.co.kimberly.wma.menu.slip.SlipInquiryActivity
+import kr.co.kimberly.wma.menu.store.StoreManagmentActivity
 import kr.co.kimberly.wma.model.MainMenuModel
 import java.util.ArrayList
 
@@ -49,6 +50,9 @@ class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapte
                     }
                     Define.MENU06 -> { // 재고조회
                         Intent(itemView.context, InventoryActivity::class.java)
+                    }
+                    Define.MENU07 -> { // 매대관리
+                        Intent(itemView.context, StoreManagmentActivity::class.java)
                     }
                     Define.MENU08 -> { // 구매요청
                         Intent(itemView.context, PurchaseRequestActivity::class.java)

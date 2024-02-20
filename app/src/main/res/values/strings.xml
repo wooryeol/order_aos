@@ -165,8 +165,34 @@
     <string name="tax">과세구분</string>
     <string name="dataHint">데이터가 없습니다.</string>
 
+    <!-- 매대관리 -->
+    <string name="storeManaTitle">제목</string>
+    <string name="storeManaTitleHint">제목을 입력해주세요.</string>
+    <string name="storeManaConstructor">생성자</string>
+    <string name="storeManaConstructorHint">생성자를 입력해주세요.</string>
+    <string name="addImage">사진등록</string>
+    <string name="before">변경전</string>
+    <string name="beforeMsg">변경전 입니다.</string>
+    <string name="after">변경후</string>
+    <string name="afterMsg">변경후 입니다.</string>
+    <string name="popupAddImageTitle">사진등록</string>
+    <string name="popupAddImage">사진 등록 방법을 선택해주세요.</string>
+    <string name="bpPost">BP등록</string>
+    <string name="camera">사진촬영</string>
+    <string name="gallery">앨범에서 선택</string>
+    <string name="storeManagementSend">매대관리전송</string>
+    <string name="storeManagementSendMsg">매대관리 정보를 전송하시겠습니까?</string>
+    <string name="successMsg">[정상등록]</string>
+    <string name="successMsg02">매대관리 자료가 정상등록 되었습니다.</string>
+    <string name="successMsg03">WMA 4.0에서 확인바랍니다.\n확인을 누르시면 메인메뉴로 이동합니다.</string>
+
+    <!-- 구매요청 -->
+    <string name="PurchaseApproval">구매승인</string>
     <string name="purchaseAccountHint">SAP Code를 검색해주세요.</string>
     <string name="purchaseAddress">배송처</string>
     <string name="purchaseAddressHint">배송처를 검색해주세요.</string>
+    <string name="purchasePostMsg">위와 같이 승인을 요청하였습니다.\n<u>본사 전송 이후 전송된 전표는 수정이 불가능합니다.</u>\n전송을 하시겠습니까?</string>
+    <string name="purchaseSlip">구매전표 :</string>
+    <string name="distributorCode">대리점코드 :</string>
 
 </resources>

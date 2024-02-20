@@ -13,6 +13,7 @@ import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
 import kr.co.kimberly.wma.model.OrderRegModel
+import kr.co.kimberly.wma.model.SearchResultModel
 import java.util.ArrayList
 
 class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -81,7 +82,12 @@ class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<Re
 
             binding.btSearch.setOnClickListener(object: OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    val popupSearchResult = PopupSearchResult(binding.root.context)
+                    val list = ArrayList<SearchResultModel>()
+                    for(i: Int in 1..15) {
+                        list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
+                    }
+
+                    val popupSearchResult = PopupSearchResult(binding.root.context, list)
                     popupSearchResult.onItemSelect = {
                         binding.searchResult.text = it.name
                     }
