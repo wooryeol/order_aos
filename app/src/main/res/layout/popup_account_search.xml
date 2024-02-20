@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <LinearLayout
+        android:id="@+id/popupAccountSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:background="@drawable/ll_round_white"
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="16dp"
+            android:lineSpacingExtra="2dp"
+            android:scrollbars="vertical"
+            android:text="@string/account"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:textSize="20dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
+            android:orientation="horizontal"
+            tools:ignore="UselessParent">
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical">
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:textSize="16dp"
+                    android:background="@drawable/et_round_c9cbd0"
+                    android:paddingVertical="10dp"
+                    android:paddingHorizontal="12dp"
+                    android:imeOptions="actionDone"
+                    android:inputType="text"
+                    android:hint="@string/productNameHint"
+                    tools:ignore="Autofill,SpUsage,TextFields" />
+
+                <ImageButton
+                    android:id="@+id/btProductNameEmpty"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/trans"
+                    android:src="@drawable/ic_empty" />
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/btLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="@string/search"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="16dp"
+                android:background="@drawable/bt_round_1d6de5"
+                style="?android:attr/borderlessButtonStyle"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/color_C9CBD0"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:nestedScrollingEnabled="false"
+            tools:ignore="RtlSymmetry" />
+
+    </LinearLayout>
+
+</LinearLayout>

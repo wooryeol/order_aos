@@ -5,11 +5,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/white">
+
     <LinearLayout
+        android:id="@+id/settingBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:padding="16dp"
         android:gravity="center"
         android:orientation="horizontal"
         tools:ignore="UseCompoundDrawables,UselessParent">
@@ -142,7 +143,7 @@
                 android:textColor="@color/color_F6F9FE"
                 android:textStyle="bold"
                 android:textSize="16dp"
-                android:background="@drawable/bt_round"
+                android:background="@drawable/bt_round_c9cbd0"
                 style="?android:attr/borderlessButtonStyle"/>
         </LinearLayout>
     </LinearLayout>

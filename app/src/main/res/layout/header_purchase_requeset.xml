@@ -22,31 +22,61 @@
             android:textSize="15dp"/>
 
         <RelativeLayout
+            android:id="@+id/accountArea"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp">
+            <TextView
+                android:id="@+id/sapCode"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/et_round_c9cbd0"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="12dp"
+                android:gravity="center"
+                android:textSize="16dp"
+                android:text="@string/purchaseAccountHint"
+                android:textColor="@color/black"
+                tools:ignore="Autofill,SpUsage,TextFields" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:orientation="horizontal"
+        tools:ignore="UselessParent">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textColor="@color/color_7E828B"
+            android:textStyle="normal"
+            android:text="@string/purchaseAddress"
+            android:textSize="15dp"/>
+
+        <RelativeLayout
+            android:id="@+id/addressArea"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical">
-            <EditText
+            <TextView
+                android:id="@+id/address"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:textSize="16dp"
                 android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
-                android:imeOptions="actionDone"
-                android:inputType="text"
-                android:hint="@string/settingTitleHint01"
+                android:gravity="center"
+                android:textSize="16dp"
+                android:text="@string/purchaseAddressHint"
+                android:textColor="@color/black"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
-            <ImageButton
-                android:id="@+id/btAccountEmpty"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:layout_centerHorizontal="true"
-                android:background="@color/trans"
-                android:src="@drawable/ic_empty" />
         </RelativeLayout>
     </LinearLayout>
 
@@ -97,14 +127,14 @@
         </RelativeLayout>
 
         <Button
-            android:id="@+id/btLogin"
+            android:id="@+id/btSearch"
             android:layout_width="56dp"
             android:layout_height="40dp"
             android:text="@string/search"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="16dp"
-            android:background="@drawable/round_103c7e"
+            android:background="@drawable/bt_round_103c7e"
             style="?android:attr/borderlessButtonStyle"/>
     </LinearLayout>
 
@@ -115,6 +145,7 @@
         android:background="@color/color_DBDCDF"/>
 
     <TextView
+        android:id="@+id/searchResult"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -174,34 +205,6 @@
             tools:ignore="Autofill,SpUsage,TextFields" />
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginHorizontal="16dp"
-        android:orientation="horizontal"
-        tools:ignore="UselessParent">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unitPrice"
-            android:textSize="14dp"
-            android:textColor="@color/color_7E828B"
-            android:layout_marginEnd="16dp"
-            tools:ignore="SpUsage" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:textSize="16dp"
-            android:background="@drawable/et_round_c9cbd0"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="12dp"
-            android:imeOptions="actionDone"
-            android:inputType="text"
-            tools:ignore="Autofill,SpUsage,TextFields" />
-    </LinearLayout>
-
     <Button
         android:id="@+id/btAddOrder"
         android:layout_width="match_parent"
@@ -213,7 +216,7 @@
         android:textColor="@color/white"
         android:textStyle="bold"
         android:textSize="16dp"
-        android:background="@drawable/round_103c7e"
+        android:background="@drawable/bt_round_103c7e"
         style="?android:attr/borderlessButtonStyle"/>
 
 </LinearLayout>

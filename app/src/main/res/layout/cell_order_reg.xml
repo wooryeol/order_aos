@@ -7,6 +7,7 @@
     android:paddingStart="16dp"
     android:orientation="vertical">
     <TextView
+        android:id="@+id/orderName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="(34870) 하기스프리미어 3공 100/1"

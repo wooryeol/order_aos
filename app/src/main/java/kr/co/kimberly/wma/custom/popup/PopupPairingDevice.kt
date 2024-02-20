@@ -3,6 +3,7 @@ package kr.co.kimberly.wma.custom.popup
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Handler
@@ -10,6 +11,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Window
+import android.widget.LinearLayout
 import kr.co.kimberly.wma.databinding.PopupPairingScannerBinding
 import kr.co.kimberly.wma.databinding.PopupParingPrinterBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
@@ -26,10 +28,16 @@ class PopupPairingDevice(context: Context, activity: Activity) {
         when(SettingActivity.isRadioChecked) {
             1 -> {
                 scannerBinding = PopupPairingScannerBinding.inflate(LayoutInflater.from(mContext))
-                mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                mDialog.setContentView(scannerBinding!!.root)
+
                 mDialog.setCancelable(false)
+                mDialog.setContentView(scannerBinding!!.root)
+
+                mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                mDialog.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+
+                /*val height = Resources.getSystem().displayMetrics.heightPixels * 0.3
+                mDialog.window?.setLayout(960, height.toInt())*/
 
                 scannerBinding!!.deviceAddress.text = deviceAddress
                 scannerBinding!!.deviceName.text = deviceName
@@ -39,15 +47,21 @@ class PopupPairingDevice(context: Context, activity: Activity) {
                 }, 3000)
 
                 mDialog.show()
-                mDialog.window?.setLayout(960, 720)
             }
 
             2 -> {
                 printerBinding = PopupParingPrinterBinding.inflate(LayoutInflater.from(mContext))
-                mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                mDialog.setContentView(printerBinding!!.root)
+
                 mDialog.setCancelable(false)
+                mDialog.setContentView(printerBinding!!.root)
+                // mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+
+                mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                mDialog.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+
+                /*val height = Resources.getSystem().displayMetrics.heightPixels * 0.45
+                mDialog.window?.setLayout(960, height.toInt())*/
 
                 printerBinding!!.deviceName.text = deviceName
 
@@ -64,7 +78,6 @@ class PopupPairingDevice(context: Context, activity: Activity) {
                 }
 
                 mDialog.show()
-                mDialog.window?.setLayout(960, 1344)
             }
         }
     }

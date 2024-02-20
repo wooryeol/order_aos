@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/trans"
     tools:context=".menu.setting.SettingActivity">
 
@@ -17,7 +18,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_vertical"
-        app:layout_constraintTop_toBottomOf="@id/header">
+        android:layout_marginTop="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,6 +37,7 @@
                 tools:ignore="SpUsage" />
 
             <EditText
+                android:id="@+id/accountCode"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
@@ -86,7 +88,7 @@
                         android:id="@+id/radioScanner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:onClick="onRadioButtonClicked"
+                        android:onClick="onSettingActRadioButtonClicked"
                         android:theme="@style/CustomRadioButton"/>
 
                     <TextView
@@ -145,7 +147,7 @@
                         android:id="@+id/radioPrint"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:onClick="onRadioButtonClicked"
+                        android:onClick="onSettingActRadioButtonClicked"
                         android:theme="@style/CustomRadioButton"/>
 
                     <TextView
@@ -175,14 +177,12 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <View
         android:id="@+id/headerDivideLine"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/color_DBDCDF"
-        app:layout_constraintTop_toBottomOf="@id/body"
         android:layout_marginVertical="20dp"
-        android:layout_marginHorizontal="16dp"
         android:orientation="horizontal" />
 
     <LinearLayout
@@ -190,9 +190,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/headerDivideLine">
+        android:paddingHorizontal="16dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -331,33 +329,26 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <View
         android:id="@+id/bottomDivideLine"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/color_DBDCDF"
         app:layout_constraintTop_toBottomOf="@id/printerBox"
         android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="16dp"
-        android:orientation="horizontal" />
+        android:layout_marginHorizontal="16dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/bottomDivideLine" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingTop="16dp"/>
 
-    <Button
-        android:id="@+id/searchDeviceBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:text="@string/searchDevices"
-        android:textColor="@color/trans"
-        android:textStyle="bold"
-        android:textSize="16dp"
-        android:background="@color/color_1D6DE5"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="SpUsage" />
+    <include
+        android:id="@+id/bottom"
+        layout="@layout/layout_bottom" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
