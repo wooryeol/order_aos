@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
 import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
 import kr.co.kimberly.wma.databinding.ActSettingBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
@@ -45,9 +46,11 @@ class SettingActivity : AppCompatActivity() {
 
         // 헤더 설정 변경
         mBinding.header.scanBtn.visibility = View.GONE
-        mBinding.header.backBtn.setOnClickListener {
-            Utils.moveToPage(mContext, MainActivity(), false)
-        }
+        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                finish()
+            }
+        })
 
         searchDevices()
         showPairedDevices()

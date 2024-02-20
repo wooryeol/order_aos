@@ -107,7 +107,7 @@
     <string name="print">인쇄</string>
     <string name="receiptPrint">거래명세서 출력</string>
     <string name="printDone">인쇄가 완료되었습니다.</string>
-    <string name="doneComment">메인 메뉴로 이동을 원하시면 \'예\'를,\n재발행을 원하시면 \'아니오\'를 누르세요.</string>
+    <string name="doneComment">메인 메뉴로 이동을 원하시면 \'예\'를,\n재발행을 원하시면 \'아니요\'를 누르세요.</string>
     <string name="remark">비고</string>
 
     <!-- 반품등록 -->

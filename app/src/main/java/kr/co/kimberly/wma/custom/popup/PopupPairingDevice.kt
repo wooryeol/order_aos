@@ -63,7 +63,7 @@ class PopupPairingDevice(context: Context, activity: Activity) {
                 /*val height = Resources.getSystem().displayMetrics.heightPixels * 0.45
                 mDialog.window?.setLayout(960, height.toInt())*/
 
-                /*printerBinding!!.deviceName.text = deviceName
+                printerBinding!!.deviceName.text = deviceName
 
                 printerBinding!!.cancelBtn.setOnClickListener {
                     mDialog.dismiss()
@@ -75,7 +75,7 @@ class PopupPairingDevice(context: Context, activity: Activity) {
 
                 printerBinding!!.checkBoxPin.setOnClickListener{
                     Log.d("wooryeol", "체크 버튼이 클릭되었습니다.")
-                }*/
+                }
 
                 mDialog.show()
             }

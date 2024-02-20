@@ -36,11 +36,11 @@ class PopupStorageList(private val mContext: AppCompatActivity, private val mAct
         mDialog.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
         InventoryActivity.storageList.add("(I001) 기본창고")
-        /*InventoryActivity.storageList.add("(I003) 내부창고")
+        InventoryActivity.storageList.add("(I003) 내부창고")
         InventoryActivity.storageList.add("(R001) 반품창고")
         InventoryActivity.storageList.add("(V001) 12호차량")
         InventoryActivity.storageList.add("(V003) 23호차량")
-        InventoryActivity.storageList.add("(X001) 외부창고")*/
+        InventoryActivity.storageList.add("(X001) 외부창고")
 
         if (InventoryActivity.storageList.size > 10) {
             Utils.dialogResize(mContext, mDialog.window)
@@ -50,9 +50,9 @@ class PopupStorageList(private val mContext: AppCompatActivity, private val mAct
             val message = android.os.Message.obtain()
             message.obj = data
             mHandler.sendMessage(message)
-            InventoryActivity.storageList.clear()
             mDialog.dismiss()
         }
+
         adapter.dataList = InventoryActivity.storageList
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)

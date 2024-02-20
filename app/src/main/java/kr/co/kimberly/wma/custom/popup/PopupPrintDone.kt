@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Handler
 import android.view.Window
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kr.co.kimberly.wma.common.Utils
@@ -25,14 +26,13 @@ class PopupPrintDone(private val mContext: AppCompatActivity, private val mActiv
 
     fun show() {
         mBinding = PopupPrintDoneBinding.inflate(mContext.layoutInflater)
-        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        mDialog.setContentView(mBinding.root)
-        mDialog.setCancelable(false)
-        mDialog.show()
 
-        val height = Resources.getSystem().displayMetrics.heightPixels * 0.25
-        mDialog.window?.setLayout(960, height.toInt())
+        mDialog.setCancelable(true)
+        mDialog.setContentView(mBinding.root)
+        // mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+
+        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        mDialog.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
         mBinding.cancel.setOnClickListener {
             mDialog.dismiss()
@@ -44,5 +44,7 @@ class PopupPrintDone(private val mContext: AppCompatActivity, private val mActiv
             mContext.startActivity(intent)
             Toast.makeText(mContext, "인쇄를 진행합니다.", Toast.LENGTH_SHORT).show()
         }
+
+        mDialog.show()
     }
 }

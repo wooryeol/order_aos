@@ -20,7 +20,7 @@ class PopupNoteType(private val mContext: AppCompatActivity, private val mActivi
     fun show() {
         mBinding = PopupNoteTypeBinding.inflate(mContext.layoutInflater)
 
-        mDialog.setCancelable(false)
+        mDialog.setCancelable(true)
         mDialog.setContentView(mBinding.root)
         // mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
 

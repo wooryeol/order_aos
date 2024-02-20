@@ -44,7 +44,7 @@ class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapte
                     Define.MENU04 -> { // 전표조회
                         Intent(itemView.context, SlipInquiryActivity::class.java)
                     }
-                    Define.MENU04 -> { // 전표조회
+                    Define.MENU05 -> { // 원장조회
                         Intent(itemView.context, LedgerActivity::class.java)
                     }
                     Define.MENU06 -> { // 재고조회
