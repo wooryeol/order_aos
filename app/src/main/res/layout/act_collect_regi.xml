@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".menu.collect.CollectManageActivity">
 
     <include
@@ -15,8 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/header">
+        android:layout_marginTop="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -90,7 +90,6 @@
                 android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
-                android:hint="@string/accountHint"
                 android:inputType="number"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -122,8 +121,7 @@
                 android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
-                android:hint="@string/accountHint"
-                android:gravity="start"
+                android:gravity="center"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
         </LinearLayout>
@@ -154,7 +152,6 @@
                 android:background="@drawable/et_round_c9cbd0"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
-                android:hint="@string/accountHint"
                 android:inputType="number"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -205,55 +202,19 @@
         app:layout_constraintTop_toBottomOf="@id/bodyTop"
         android:layout_marginTop="20dp" />
 
-    <LinearLayout
-        android:id="@+id/cashBox"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/divideLine">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
-            android:id="@+id/cashAmount"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:text="@string/cashAmount"
-                android:textSize="14dp"
-                android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="12dp"
-                tools:ignore="SpUsage" />
-
-            <EditText
-                    android:singleLine="true"
-                android:id="@+id/cashAmountText"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:hint="@string/accountHint"
-                tools:ignore="Autofill,SpUsage,TextFields" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/noteBox"
-            android:visibility="gone"
+            android:id="@+id/cashBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/type"
+                android:id="@+id/cashAmount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="16dp"
@@ -263,39 +224,7 @@
                 <TextView
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/type"
-                    android:textSize="14dp"
-                    android:textColor="@color/color_7E828B"
-                    android:layout_marginEnd="12dp"
-                    tools:ignore="SpUsage" />
-
-                <Button
-                    android:id="@+id/typeText"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:textSize="16dp"
-                    android:background="@drawable/et_round_c9cbd0"
-                    android:paddingVertical="10dp"
-                    android:paddingHorizontal="12dp"
-                    android:text=""
-                    android:hint="@string/noteHint"
-                    tools:ignore="Autofill,SpUsage,TextFields" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/noteAmount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/noteAmount"
+                    android:text="@string/cashAmount"
                     android:textSize="14dp"
                     android:textColor="@color/color_7E828B"
                     android:layout_marginEnd="12dp"
@@ -303,7 +232,7 @@
 
                 <EditText
                     android:singleLine="true"
-                    android:id="@+id/noteAmountText"
+                    android:id="@+id/cashAmountText"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
@@ -312,22 +241,223 @@
                     android:paddingVertical="10dp"
                     android:paddingHorizontal="12dp"
                     android:inputType="number"
+                    android:gravity="end"
                     tools:ignore="Autofill,SpUsage,TextFields" />
 
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/noteNumber"
+                android:id="@+id/noteBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/type"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_7E828B"
+                        android:layout_marginEnd="12dp"
+                        tools:ignore="SpUsage" />
+
+                    <Button
+                        android:id="@+id/typeText"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:textSize="16dp"
+                        android:background="@drawable/et_round_c9cbd0"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="12dp"
+                        android:text=""
+                        android:hint="@string/noteHint"
+                        tools:ignore="Autofill,SpUsage,TextFields" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/noteAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/noteAmount"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_7E828B"
+                        android:layout_marginEnd="12dp"
+                        tools:ignore="SpUsage" />
+
+                    <EditText
+                        android:singleLine="true"
+                        android:id="@+id/noteAmountText"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:textSize="16dp"
+                        android:background="@drawable/et_round_c9cbd0"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="number"
+                        android:gravity="end"
+                        tools:ignore="Autofill,SpUsage,TextFields" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/noteNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/noteNumber"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_7E828B"
+                        android:layout_marginEnd="12dp"
+                        tools:ignore="SpUsage" />
+
+                    <EditText
+                        android:singleLine="true"
+                        android:id="@+id/noteNumberText"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:textSize="16dp"
+                        android:background="@drawable/et_round_c9cbd0"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="12dp"
+                        tools:ignore="Autofill,SpUsage,TextFields" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/publishBy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/publishBy"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_7E828B"
+                        android:layout_marginEnd="12dp"
+                        tools:ignore="SpUsage" />
+
+                    <EditText
+                        android:singleLine="true"
+                        android:id="@+id/publishByText"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:textSize="16dp"
+                        android:background="@drawable/et_round_c9cbd0"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="12dp"
+                        tools:ignore="Autofill,SpUsage,TextFields" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/publishDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/publishDate"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_7E828B"
+                        android:layout_marginEnd="12dp"
+                        tools:ignore="SpUsage" />
+
+                    <EditText
+                        android:singleLine="true"
+                        android:id="@+id/publishDateText"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:textSize="16dp"
+                        android:background="@drawable/et_round_c9cbd0"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="date"
+                        tools:ignore="Autofill,SpUsage,TextFields" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/expireDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/expireDate"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_7E828B"
+                        android:layout_marginEnd="12dp"
+                        tools:ignore="SpUsage" />
+
+                    <EditText
+                        android:singleLine="true"
+                        android:id="@+id/expireDateText"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:textSize="16dp"
+                        android:background="@drawable/et_round_c9cbd0"
+                        android:paddingVertical="10dp"
+                        android:paddingHorizontal="12dp"
+                        android:inputType="date"
+                        tools:ignore="Autofill,SpUsage,TextFields" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/remark"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginVertical="16dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/noteNumber"
+                    android:text="@string/remark"
                     android:textSize="14dp"
                     android:textColor="@color/color_7E828B"
                     android:layout_marginEnd="12dp"
@@ -335,7 +465,7 @@
 
                 <EditText
                     android:singleLine="true"
-                    android:id="@+id/noteNumberText"
+                    android:id="@+id/remarkText"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
                     android:layout_weight="1"
@@ -343,142 +473,16 @@
                     android:background="@drawable/et_round_c9cbd0"
                     android:paddingVertical="10dp"
                     android:paddingHorizontal="12dp"
-                    tools:ignore="Autofill,SpUsage,TextFields" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/publishBy"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/publishBy"
-                    android:textSize="14dp"
-                    android:textColor="@color/color_7E828B"
-                    android:layout_marginEnd="12dp"
-                    tools:ignore="SpUsage" />
-
-                <EditText
-                    android:singleLine="true"
-                    android:id="@+id/publishByText"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:textSize="16dp"
-                    android:background="@drawable/et_round_c9cbd0"
-                    android:paddingVertical="10dp"
-                    android:paddingHorizontal="12dp"
-                    tools:ignore="Autofill,SpUsage,TextFields" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/publishDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/publishDate"
-                    android:textSize="14dp"
-                    android:textColor="@color/color_7E828B"
-                    android:layout_marginEnd="12dp"
-                    tools:ignore="SpUsage" />
-
-                <Button
-                    android:singleLine="true"
-                    android:id="@+id/publishDateText"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:textSize="16dp"
-                    android:background="@drawable/et_round_c9cbd0"
-                    android:paddingVertical="10dp"
-                    android:paddingHorizontal="12dp"
-                    tools:ignore="Autofill,SpUsage,TextFields" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/expireDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="80dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/expireDate"
-                    android:textSize="14dp"
-                    android:textColor="@color/color_7E828B"
-                    android:layout_marginEnd="12dp"
-                    tools:ignore="SpUsage" />
-
-                <EditText
-                    android:singleLine="true"
-                    android:id="@+id/expireDateText"
-                    android:layout_width="0dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:textSize="16dp"
-                    android:background="@drawable/et_round_c9cbd0"
-                    android:paddingVertical="10dp"
-                    android:paddingHorizontal="12dp"
-                    android:inputType="date"
                     tools:ignore="Autofill,SpUsage,TextFields" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/remark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            android:layout_marginTop="16dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:text="@string/remark"
-                android:textSize="14dp"
-                android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="12dp"
-                tools:ignore="SpUsage" />
-
-            <EditText
-                    android:singleLine="true"
-                android:id="@+id/remarkText"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:hint="@string/accountHint"
-                tools:ignore="Autofill,SpUsage,TextFields" />
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </ScrollView>
 
     <include
         android:id="@+id/bottom"
         layout="@layout/layout_bottom" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

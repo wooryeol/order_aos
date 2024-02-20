@@ -7,10 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.util.Log
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.InventoryListAdapter
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupError
 import kr.co.kimberly.wma.custom.popup.PopupStorageList
 import kr.co.kimberly.wma.databinding.ActInventoryBinding
@@ -49,20 +51,27 @@ class InventoryActivity : AppCompatActivity() {
         // 헤더 설정 변경
         mBinding.header.headerTitle.text = getString(R.string.menu06)
         mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
+        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                finish()
+            }
+        })
 
         mBinding.search.setOnClickListener {
             showInventoryList()
         }
 
+        // 진입 시 창고 리스트 팝업 활성화
+        val dlg = PopupStorageList(this, mActivity, handler)
+        dlg.show()
         mBinding.selectStorageBtn.setOnClickListener {
-            val dlg = PopupStorageList(this, mActivity, handler)
             dlg.show()
         }
     }
 
     // 검색을 눌렀을 때
     private fun showInventoryList() {
-        //inventoryList.add(InventoryModel("(00234)크리넥스 수앤수 10매*3", "20", "0", "1000"))
+        inventoryList.add(InventoryModel("(00234)크리넥스 수앤수 10매*3", "20", "0", "1000"))
 
         val adapter = InventoryListAdapter(mContext, mActivity)
         adapter.dataList = inventoryList
@@ -75,8 +84,6 @@ class InventoryActivity : AppCompatActivity() {
         } else {
             val dlg = PopupError(this, mActivity)
             dlg.show()
-            mBinding.noSearch.visibility = View.VISIBLE
-            mBinding.recyclerview.visibility = View.GONE
         }
     }
 

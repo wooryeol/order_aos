@@ -1,88 +1,134 @@
 package kr.co.kimberly.wma.custom.popup
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
-import android.app.DatePickerDialog
-import android.content.Context
-import android.view.LayoutInflater
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.View
 import android.widget.Button
-import android.widget.NumberPicker
-import kr.co.kimberly.wma.R
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import kr.co.kimberly.wma.databinding.PopupDatePickerBinding
 import java.util.Calendar
 
-class PopupDatePicker(private val context: Context) {
-    @SuppressLint("SetTextI18n")
-    fun showDatePickerDialog(text: Button) {
-        val today = Calendar.getInstance()
-        val year: Int = today.get(Calendar.YEAR)
-        val month: Int = today.get(Calendar.MONTH)
-        val date: Int = today.get(Calendar.DATE)
+class PopupDatePicker(private val mContext: AppCompatActivity) {
 
-        val datePickerDialog = DatePickerDialog(context, android.R.style.Theme_Holo_Light_Dialog_NoActionBar, { _, year, month, dayOfMonth ->
-            text.text = "${year}-${month + 1}-${dayOfMonth}"
-        }, year, month, date)
+    private lateinit var mBinding : PopupDatePickerBinding
+    private val mDialog = Dialog(mContext)
 
-        datePickerDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-        datePickerDialog.show()
+    private val today: Calendar = Calendar.getInstance()
+    private var year: Int = today.get(Calendar.YEAR)
+    private var month: Int = today.get(Calendar.MONTH)
+    private var date: Int = today.get(Calendar.DATE)
+
+    // 날짜 갱신 함수 정의
+    private fun updateDate() {
+        today.set(year, month - 1, 1) // 선택한 월의 1일로 설정하여 해당 월의 마지막 날짜를 가져옴
+        val maxDate = today.getActualMaximum(Calendar.DAY_OF_MONTH)
+        if (date > maxDate) {
+            date = maxDate // 선택한 월의 마지막 날짜를 넘어가면 마지막 날짜로 설정
+        }
+        mBinding.year.text = year.toString()
+        mBinding.month.text = month.toString().padStart(2, '0')
+        mBinding.date.text = date.toString().padStart(2, '0')
+    }
+
+    // 직전 한달만 가져오기
+    private fun getPreviousMonthDate() {
+        // 현재 날짜에서 한 달을 뺌
+        val previousMonth = Calendar.getInstance()
+        previousMonth.set(year, month - 2, date) // month는 0부터 시작하므로 -1 해줌
+
+        // 갱신된 날짜 설정
+        year = previousMonth.get(Calendar.YEAR)
+        month = previousMonth.get(Calendar.MONTH) + 1 // Calendar.MONTH는 0부터 시작하므로 +1 해줌
+        date = previousMonth.get(Calendar.DATE)
+
+        updateDate()
     }
 
     @SuppressLint("SetTextI18n")
-    fun initCustomDatePicker(text: Button) {
-        val dialog = AlertDialog.Builder(context).create()
-        val mDialog : LayoutInflater = LayoutInflater.from(context)
-        val mView : View = mDialog.inflate(R.layout.popup_date_picker,null)
+    fun initCustomDatePicker(text: Button, noDate: Boolean? = null) {
+        mBinding = PopupDatePickerBinding.inflate(mContext.layoutInflater)
 
-        val year : NumberPicker = mView.findViewById(R.id.year)
-        val month : NumberPicker = mView.findViewById(R.id.month)
-        val day : NumberPicker = mView.findViewById(R.id.day)
-        val save : Button = mView.findViewById(R.id.confirmBtn)
-        val cancel : Button = mView.findViewById(R.id.cancelBtn)
+        mDialog.setCancelable(false)
+        mDialog.setContentView(mBinding.root)
 
+        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        mDialog.window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
+        if (noDate != null) {
+            if (noDate) {
+                mBinding.layoutDate.visibility = View.GONE
+            }
+        }
 
-        //  순환 안되게 막기
-        year.wrapSelectorWheel = false
-        month.wrapSelectorWheel = false
-        day.wrapSelectorWheel = false
+        // 초기화된 날짜 설정
+        updateDate()
 
-        //  editText 설정 해제
-        year.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
-        month.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
-        day.descendantFocusability = NumberPicker.FOCUS_BLOCK_DESCENDANTS
+        // 년도 조절 버튼
+        mBinding.btnAddYear.setOnClickListener {
+            year += 1
+            updateDate()
+        }
 
-        //  최소값 설정
-        year.minValue = 1980
-        month.minValue = 1
-        day.minValue = 1
+        mBinding.btnMinusYear.setOnClickListener {
+            year -= 1
+            updateDate()
+        }
 
-        //  최대값 설정
-        year.maxValue = 2024
-        month.maxValue = 12
-        day.maxValue = 31
+        // 월 조절 버튼
+        mBinding.btnAddMonth.setOnClickListener {
+            month += 1
+            if (month > 12) {
+                month = 1 // 12월을 넘어가면 1월로 설정
+                year += 1 // 연도도 증가
+            }
+            updateDate()
+        }
 
+        mBinding.btnMinusMonth.setOnClickListener {
+            month -= 1
+            if (month < 1) {
+                month = 12 // 1월 미만이면 12월로 설정
+                year -= 1 // 연도도 감소
+            }
+            updateDate()
+        }
+
+        // 일 조절 버튼
+        mBinding.btnAddDate.setOnClickListener {
+            date += 1
+            updateDate()
+        }
+
+        mBinding.btnMinusDate.setOnClickListener {
+            date -= 1
+            if (date < 1) {
+                date = 1 // 1일 미만이면 1일로 설정
+            }
+            updateDate()
+        }
 
         //  취소 버튼 클릭 시
-        cancel.setOnClickListener {
-            dialog.dismiss()
-            dialog.cancel()
+        mBinding.cancelBtn.setOnClickListener {
+            mDialog.dismiss()
         }
 
         //  완료 버튼 클릭 시
-        save.setOnClickListener {
-            /*year_textview_statsfrag.text = (year.value).toString() + "년"
-            month_textview_statsfrag.text = (month.value).toString() + "월"*/
-            text.text = "$year/$month/$day"
-            dialog.dismiss()
-            dialog.cancel()
+        mBinding.confirmBtn.setOnClickListener {
+            val selectedMonth = month.toString().padStart(2, '0')
+            val selectedDate = date.toString().padStart(2, '0')
+            if (noDate != null) {
+                if (noDate) {
+                    text.text = "$year-$selectedMonth"
+                }
+            } else {
+                text.text = "$year/$selectedMonth/$selectedDate"
+            }
+            mDialog.dismiss()
         }
 
-
-
-
-        dialog.setView(mView)
-        dialog.create()
-        dialog.show()
+        mDialog.show()
     }
 }

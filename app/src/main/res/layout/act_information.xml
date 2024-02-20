@@ -95,6 +95,7 @@
         android:layout_marginTop="20dp" />
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/accountInfoLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -125,6 +126,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -149,6 +151,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -173,6 +176,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -197,6 +201,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -214,11 +219,14 @@
                 android:textSize="16dp"
                 tools:ignore="SpUsage" />
 
-            <TextView
+            <Button
                 android:id="@+id/phone"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:background="@color/trans"
+                android:textColor="@color/color_1A1A1A"
+                android:textStyle="normal"
                 android:textSize="16dp"
                 android:gravity="end"
                 tools:ignore="SpUsage" />
@@ -245,6 +253,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -269,6 +278,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -293,6 +303,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -317,6 +328,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -341,6 +353,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -358,13 +371,17 @@
                 android:textSize="16dp"
                 tools:ignore="SpUsage" />
 
-            <TextView
+            <Button
                 android:id="@+id/inChargeNum"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:background="@color/trans"
+                android:textColor="@color/color_1A1A1A"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:clickable="true"
+                android:textStyle="normal"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>
@@ -372,6 +389,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:visibility="visible"
         android:id="@+id/productInfoLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -380,7 +398,6 @@
         android:paddingHorizontal="20dp"
         android:layout_margin="16dp"
         android:background="@drawable/et_round_c9cbd0"
-        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/divideLine">
 
         <LinearLayout
@@ -552,6 +569,7 @@
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/noImage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingVertical="8dp">
@@ -563,10 +581,10 @@
                 android:background="@drawable/ll_round_f3f4f5"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="ContentDescription"/>
+                tools:ignore="ContentDescription" />
 
             <ImageView
-                android:id="@+id/noImage"
+                android:id="@+id/imageView"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/imagesmode"
@@ -586,10 +604,18 @@
                 android:textColor="@color/color_4C4F54"
                 android:textSize="16dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/noImage"
+                app:layout_constraintTop_toBottomOf="@+id/imageView"
                 tools:ignore="SpUsage" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ll_round"
+            android:layout_marginVertical="8dp"/>
 
     </LinearLayout>
 

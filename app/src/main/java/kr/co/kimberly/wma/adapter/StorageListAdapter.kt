@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,7 +24,7 @@ class StorageListAdapter(context: Context, activity: Activity, private val onIte
         fun bind(itemModel: String) {
             binding.storageName.text = itemModel
 
-            itemView.setOnClickListener {
+            binding.storageName.setOnClickListener {
                 onItemClick(binding.storageName.text.toString())
             }
         }

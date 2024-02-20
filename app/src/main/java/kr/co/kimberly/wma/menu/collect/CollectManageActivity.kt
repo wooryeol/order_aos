@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
 import kr.co.kimberly.wma.custom.popup.PopupNoteType
 import kr.co.kimberly.wma.databinding.ActCollectManageBinding
@@ -37,9 +38,11 @@ class CollectManageActivity : AppCompatActivity() {
         // 헤더 설정 변경
         mBinding.header.headerTitle.text = getString(R.string.menu02)
         mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
-        mBinding.header.backBtn.setOnClickListener {
-            Utils.moveToPage(mContext, MainActivity(), false)
-        }
+        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                finish()
+            }
+        })
 
         // 바텀 설정 변경
         mBinding.bottom.bottomButton.text = getString(R.string.collectRegi)
@@ -51,17 +54,17 @@ class CollectManageActivity : AppCompatActivity() {
 
         // 수금등록
         mBinding.bottom.bottomButton.setOnClickListener {
-            Utils.moveToPage(mContext, CollectRegiActivity(), true)
+            Utils.moveToPage(mContext, CollectRegiActivity())
         }
 
         // 날짜 선택
-        val datePickerDialog = PopupDatePicker(mContext)
+        /*val datePickerDialog = PopupDatePicker(mContext)
         mBinding.startDate.setOnClickListener {
             datePickerDialog.showDatePickerDialog(mBinding.startDate)
         }
         mBinding.endDate.setOnClickListener {
             datePickerDialog.showDatePickerDialog(mBinding.endDate)
-        }
+        }*/
 
 
     }

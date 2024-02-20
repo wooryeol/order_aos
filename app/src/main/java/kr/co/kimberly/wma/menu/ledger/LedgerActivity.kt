@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.adapter.LedgerAdapter
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
 import kr.co.kimberly.wma.databinding.ActLedgerBinding
 import kr.co.kimberly.wma.model.AccountModel
@@ -30,11 +31,19 @@ class LedgerActivity : AppCompatActivity() {
         mContext = this
         mActivity = this
 
+        // 헤더 설정
+        mBinding.header.headerTitle.text = getString(R.string.menu05)
+        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                finish()
+            }
+        })
+
 
         // 날짜 선택
-        val datePickerDialog = PopupDatePicker(mContext)
+        val datePickerDialog = PopupDatePicker(this)
         mBinding.date.setOnClickListener {
-            datePickerDialog.showDatePickerDialog(mBinding.date)
+            datePickerDialog.initCustomDatePicker(mBinding.date, true)
         }
 
 

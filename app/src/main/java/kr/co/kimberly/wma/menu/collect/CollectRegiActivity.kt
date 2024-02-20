@@ -7,10 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
+import android.text.method.ScrollingMovementMethod
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
 import kr.co.kimberly.wma.custom.popup.PopupNoteType
 import kr.co.kimberly.wma.custom.popup.PopupOrderSend
@@ -46,6 +48,11 @@ class CollectRegiActivity : AppCompatActivity() {
         //헤더 및 바텀 설정
         mBinding.header.headerTitle.text = getString(R.string.collectRegi)
         mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
+        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                finish()
+            }
+        })
         mBinding.bottom.bottomButton.text = getString(R.string.collectRegi)
 
         mBinding.typeText.setOnClickListener {
@@ -61,12 +68,9 @@ class CollectRegiActivity : AppCompatActivity() {
         }
 
         // 날짜 선택
-        val datePickerDialog = PopupDatePicker(mContext)
+        val datePickerDialog = PopupDatePicker(this)
         mBinding.collectedDate.setOnClickListener {
-            datePickerDialog.showDatePickerDialog(mBinding.collectedDate)
-        }
-        mBinding.publishDateText.setOnClickListener {
-            datePickerDialog.showDatePickerDialog(mBinding.publishDateText)
+            datePickerDialog.initCustomDatePicker(mBinding.collectedDate)
         }
 
         //현금 선택 화면이 먼저 보이도록

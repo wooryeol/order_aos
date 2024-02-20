@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Toast
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupPrintDone
 import kr.co.kimberly.wma.databinding.ActCollectApprovalBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
@@ -29,9 +30,11 @@ class CollectApprovalActivity : AppCompatActivity() {
         // 헤더 및 바텀 설정
         mBinding.header.headerTitle.text = getString(R.string.orderApproval)
         mBinding.header.scanBtn.visibility = View.GONE
-        mBinding.header.backBtn.setOnClickListener {
-            Utils.moveToPage(mContext, MainActivity(), false)
-        }
+        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                finish()
+            }
+        })
 
         // 인쇄
         mBinding.printBtn.setOnClickListener {
