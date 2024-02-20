@@ -1,4 +1,4 @@
-package kr.co.kimberly.wma.menu.`return`
+package kr.co.kimberly.wma.menu.purchase
 
 import android.app.Activity
 import android.content.Context
@@ -9,28 +9,31 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.adapter.PurchaseRequestAdapter
 import kr.co.kimberly.wma.adapter.RegAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupMessage
-import kr.co.kimberly.wma.databinding.ActReturnRegBinding
+import kr.co.kimberly.wma.databinding.ActOrderRegBinding
+import kr.co.kimberly.wma.databinding.ActPrinterOptionBinding
+import kr.co.kimberly.wma.databinding.ActPurchaseRequestBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.model.OrderRegModel
 
-class ReturnRegActivity : AppCompatActivity() {
-    private lateinit var mBinding: ActReturnRegBinding
+class PurchaseRequestActivity: AppCompatActivity() {
+    private lateinit var mBinding: ActPurchaseRequestBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = ActReturnRegBinding.inflate(layoutInflater)
+        mBinding = ActPurchaseRequestBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         mContext = this
         mActivity = this
 
-        mBinding.header.headerTitle.text = getString(R.string.menu03)
-        mBinding.bottom.bottomButton.text = getString(R.string.orderApproval)
+        mBinding.header.headerTitle.text = getString(R.string.menu08)
+        mBinding.bottom.bottomButton.text = getString(R.string.menu08)
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
@@ -61,7 +64,7 @@ class ReturnRegActivity : AppCompatActivity() {
             list.add(OrderRegModel("(34870) 하기스프리미어 3공 100/1", "10", "0", "9,999,999원", "240", "9,999,999,999원"))
         }
 
-        val adapter = RegAdapter(mContext, mActivity)
+        val adapter = PurchaseRequestAdapter(mContext, mActivity)
         adapter.dataList = list
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)

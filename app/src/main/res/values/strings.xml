@@ -165,4 +165,8 @@
     <string name="tax">과세구분</string>
     <string name="dataHint">데이터가 없습니다.</string>
 
+    <string name="purchaseAccountHint">SAP Code를 검색해주세요.</string>
+    <string name="purchaseAddress">배송처</string>
+    <string name="purchaseAddressHint">배송처를 검색해주세요.</string>
+
 </resources>
