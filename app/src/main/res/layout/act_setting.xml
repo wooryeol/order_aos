@@ -37,6 +37,7 @@
                 tools:ignore="SpUsage" />
 
             <EditText
+                android:id="@+id/accountCode"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
@@ -344,7 +345,7 @@
         android:layout_weight="1"
         android:clipToPadding="false"
         android:overScrollMode="never"
-        android:layout_marginTop="16dp" />
+        android:paddingTop="16dp"/>
 
     <include
         android:id="@+id/bottom"

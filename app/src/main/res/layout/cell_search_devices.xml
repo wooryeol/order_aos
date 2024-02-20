@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="2dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
@@ -59,7 +58,8 @@
             tools:ignore="SpUsage" />
     </LinearLayout>
 
-    <LinearLayout
+    <View
+        android:id="@+id/divideLine"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/color_DBDCDF"
