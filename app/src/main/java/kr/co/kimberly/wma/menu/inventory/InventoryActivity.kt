@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.InventoryListAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupError
 import kr.co.kimberly.wma.custom.popup.PopupStorageList
 import kr.co.kimberly.wma.databinding.ActInventoryBinding
@@ -54,6 +55,17 @@ class InventoryActivity : AppCompatActivity() {
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 finish()
+            }
+        })
+
+        // 거래처 검색
+        mBinding.search.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val popupAccountSearch = PopupAccountSearch(mContext)
+                popupAccountSearch.onItemSelect = {
+                    mBinding.accountName.text = it.name
+                }
+                popupAccountSearch.show()
             }
         })
 

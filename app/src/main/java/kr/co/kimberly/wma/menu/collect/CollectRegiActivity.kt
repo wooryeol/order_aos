@@ -13,6 +13,7 @@ import android.widget.RadioButton
 import android.widget.Toast
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
 import kr.co.kimberly.wma.custom.popup.PopupNoteType
 import kr.co.kimberly.wma.custom.popup.PopupOrderSend
@@ -75,6 +76,17 @@ class CollectRegiActivity : AppCompatActivity() {
 
         //현금 선택 화면이 먼저 보이도록
         mBinding.cash.isChecked = true
+
+        // 거래처 검색
+        mBinding.search.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val popupAccountSearch = PopupAccountSearch(mContext)
+                popupAccountSearch.onItemSelect = {
+                    mBinding.accountName.text = it.name
+                }
+                popupAccountSearch.show()
+            }
+        })
     }
 
     private fun handleValueFromDialog(value: String) {
@@ -126,7 +138,7 @@ class CollectRegiActivity : AppCompatActivity() {
     }
 
     private fun emptyCheck(): Boolean {
-        if (mBinding.accountSearch.text.isEmpty()
+        if (mBinding.accountName.text.isEmpty()
             || mBinding.uncollected.text.isEmpty()
             || mBinding.collectedDate.text.isEmpty()
             || mBinding.totalAmount.text.isEmpty()){

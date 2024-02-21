@@ -10,6 +10,7 @@ import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.adapter.LedgerAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
 import kr.co.kimberly.wma.databinding.ActLedgerBinding
 import kr.co.kimberly.wma.model.AccountModel
@@ -46,6 +47,16 @@ class LedgerActivity : AppCompatActivity() {
             datePickerDialog.initCustomDatePicker(mBinding.date, true)
         }
 
+        // 거래처 검색
+        mBinding.search.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val popupAccountSearch = PopupAccountSearch(mContext)
+                popupAccountSearch.onItemSelect = {
+                    mBinding.accountName.text = it.name
+                }
+                popupAccountSearch.show()
+            }
+        })
 
         mBinding.search.setOnClickListener {
             showCollectList()

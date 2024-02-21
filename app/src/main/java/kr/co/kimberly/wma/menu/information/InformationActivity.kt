@@ -15,6 +15,7 @@ import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.databinding.ActInformationBinding
 import kr.co.kimberly.wma.model.AccountInfoModel
 import kr.co.kimberly.wma.model.ProductInfoModel
@@ -42,6 +43,17 @@ class InformationActivity : AppCompatActivity() {
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 finish()
+            }
+        })
+
+        // 거래처 검색
+        mBinding.search.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val popupAccountSearch = PopupAccountSearch(mContext)
+                popupAccountSearch.onItemSelect = {
+                    mBinding.accountName.text = it.name
+                }
+                popupAccountSearch.show()
             }
         })
 
@@ -98,7 +110,7 @@ class InformationActivity : AppCompatActivity() {
         )
 
         mBinding.accountCode.text = accountInfo.accountCode
-        mBinding.accountName.text = accountInfo.accountName
+        mBinding.account.text = accountInfo.accountName
         mBinding.represent.text = accountInfo.represent
         mBinding.businessNum.text = accountInfo.businessNum
         mBinding.phone.text = accountInfo.phone

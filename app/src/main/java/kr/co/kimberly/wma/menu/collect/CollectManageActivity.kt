@@ -14,6 +14,7 @@ import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
 import kr.co.kimberly.wma.custom.popup.PopupNoteType
 import kr.co.kimberly.wma.databinding.ActCollectManageBinding
@@ -66,6 +67,16 @@ class CollectManageActivity : AppCompatActivity() {
             datePickerDialog.showDatePickerDialog(mBinding.endDate)
         }*/
 
+        // 거래처 검색
+        mBinding.search.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val popupAccountSearch = PopupAccountSearch(mContext)
+                popupAccountSearch.onItemSelect = {
+                    mBinding.accountName.text = it.name
+                }
+                popupAccountSearch.show()
+            }
+        })
 
     }
 

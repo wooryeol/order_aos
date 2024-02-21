@@ -9,10 +9,13 @@ import android.bluetooth.BluetoothManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.registerReceiver
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
@@ -33,6 +36,15 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
         arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
+    fun searchBluetooth(){
+        val filter = IntentFilter()
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+        filter.addAction(BluetoothDevice.ACTION_FOUND)
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        registerReceiver(mContext, receiver, filter, 0)
+    }
+
     fun initBluetooth() {
         TedPermission.create()
             .setPermissionListener(object : PermissionListener {
@@ -50,13 +62,17 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
     }
     @SuppressLint("HardwareIds")
     fun checkBluetooth() {
-        if (!bluetoothAdapter.isEnabled) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                mContext.startActivityForResult(enableBtIntent, Define.REQUEST_ENABLE_BT)
-            }
+        if (bluetoothAdapter == null) {
+            Toast.makeText(mContext, "블루투스를 지원하지 않는 기기입니다.", Toast.LENGTH_SHORT).show()
         } else {
-            discovery()
+            if (!bluetoothAdapter.isEnabled) {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                    mContext.startActivityForResult(enableBtIntent, Define.REQUEST_ENABLE_BT)
+                }
+            } else {
+                discovery()
+            }
         }
     }
 
@@ -66,14 +82,6 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
             return
         } else {
             SettingActivity.searchedList.clear()
-            val pairedDevice = bluetoothAdapter.bondedDevices
-            pairedDevice?.let {
-                it.forEach {device ->
-                    val name = device.name
-                    val address = device.address
-                    PopupSearchDevices(mContext, mActivity).adapter.notifyDataSetChanged()
-                }
-            }
             bluetoothAdapter.startDiscovery()
         }
     }
@@ -83,8 +91,6 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
         override fun onReceive(context: Context, intent: Intent) {
             when(intent.action) {
                 BluetoothDevice.ACTION_FOUND -> {
-                    // Discovery has found a device. Get the BluetoothDevice
-                    // object and its info from the Intent.
                     val device: BluetoothDevice? =
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     if (device?.name != null) {

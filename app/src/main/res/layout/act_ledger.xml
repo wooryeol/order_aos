@@ -63,8 +63,8 @@
                 android:layout_marginEnd="12dp"
                 tools:ignore="SpUsage" />
 
-            <EditText
-                android:id="@+id/accountSearch"
+            <TextView
+                android:id="@+id/accountName"
                 android:singleLine="true"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
@@ -73,8 +73,6 @@
                 android:background="@drawable/et_round_c9cbd0"
                 android:paddingHorizontal="12dp"
                 android:layout_marginEnd="8dp"
-                android:imeOptions="actionDone"
-                android:inputType="text"
                 android:hint="@string/accountHint"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 

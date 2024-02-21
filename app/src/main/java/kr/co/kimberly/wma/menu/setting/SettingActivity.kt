@@ -101,13 +101,13 @@ class SettingActivity : AppCompatActivity() {
                         val dlg = PopupSearchDevices(this, mActivity)
                         dlg.show()
                         Log.d("wooryeol", "스캐너 선택됨")
-                        mBluetooth.checkBluetooth()
+                        /*mBluetooth.searchBluetooth()*/
                     }
                     2 -> {
                         val dlg = PopupSearchDevices(this, mActivity)
                         dlg.show()
                         Log.d("wooryeol", "프린터 선택됨")
-                        mBluetooth.checkBluetooth()
+                        /*mBluetooth.searchBluetooth()*/
                     }
                     else -> {
                         Toast.makeText(mContext, "스캐너 혹은 프린터를 체크해주세요", Toast.LENGTH_LONG).show()
