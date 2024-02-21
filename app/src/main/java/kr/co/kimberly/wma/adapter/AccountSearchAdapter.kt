@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Outline
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -63,6 +64,12 @@ class AccountSearchAdapter(context: Context): RecyclerView.Adapter<AccountSearch
 
         if(position == (itemCount - 1)) {
             holder.binding.line.visibility = View.INVISIBLE
+        }
+
+        if (holder.binding.accountSearchName.text == "") {
+            holder.binding.line.visibility = View.INVISIBLE
+        } else {
+            holder.binding.line.visibility = View.VISIBLE
         }
     }
 

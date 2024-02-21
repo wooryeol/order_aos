@@ -29,6 +29,7 @@
             android:textColor="@color/color_8A8F99"/>
 
         <TextView
+            android:id="@+id/tvBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="10"
@@ -40,12 +41,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:text="닡개 : "
+            android:text="낱개 : "
             android:textSize="12dp"
             android:textStyle="normal"
             android:textColor="@color/color_8A8F99"/>
 
         <TextView
+            android:id="@+id/tvEach"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="10"
@@ -68,6 +70,7 @@
             android:textColor="@color/color_8A8F99"/>
 
         <TextView
+            android:id="@+id/tvPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="9,999,999원"
@@ -76,7 +79,7 @@
             android:textColor="@color/color_1A1A1A"/>
 
         <ImageButton
-            android:id="@+id/header_button"
+            android:id="@+id/deleteButton"
             android:layout_width="60dp"
             android:layout_height="match_parent"
             android:src="@drawable/ic_trash"
@@ -98,6 +101,7 @@
             android:textColor="@color/color_8A8F99"/>
 
         <TextView
+            android:id="@+id/tvTotal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="240"
@@ -119,6 +123,7 @@
             android:textColor="@color/color_8A8F99"/>
 
         <TextView
+            android:id="@+id/tvTotalAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="9,999,999,999원"

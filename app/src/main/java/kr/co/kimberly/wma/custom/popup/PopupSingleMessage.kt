@@ -9,8 +9,9 @@ import android.view.View
 import android.widget.LinearLayout
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSingleMessageBinding
+import kotlin.system.exitProcess
 
-class PopupSingleMessage(mContext: Context, private var title: String, private var msg: String): Dialog(mContext) {
+class PopupSingleMessage(mContext: Context, private var title: String, private var msg: String? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupSingleMessageBinding
 
     private var context = mContext
@@ -47,8 +48,16 @@ class PopupSingleMessage(mContext: Context, private var title: String, private v
             override fun onSingleClick(v: View) {
                 itemClickListener?.onOkClick()
                 hideDialog()
+                if (msg.isNullOrEmpty()) {
+                    exitProcess(0)
+                }
             }
         })
+
+        if (msg.isNullOrEmpty()) {
+            mBinding.tvMsg.visibility = View.GONE
+            mBinding.title.textSize = 18F
+        }
     }
 
     fun hideDialog() {

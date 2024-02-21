@@ -32,6 +32,7 @@ import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessageIcon
 import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActStoreManagementBinding
+import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import java.io.File
 import java.io.IOException
@@ -149,11 +150,13 @@ class StoreManagementActivity : AppCompatActivity() {
                         )
                         popupDoubleMessageIcon.itemClickListener = object: PopupDoubleMessageIcon.ItemClickListener {
                             override fun onCancelClick() {
-                                TODO("Not yet implemented")
+                                popupDoubleMessageIcon.dismiss()
                             }
 
                             override fun onOkClick() {
-                                TODO("Not yet implemented")
+                                val intent =  Intent(mContext, MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                mContext.startActivity(intent)
                             }
 
                         }

@@ -5,20 +5,14 @@ import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.view.View
-import android.widget.RadioButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
-import kr.co.kimberly.wma.custom.popup.PopupDatePicker
-import kr.co.kimberly.wma.custom.popup.PopupNoteType
 import kr.co.kimberly.wma.databinding.ActCollectManageBinding
-import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.model.AccountModel
 
 class CollectManageActivity : AppCompatActivity() {
@@ -47,11 +41,6 @@ class CollectManageActivity : AppCompatActivity() {
 
         // 바텀 설정 변경
         mBinding.bottom.bottomButton.text = getString(R.string.collectRegi)
-
-        // 거래처 미수금 검색
-        mBinding.search.setOnClickListener {
-            showCollectList()
-        }
 
         // 수금등록
         mBinding.bottom.bottomButton.setOnClickListener {

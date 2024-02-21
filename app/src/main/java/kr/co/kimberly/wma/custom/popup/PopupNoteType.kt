@@ -2,11 +2,9 @@ package kr.co.kimberly.wma.custom.popup
 
 import android.app.Activity
 import android.app.Dialog
-import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Handler
-import android.view.Window
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import kr.co.kimberly.wma.databinding.PopupNoteTypeBinding

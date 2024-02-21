@@ -1,5 +1,6 @@
 package kr.co.kimberly.wma.menu.order
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -20,6 +21,12 @@ class OrderRegActivity : AppCompatActivity() {
     private lateinit var mBinding: ActOrderRegBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
+
+    companion object {
+        val list = ArrayList<OrderRegModel>()
+        @SuppressLint("StaticFieldLeak")
+        lateinit var adapter: RegAdapter
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,12 +63,11 @@ class OrderRegActivity : AppCompatActivity() {
             }
         })
 
-        val list = ArrayList<OrderRegModel>()
-        for(i: Int in 1..10) {
+        /*for(i: Int in 1..10) {
             list.add(OrderRegModel("(34870) 하기스프리미어 3공 100/1", "10", "0", "9,999,999원", "240", "9,999,999,999원"))
-        }
+        }*/
 
-        val adapter = RegAdapter(mContext, mActivity)
+        adapter = RegAdapter(mContext, mActivity)
         adapter.dataList = list
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)

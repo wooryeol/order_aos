@@ -15,4 +15,6 @@ object Define {
     const val provider = "kr.co.kimberly.wma.provider"
 
     const val REQUEST_ENABLE_BT = 100
+
+    const val IS_TEST = true
 }

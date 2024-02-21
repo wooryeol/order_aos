@@ -52,4 +52,7 @@ dependencies {
 
     // 이미지 전체화면
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
+
+    //gson
+    implementation("com.google.code.gson:gson:2.10.1")
 }

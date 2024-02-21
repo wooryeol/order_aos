@@ -7,6 +7,7 @@ import android.content.res.Resources
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -17,6 +18,7 @@ import kr.co.kimberly.wma.custom.GridSpacingItemDecoration
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNotification
+import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActMainBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.model.MainMenuModel
@@ -57,11 +59,23 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        val popupNotice = PopupNotice(mContext, "테스트 팝업 입니다.")
-        popupNotice.show()
-
         val popupNotification = PopupNotification(mContext, "테스트 공지사항 팝업 입니다.")
         popupNotification.show()
+
+        // 공지사항
+        mBinding.notification.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                popupNotification.show()
+            }
+        })
+
+        // 실행종료
+        val popupSingleMessage = PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?")
+        mBinding.finish.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                popupSingleMessage.show()
+            }
+        })
     }
 
     private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()

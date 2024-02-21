@@ -40,7 +40,7 @@ class PopupPrintDone(private val mContext: AppCompatActivity, private val mActiv
 
         mBinding.order.setOnClickListener {
             val intent =  Intent(mContext, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             mContext.startActivity(intent)
             Toast.makeText(mContext, "인쇄를 진행합니다.", Toast.LENGTH_SHORT).show()
         }

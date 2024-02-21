@@ -44,10 +44,10 @@
             android:layout_weight="1"/>
 
         <LinearLayout
+            android:id="@+id/finish"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
+            android:padding="16dp"
             android:gravity="center"
             android:orientation="horizontal"
             tools:ignore="UseCompoundDrawables,UselessParent">
@@ -72,7 +72,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="24dp"
         android:orientation="horizontal">
         <Button
             android:id="@+id/settingBtn"
@@ -90,6 +90,7 @@
             android:background="@drawable/bt_round_b1b4bb"/>
 
         <Button
+            android:id="@+id/notification"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="1"
