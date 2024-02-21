@@ -4,10 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.databinding.PopupDatePickerBinding
 import java.util.Calendar
 
@@ -28,9 +31,60 @@ class PopupDatePicker(private val mContext: AppCompatActivity) {
         if (date > maxDate) {
             date = maxDate // 선택한 월의 마지막 날짜를 넘어가면 마지막 날짜로 설정
         }
-        mBinding.year.text = year.toString()
-        mBinding.month.text = month.toString().padStart(2, '0')
-        mBinding.date.text = date.toString().padStart(2, '0')
+        mBinding.year.setText(year.toString())
+        mBinding.month.setText(month.toString().padStart(2, '0'))
+        mBinding.date.setText(date.toString().padStart(2, '0'))
+
+        mBinding.year.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val yearStr = mBinding.year.text.toString()
+                if(yearStr.isNotEmpty()) {
+                    year = Integer.parseInt(mBinding.year.text.toString())
+                }
+            }
+        })
+
+        mBinding.month.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val monthStr = mBinding.month.text.toString()
+                if(monthStr.isNotEmpty()) {
+                    month = Integer.parseInt(mBinding.month.text.toString())
+                }
+            }
+        })
+
+        mBinding.date.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val dateStr = mBinding.date.text.toString()
+                if(dateStr.isNotEmpty()) {
+                    date = Integer.parseInt(mBinding.date.text.toString())
+                }
+            }
+        })
     }
 
     // 직전 한달만 가져오기
@@ -117,16 +171,25 @@ class PopupDatePicker(private val mContext: AppCompatActivity) {
 
         //  완료 버튼 클릭 시
         mBinding.confirmBtn.setOnClickListener {
-            val selectedMonth = month.toString().padStart(2, '0')
-            val selectedDate = date.toString().padStart(2, '0')
-            if (noDate != null) {
-                if (noDate) {
-                    text.text = "$year-$selectedMonth"
-                }
+            if(month > 12) {
+                val popupNotice = PopupNotice(mContext, mContext.getString(R.string.monthErr))
+                popupNotice.show()
+            } else if(date > 31) {
+                val popupNotice = PopupNotice(mContext, mContext.getString(R.string.dateErr))
+                popupNotice.show()
             } else {
-                text.text = "$year/$selectedMonth/$selectedDate"
+                val selectedMonth = month.toString().padStart(2, '0')
+                val selectedDate = date.toString().padStart(2, '0')
+                if (noDate != null) {
+                    if (noDate) {
+                        text.text = "$year-$selectedMonth"
+                    }
+                } else {
+                    text.text = "$year/$selectedMonth/$selectedDate"
+                }
+
+                mDialog.dismiss()
             }
-            mDialog.dismiss()
         }
 
         mDialog.show()

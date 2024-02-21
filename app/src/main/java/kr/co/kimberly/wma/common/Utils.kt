@@ -1,5 +1,6 @@
 package kr.co.kimberly.wma.common
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.Point
+import android.icu.util.Calendar
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
@@ -22,6 +24,8 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
 
 object Utils {
 
@@ -125,6 +129,9 @@ object Utils {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
     }
 
+    /**
+     * 이미지를 파일로 저장 후 uri로 변환 시키는 함수
+     */
     fun saveBitmapToFile(context: Context, bitmap: Bitmap): Uri? {
         val fileName = "temp_image" // 임시 파일 이름
         val stream = ByteArrayOutputStream()
@@ -145,4 +152,30 @@ object Utils {
         return null
     }
 
+    /**
+     * 날짜 가져오는 함수
+     */
+    @SuppressLint("SimpleDateFormat")
+    fun getDateFormat(format: String, type: String, time: Int = 0): String {
+        val simpleDateFormat = SimpleDateFormat(format)
+        val calendar = Calendar.getInstance()
+
+        return when (type) {
+            Define.YEAR -> {
+                calendar.add(Calendar.YEAR, time)
+                simpleDateFormat.format(calendar.time)
+            }
+            Define.MONTH -> {
+                calendar.add(Calendar.MONTH, time)
+                simpleDateFormat.format(calendar.time)
+            }
+            Define.DAY -> {
+                calendar.add(Calendar.DATE, time)
+                simpleDateFormat.format(calendar.time)
+            }
+            else -> {
+                simpleDateFormat.format(calendar.time)
+            }
+        }
+    }
 }

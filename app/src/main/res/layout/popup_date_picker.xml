@@ -48,15 +48,16 @@
                     android:paddingVertical="10dp"
                     android:src="@drawable/add"/>
 
-                <TextView
+                <EditText
                     android:id="@+id/year"
                     android:layout_width="80dp"
                     android:layout_height="40dp"
                     android:background="@drawable/et_round_c9cbd0"
+                    android:inputType="number"
                     android:gravity="center"
                     android:theme="@style/CustomDatepicker"/>
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/btnMinusYear"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
@@ -81,15 +82,16 @@
                     android:paddingVertical="10dp"
                     android:src="@drawable/add"/>
 
-                <TextView
+                <EditText
                     android:id="@+id/month"
                     android:layout_width="80dp"
                     android:layout_height="40dp"
                     android:background="@drawable/et_round_c9cbd0"
+                    android:inputType="number"
                     android:gravity="center"
                     android:theme="@style/CustomDatepicker"/>
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/btnMinusMonth"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
@@ -115,15 +117,16 @@
                     android:paddingVertical="10dp"
                     android:src="@drawable/add"/>
 
-                <TextView
+                <EditText
                     android:id="@+id/date"
                     android:layout_width="80dp"
                     android:layout_height="40dp"
                     android:background="@drawable/et_round_c9cbd0"
+                    android:inputType="number"
                     android:gravity="center"
                     android:theme="@style/CustomDatepicker"/>
 
-                <ImageView
+                <ImageButton
                     android:id="@+id/btnMinusDate"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"

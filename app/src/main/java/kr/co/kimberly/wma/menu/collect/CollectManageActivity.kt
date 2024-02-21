@@ -5,14 +5,21 @@ import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.view.View
+import android.widget.RadioButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
+import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
+import kr.co.kimberly.wma.custom.popup.PopupDatePicker
+import kr.co.kimberly.wma.custom.popup.PopupNoteType
 import kr.co.kimberly.wma.databinding.ActCollectManageBinding
+import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.model.AccountModel
 
 class CollectManageActivity : AppCompatActivity() {
@@ -57,16 +64,42 @@ class CollectManageActivity : AppCompatActivity() {
         }*/
 
         // 거래처 검색
-        mBinding.search.setOnClickListener(object: OnSingleClickListener() {
+        mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
+                    mBinding.btEmpty.visibility = View.VISIBLE
                     mBinding.accountName.text = it.name
                 }
                 popupAccountSearch.show()
             }
         })
 
+        mBinding.btEmpty.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                mBinding.accountName.text = getString(R.string.accountHint)
+                mBinding.btEmpty.visibility = View.INVISIBLE
+            }
+        })
+
+        // 거래처 검색
+        mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                showCollectList()
+            }
+        })
+
+        // UI 설정
+        setUI()
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private fun setUI() {
+        val format = "yyyy/MM/dd"
+        mBinding.startDate.text = Utils.getDateFormat(format, Define.TODAY)
+        mBinding.endDate.text = Utils.getDateFormat(format, Define.MONTH, 1)
+
+        mBinding.accountName.isSelected = true
     }
 
     // 검색을 눌렀을 때
