@@ -36,8 +36,8 @@
     <string name="printerMenuOption">메뉴별</string>
     <string name="printerIntegratedOption">통합</string>
     <string name="confirmSetting">설정</string>
-    <string name="monthErr">월이 잘못 되었습니다.\n다시 설정해 주세요.</string>
-    <string name="dateErr">일이 잘못 되었습니다.\n다시 설정해 주세요.</string>
+    <string name="monthErr">월이 잘못 되었습니다.</string>
+    <string name="dateErr">일이 잘못 되었습니다.</string>
 
     <!-- Login -->
     <string name="msg01">더 나은 생활을 향한 믿음!</string>
