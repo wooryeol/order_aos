@@ -48,7 +48,7 @@ class LedgerActivity : AppCompatActivity() {
         }
 
         // 거래처 검색
-        mBinding.search.setOnClickListener(object: OnSingleClickListener() {
+        mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
@@ -57,10 +57,6 @@ class LedgerActivity : AppCompatActivity() {
                 popupAccountSearch.show()
             }
         })
-
-        mBinding.search.setOnClickListener {
-            showCollectList()
-        }
     }
 
     // 검색을 눌렀을 때
