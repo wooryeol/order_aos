@@ -72,9 +72,9 @@ class CollectRegiActivity : AppCompatActivity() {
         }
 
         // 날짜 선택
-        val datePickerDialog = PopupDatePicker(this)
+        // val datePickerDialog = PopupDatePicker(this)
         mBinding.collectedDate.setOnClickListener {
-            datePickerDialog.initCustomDatePicker(mBinding.collectedDate)
+            // datePickerDialog.initCustomDatePicker(mBinding.collectedDate)
         }
 
         mBinding.accountArea.setOnClickListener(object: OnSingleClickListener() {

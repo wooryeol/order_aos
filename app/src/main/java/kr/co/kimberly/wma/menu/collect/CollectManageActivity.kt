@@ -64,7 +64,7 @@ class CollectManageActivity : AppCompatActivity() {
         }*/
 
         // 거래처 검색
-        mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
+        mBinding.accountArea.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {

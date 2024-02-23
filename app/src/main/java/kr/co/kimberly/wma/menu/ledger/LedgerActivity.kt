@@ -1,6 +1,7 @@
 package kr.co.kimberly.wma.menu.ledger
 
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -42,19 +43,34 @@ class LedgerActivity : AppCompatActivity() {
 
 
         // 날짜 선택
-        val datePickerDialog = PopupDatePicker(this)
-        mBinding.date.setOnClickListener {
-            datePickerDialog.initCustomDatePicker(mBinding.date, true)
+        mBinding.dateArea.setOnClickListener {
+            val date = if(mBinding.tvDate.text.toString() == getString(R.string.monthHint)) {
+                null
+            } else {
+                mBinding.tvDate.text.toString()
+            }
+            val popupDatePicker = PopupDatePicker(mContext, false, date)
+            popupDatePicker.onDateSelect = {
+                mBinding.tvDate.text = it
+            }
+            popupDatePicker.show()
         }
 
-        // 거래처 검색
-        mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
+        // 거래처 선택
+        mBinding.accountArea.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
+                    mBinding.btEmpty.visibility = View.VISIBLE
                     mBinding.accountName.text = it.name
                 }
                 popupAccountSearch.show()
+            }
+        })
+
+        mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                showCollectList()
             }
         })
     }
