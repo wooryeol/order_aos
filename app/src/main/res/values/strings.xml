@@ -174,9 +174,8 @@
     <string name="storeManaConstructorHint">생성자를 입력해주세요.</string>
     <string name="addImage">사진등록</string>
     <string name="before">변경전</string>
-    <string name="beforeMsg">변경전 입니다.</string>
     <string name="after">변경후</string>
-    <string name="afterMsg">변경후 입니다.</string>
+    <string name="msgHint">내용을 입력해주세요.</string>
     <string name="popupAddImageTitle">사진등록</string>
     <string name="popupAddImage">사진 등록 방법을 선택해주세요.</string>
     <string name="bpPost">BP등록</string>
@@ -193,7 +192,9 @@
     <string name="purchaseAccountHint">SAP Code를 검색해주세요.</string>
     <string name="purchaseAddress">배송처</string>
     <string name="purchaseAddressHint">배송처를 검색해주세요.</string>
-    <string name="purchasePostMsg">위와 같이 승인을 요청하였습니다.\n<u>본사 전송 이후 전송된 전표는 수정이 불가능합니다.</u>\n전송을 하시겠습니까?</string>
+    <string name="purchasePostMsg01">위와 같이 승인을 요청하였습니다.</string>
+    <string name="purchasePostMsg02">본사 전송 이후 전송된 전표는 수정이 불가능합니다.</string>
+    <string name="purchasePostMsg03">전송을 하시겠습니까?</string>
     <string name="purchaseSlip">구매전표 :</string>
     <string name="distributorCode">대리점코드 :</string>
 

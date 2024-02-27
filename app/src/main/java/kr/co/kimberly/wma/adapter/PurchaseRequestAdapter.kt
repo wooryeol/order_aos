@@ -1,29 +1,37 @@
 package kr.co.kimberly.wma.adapter
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
+import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
-import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
+import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderPurchaseRequesetBinding
-import kr.co.kimberly.wma.databinding.HeaderRegBinding
+import kr.co.kimberly.wma.menu.purchase.PurchaseApprovalActivity
+import kr.co.kimberly.wma.menu.purchase.PurchaseRequestActivity
 import kr.co.kimberly.wma.model.OrderRegModel
 import kr.co.kimberly.wma.model.SearchResultModel
+import java.text.DecimalFormat
 import java.util.ArrayList
 
-class PurchaseRequestAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val totalValueListener: TotalValueListener? = null): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
-    var dataList: List<OrderRegModel> = ArrayList()
+    var dataList: ArrayList<OrderRegModel> = ArrayList()
 
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ITEM = 1
+        var totalValue: Int = 0
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -45,6 +53,31 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity): RecyclerVie
         when (holder) {
             is ViewHolder -> {
                 holder.bind(dataList[position - 1]) // 헤더가 있으므로 position - 1
+                val data = dataList[position-1]
+
+                val addValue = calculateTotalValue()
+                totalValueListener?.onTotalValueChanged(addValue)
+
+                holder.binding.deleteButton.setOnClickListener(object : OnSingleClickListener() {
+                    override fun onSingleClick(v: View) {
+                        val popupDoubleMessage = PopupDoubleMessage(v.context, "제품 삭제", data.orderName, "선택한 제품이 주문리스트에서 삭제됩니다.\n삭제하시겠습니까?")
+                        popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
+                            override fun onCancelClick() {
+                                Log.d("tttt", "취소 클릭함")
+                            }
+
+                            @SuppressLint("NotifyDataSetChanged")
+                            override fun onOkClick() {
+                                dataList.remove(data)
+                                notifyDataSetChanged()
+
+                                val removeValue = calculateTotalValue()
+                                totalValueListener?.onTotalValueChanged(removeValue)
+                            }
+                        }
+                        popupDoubleMessage.show()
+                    }
+                })
 
                 if (position == itemCount - 1) {
                     holder.binding.borderView.visibility = View.INVISIBLE // 숨김
@@ -63,24 +96,39 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity): RecyclerVie
     }
 
     class ViewHolder(val binding: CellOrderRegBinding) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
         fun bind(item: OrderRegModel) {
             // 데이터 바인딩
             // 예: binding.textView.text = data.someText
+
+            binding.tvBox.text = item.box
+            binding.tvEach.text = item.each
+            binding.tvPrice.text = "${item.unitPrice}원"
+            binding.tvTotal.text = item.totalQty
+            binding.tvTotalAmount.text = "${item.totalAmount}원"
         }
     }
 
-    class HeaderViewHolder(private val binding: HeaderPurchaseRequesetBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class HeaderViewHolder(private val binding: HeaderPurchaseRequesetBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind() {
+            val list = ArrayList<SearchResultModel>()
+
+            binding.sapCode.isSelected = true
+            binding.address.isSelected = true
+
             binding.accountArea.setOnClickListener(object: OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    val list = ArrayList<SearchResultModel>()
+                    list.clear()
                     for(i: Int in 1..15) {
-                        list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
+                        list.add(SearchResultModel("(30900785) (주) 명보유통 [$i]"))
                     }
 
                     val popupSearchResult = PopupSearchResult(binding.root.context, list)
                     popupSearchResult.onItemSelect = {
                         binding.sapCode.text = it.name
+                        PurchaseRequestActivity.accountName = it.name
+                        PurchaseRequestActivity.list.clear()
+                        totalValueListener?.onTotalValueChanged(0)
                     }
                     popupSearchResult.show()
                 }
@@ -88,25 +136,129 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity): RecyclerVie
 
             binding.addressArea.setOnClickListener(object: OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    val list = ArrayList<SearchResultModel>()
+                    list.clear()
                     for(i: Int in 1..15) {
-                        list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
+                        list.add(SearchResultModel("(09087754) 비즈위즈 시스템 [$i]"))
                     }
 
                     val popupSearchResult = PopupSearchResult(binding.root.context, list)
                     popupSearchResult.onItemSelect = {
                         binding.address.text = it.name
+                        PurchaseApprovalActivity.purchaseAddress = it.name
                     }
                     popupSearchResult.show()
                 }
             })
 
-            binding.btAddOrder.setOnClickListener(object: OnSingleClickListener() {
+            binding.btSearch.setOnClickListener(object : OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                     val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
-                     popupProductPriceHistory.show()
+                    list.clear()
+                    if (binding.etProductName.text.isNullOrEmpty()) {
+                        Toast.makeText(v.context, "제품명을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    } else {
+                        for (i: Int in 1..15) {
+                            list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
+                        }
+                        val popupSearchResult =
+                            PopupSearchResult(binding.root.context, list)
+                        popupSearchResult.onItemSelect = {
+                            binding.searchResult.text = it.name
+                            binding.etProductName.visibility = View.GONE
+                            binding.tvProductName.visibility = View.VISIBLE
+                            binding.tvProductName.isSelected = true
+                            binding.tvProductName.text = it.name
+                        }
+                        popupSearchResult.show()
+                    }
+                }
+            })
+
+            binding.btAddOrder.setOnClickListener(object : OnSingleClickListener() {
+                @SuppressLint("NotifyDataSetChanged")
+                override fun onSingleClick(v: View) {
+
+                    /*val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
+                     popupProductPriceHistory.show()*/
+
+                    if (binding.etBox.text.isNullOrEmpty() || binding.etPrice.text.isNullOrEmpty() || binding.searchResult.text == "검색된 제품명") {
+                        Toast.makeText(v.context, "모든 항목을 채워주세요", Toast.LENGTH_SHORT).show()
+                    } else {
+                        try {
+                            val decimal = DecimalFormat("#,###")
+                            val box = binding.etBox.text.toString().toInt()
+                            val unitPrice = binding.etPrice.text.toString().toInt()
+                            val totalQty = 24 * box
+                            val totalAmount = totalQty * unitPrice
+
+                            if (box == 0 || unitPrice == 0) {
+                                Toast.makeText(v.context, "박스와 단가에는 0이 들어갈 수 없습니다.", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                if (box == 0) {
+                                    Toast.makeText(
+                                        v.context,
+                                        "박스 수량을 확인해주세요",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    if (PurchaseRequestActivity.purchaseAdapter != null) {
+                                        PurchaseRequestActivity.list.add(
+                                            OrderRegModel(
+                                                list[list.size - 1].name,
+                                                decimal.format(box).toString(),
+                                                "0",
+                                                decimal.format(unitPrice).toString(),
+                                                decimal.format(totalQty).toString(),
+                                                decimal.format(totalAmount).toString()
+                                            )
+                                        )
+                                        PurchaseRequestActivity.purchaseAdapter?.notifyDataSetChanged()
+                                    }
+
+                                    binding.etProductName.text = null
+                                    binding.etProductName.visibility = View.VISIBLE
+                                    binding.tvProductName.text = null
+                                    binding.tvProductName.visibility = View.GONE
+                                    binding.searchResult.text =
+                                        v.context.getString(R.string.searchResult)
+                                    binding.etBox.text = null
+                                    binding.etPrice.text = null
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.d("test log", "e >>> $e")
+                            Toast.makeText(v.context, "올바른 값을 입력해주세요", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            })
+
+            binding.etProductName.addTextChangedListener {
+                if (binding.etProductName.text.isNullOrEmpty()) {
+                    binding.btProductNameEmpty.visibility = View.GONE
+                } else {
+                    binding.btProductNameEmpty.visibility = View.VISIBLE
+                }
+            }
+
+            binding.btProductNameEmpty.setOnClickListener(object : OnSingleClickListener() {
+                override fun onSingleClick(v: View) {
+                    binding.etProductName.text = null
+                    binding.searchResult.text = v.context.getString(R.string.searchResult)
+                    binding.tvProductName.text = null
+                    binding.tvProductName.visibility = View.GONE
+                    binding.etProductName.visibility = View.VISIBLE
+                    binding.etProductName.hint = v.context.getString(R.string.productNameHint)
                 }
             })
         }
+    }
+    private fun calculateTotalValue(): Int {
+        totalValue = 0
+        for (data in dataList) {
+            val stringWithoutComma = data.totalAmount.replace(",", "")
+            totalValue += stringWithoutComma.toInt()
+        }
+        return totalValue
     }
 }

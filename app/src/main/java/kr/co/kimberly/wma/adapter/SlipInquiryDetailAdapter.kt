@@ -1,5 +1,6 @@
 package kr.co.kimberly.wma.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +15,15 @@ class SlipInquiryDetailAdapter(context: Context): RecyclerView.Adapter<SlipInqui
     var mContext = context
 
     inner class ViewHolder(val binding: CellOrderRegBinding): RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
         fun bind(itemModel: OrderRegModel) {
+
+            binding.tvBox.text = itemModel.box
+            binding.tvEach.text = itemModel.each
+            binding.tvPrice.text = "${itemModel.unitPrice}원"
+            binding.tvTotal.text = itemModel.totalQty
+            binding.tvTotalAmount.text = "${itemModel.totalAmount}원"
+
             itemView.setOnClickListener {
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
                 intent.putExtra(Define.UNIQUE, itemModel.name)

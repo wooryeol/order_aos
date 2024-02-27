@@ -3,32 +3,41 @@ package kr.co.kimberly.wma.adapter
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.flow.combine
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
+import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
 import kr.co.kimberly.wma.menu.order.OrderRegActivity
+import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
 import kr.co.kimberly.wma.model.OrderRegModel
+import kr.co.kimberly.wma.model.ProductPriceHistoryModel
 import kr.co.kimberly.wma.model.SearchResultModel
+import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.ArrayList
+import java.util.Date
 
-class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RegAdapter(mContext: Context, activity: Activity, private val totalValueListener: TotalValueListener? = null): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
-    var dataList: List<OrderRegModel> = ArrayList()
+    var dataList: ArrayList<OrderRegModel> = ArrayList()
+
 
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ITEM = 1
+        var totalValue: Int = 0
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -46,10 +55,36 @@ class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<Re
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ViewHolder -> {
+
                 holder.bind(dataList[position - 1]) // 헤더가 있으므로 position - 1
+                val data = dataList[position-1]
+
+                val addValue = calculateTotalValue()
+                totalValueListener?.onTotalValueChanged(addValue)
+
+                holder.binding.deleteButton.setOnClickListener(object : OnSingleClickListener() {
+                    override fun onSingleClick(v: View) {
+                        val popupDoubleMessage = PopupDoubleMessage(v.context, "제품 삭제", data.orderName, "선택한 제품이 주문리스트에서 삭제됩니다.\n삭제하시겠습니까?")
+                        popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
+                            override fun onCancelClick() {
+                                Log.d("tttt", "취소 클릭함")
+                            }
+
+                            override fun onOkClick() {
+                                dataList.remove(data)
+                                notifyDataSetChanged()
+
+                                val removeValue = calculateTotalValue()
+                                totalValueListener?.onTotalValueChanged(removeValue)
+                            }
+                        }
+                        popupDoubleMessage.show()
+                    }
+                })
 
                 if (position == itemCount - 1) {
                     holder.binding.borderView.visibility = View.INVISIBLE // 숨김
@@ -67,54 +102,66 @@ class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<Re
         return dataList.size + 1 // 헤더뷰를 포함
     }
 
-    class ViewHolder(val binding: CellOrderRegBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(val binding: CellOrderRegBinding) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n", "SimpleDateFormat")
         fun bind(item: OrderRegModel) {
             // 데이터 바인딩
             // 예: binding.textView.text = data.someText
             itemView.setOnClickListener {
                 val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
                 popupProductPriceHistory.show()
+
+                val date = Date()
+                val dateFormat = SimpleDateFormat("yyyy/MM/dd")
+                val formattedDate = dateFormat.format(date)
+                PopupProductPriceHistory.productPriceHistory.clear()
+                PopupProductPriceHistory.productPriceHistory.add(ProductPriceHistoryModel(formattedDate, "${binding.tvPrice.text}"))
             }
 
             binding.tvBox.text = item.box
             binding.tvEach.text = item.each
-            binding.tvPrice.text = item.unitPrice
+            binding.tvPrice.text = "${item.unitPrice}원"
             binding.tvTotal.text = item.totalQty
-            binding.tvTotalAmount.text = item.totalAmount
-
-            binding.deleteButton.setOnClickListener {
-
-            }
+            binding.tvTotalAmount.text = "${item.totalAmount}원"
         }
     }
 
-    class HeaderViewHolder(private val binding: HeaderRegBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class HeaderViewHolder(private val binding: HeaderRegBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind() {
-            val scanResultList = ArrayList<SearchResultModel>()
+            val list = ArrayList<SearchResultModel>()
 
-            binding.accountArea.setOnClickListener(object: OnSingleClickListener() {
+            binding.accountArea.setOnClickListener(object : OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
                     val popupAccountSearch = PopupAccountSearch(binding.root.context)
                     popupAccountSearch.onItemSelect = {
                         binding.accountName.text = it.name
+                        OrderRegActivity.accountName = it.name
+                        OrderRegActivity.list.clear()
+                        ReturnRegActivity.accountName = it.name
+                        ReturnRegActivity.list.clear()
+                        totalValueListener?.onTotalValueChanged(0)
                     }
                     popupAccountSearch.show()
                 }
             })
 
-            binding.btSearch.setOnClickListener(object: OnSingleClickListener() {
+            binding.btSearch.setOnClickListener(object : OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-
                     if (binding.etProductName.text.isNullOrEmpty()) {
                         Toast.makeText(v.context, "제품명을 입력해주세요", Toast.LENGTH_SHORT).show()
                     } else {
-                        for(i: Int in 1..15) {
-                            scanResultList.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
+                        list.clear()
+                        for (i: Int in 1..15) {
+                            list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
                         }
-
-                        val popupSearchResult = PopupSearchResult(binding.root.context, scanResultList)
+                        val popupSearchResult =
+                            PopupSearchResult(binding.root.context, list)
                         popupSearchResult.onItemSelect = {
                             binding.searchResult.text = it.name
+                            binding.etProductName.visibility = View.GONE
+                            binding.tvProductName.visibility = View.VISIBLE
+                            binding.tvProductName.isSelected = true
+                            binding.tvProductName.text = it.name
                         }
                         popupSearchResult.show()
                     }
@@ -122,17 +169,83 @@ class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<Re
             })
 
 
-            binding.btAddOrder.setOnClickListener(object: OnSingleClickListener() {
+            binding.btAddOrder.setOnClickListener(object : OnSingleClickListener() {
                 @SuppressLint("NotifyDataSetChanged")
                 override fun onSingleClick(v: View) {
-                    val box = binding.etBox.text.toString()
-                    val each = binding.etEach.text.toString()
-                    val unitPrice = binding.etPrice.text.toString()
-                    val totalQty = 24 * box.toInt() + each.toInt()
-                    val totalAmount = totalQty * unitPrice.toInt()
+                    if (binding.etPrice.text.isNullOrEmpty() || binding.searchResult.text == "검색된 제품명") {
+                        Toast.makeText(v.context, "모든 항목을 채워주세요", Toast.LENGTH_SHORT).show()
+                    } else {
+                        try {
+                            if (binding.etBox.text.isNullOrEmpty()) {
+                                binding.etBox.setText("0")
+                            }
 
-                    OrderRegActivity.list.add(OrderRegModel(scanResultList[0].name, box, each, unitPrice, totalQty.toString(), totalAmount.toString()))
-                    OrderRegActivity.adapter.notifyDataSetChanged()
+                            if (binding.etEach.text.isNullOrEmpty()) {
+                                binding.etEach.setText("0")
+                            }
+
+                            val decimal = DecimalFormat("#,###")
+                            val box = binding.etBox.text.toString().toInt()
+                            val each = binding.etEach.text.toString().toInt()
+                            val unitPrice = binding.etPrice.text.toString().toInt()
+                            val totalQty = 24 * box + each
+                            val totalAmount = totalQty * unitPrice
+
+                            if (unitPrice == 0) {
+                                Toast.makeText(v.context, "단가에는 0이 들어갈 수 없습니다.", Toast.LENGTH_SHORT)
+                                    .show()
+                            } else {
+                                if (box == 0 && each == 0) {
+                                    Toast.makeText(
+                                        v.context,
+                                        "박스 혹은 낱개의 수량을 확인해주세요",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    if (OrderRegActivity.orderAdapter != null) {
+                                        OrderRegActivity.list.add(
+                                            OrderRegModel(
+                                                list[list.size - 1].name,
+                                                decimal.format(box).toString(),
+                                                decimal.format(each).toString(),
+                                                decimal.format(unitPrice).toString(),
+                                                decimal.format(totalQty).toString(),
+                                                decimal.format(totalAmount).toString()
+                                            )
+                                        )
+                                        OrderRegActivity.orderAdapter?.notifyDataSetChanged()
+                                    }
+
+                                    if (ReturnRegActivity.returnAdapter != null) {
+                                        ReturnRegActivity.list.add(
+                                            OrderRegModel(
+                                                list[list.size - 1].name,
+                                                decimal.format(box).toString(),
+                                                decimal.format(each).toString(),
+                                                decimal.format(unitPrice).toString(),
+                                                decimal.format(totalQty).toString(),
+                                                decimal.format(totalAmount).toString()
+                                            )
+                                        )
+                                        ReturnRegActivity.returnAdapter?.notifyDataSetChanged()
+                                    }
+
+                                    binding.etProductName.text = null
+                                    binding.etProductName.visibility = View.VISIBLE
+                                    binding.tvProductName.text = null
+                                    binding.tvProductName.visibility = View.GONE
+                                    binding.searchResult.text =
+                                        v.context.getString(R.string.searchResult)
+                                    binding.etBox.text = null
+                                    binding.etEach.text = null
+                                    binding.etPrice.text = null
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.d("test log", "e >>> $e")
+                            Toast.makeText(v.context, "올바른 값을 입력해주세요", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             })
 
@@ -148,10 +261,23 @@ class RegAdapter(mContext: Context, activity: Activity): RecyclerView.Adapter<Re
                 override fun onSingleClick(v: View) {
                     binding.etProductName.text = null
                     binding.searchResult.text = v.context.getString(R.string.searchResult)
+                    binding.tvProductName.text = null
+                    binding.tvProductName.visibility = View.GONE
+                    binding.etProductName.visibility = View.VISIBLE
+                    binding.etProductName.hint = v.context.getString(R.string.productNameHint)
                 }
             })
 
-
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun calculateTotalValue(): Int {
+        totalValue = 0
+        for (data in dataList) {
+            val stringWithoutComma = data.totalAmount.replace(",", "")
+            totalValue += stringWithoutComma.toInt()
+        }
+        return totalValue
     }
 }

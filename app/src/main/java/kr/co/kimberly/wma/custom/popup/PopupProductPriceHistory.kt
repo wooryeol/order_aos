@@ -24,8 +24,11 @@ import kr.co.kimberly.wma.model.SearchResultModel
 
 class PopupProductPriceHistory(mContext: Context): Dialog(mContext) {
     private lateinit var mBinding: PopupProductPriceHistoryBinding
-
     private var context = mContext
+
+    companion object {
+       val productPriceHistory = ArrayList<ProductPriceHistoryModel>()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,17 +46,16 @@ class PopupProductPriceHistory(mContext: Context): Dialog(mContext) {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
-        val list = ArrayList<ProductPriceHistoryModel>()
-        for(i: Int in 1..100) {
-            list.add(ProductPriceHistoryModel("2024/01/14", "${i}원"))
-        }
+        /*for(i: Int in 1..100) {
+            productPriceHistory.add(ProductPriceHistoryModel("2024/01/14", "${i}원"))
+        }*/
 
         val adapter = ProductPriceHistoryAdapter(context)
-        adapter.dataList = list
+        adapter.dataList = productPriceHistory
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(context)
 
-        if(list.size > 10) {
+        if(productPriceHistory.size > 10) {
             Utils.dialogResize(context, window)
 
             val layoutParams = mBinding.recyclerview.layoutParams

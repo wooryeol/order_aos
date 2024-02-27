@@ -34,6 +34,9 @@
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:gravity="center"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:singleLine="true"
                 android:textSize="16dp"
                 android:text="@string/purchaseAccountHint"
                 android:textColor="@color/black"
@@ -72,6 +75,9 @@
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:gravity="center"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:singleLine="true"
                 android:textSize="16dp"
                 android:text="@string/purchaseAddressHint"
                 android:textColor="@color/black"
@@ -81,7 +87,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginHorizontal="16dp"
@@ -96,35 +102,53 @@
             android:text="@string/productName"
             android:textSize="15dp"/>
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="40dp"
+            android:orientation="horizontal"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
-            android:layout_weight="1"
+            android:background="@drawable/et_round_c9cbd0"
             android:layout_gravity="center_vertical">
             <EditText
-                android:layout_width="match_parent"
+                android:id="@+id/etProductName"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="40dp"
                 android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
+                android:background="@color/trans"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:imeOptions="actionDone"
+                android:singleLine="true"
                 android:inputType="text"
                 android:hint="@string/productNameHint"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tvProductName"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:textSize="16dp"
+                android:background="@color/trans"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="12dp"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:singleLine="true"
+                tools:ignore="SpUsage" />
+
             <ImageButton
+                android:visibility="gone"
                 android:id="@+id/btProductNameEmpty"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:layout_centerHorizontal="true"
                 android:background="@color/trans"
                 android:src="@drawable/ic_empty" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <Button
             android:id="@+id/btSearch"
@@ -171,7 +195,8 @@
             tools:ignore="SpUsage" />
 
         <EditText
-            android:layout_width="wrap_content"
+            android:id="@+id/etBox"
+            android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:layout_marginEnd="10dp"
@@ -179,21 +204,22 @@
             android:background="@drawable/et_round_c9cbd0"
             android:paddingVertical="10dp"
             android:paddingHorizontal="12dp"
-            android:imeOptions="actionDone"
-            android:inputType="text"
+            android:imeOptions="actionNext"
+            android:inputType="number"
             tools:ignore="Autofill,SpUsage,TextFields" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/each"
+            android:text="@string/unitPrice"
             android:textSize="14dp"
             android:textColor="@color/color_7E828B"
             android:layout_marginEnd="15dp"
             tools:ignore="SpUsage" />
 
         <EditText
-            android:layout_width="wrap_content"
+            android:id="@+id/etPrice"
+            android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:textSize="16dp"
@@ -201,7 +227,7 @@
             android:paddingVertical="10dp"
             android:paddingHorizontal="12dp"
             android:imeOptions="actionDone"
-            android:inputType="text"
+            android:inputType="number"
             tools:ignore="Autofill,SpUsage,TextFields" />
     </LinearLayout>
 
