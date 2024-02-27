@@ -9,24 +9,28 @@ import android.graphics.Paint
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.RadioButton
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
+import android.widget.RadioGroup.OnCheckedChangeListener
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
+import kr.co.kimberly.wma.custom.popup.PopupNotice
+import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.ActInformationBinding
 import kr.co.kimberly.wma.model.AccountInfoModel
 import kr.co.kimberly.wma.model.ProductInfoModel
+import kr.co.kimberly.wma.model.SearchResultModel
 
 class InformationActivity : AppCompatActivity() {
-
     private lateinit var mBinding: ActInformationBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
-    private lateinit var accountInfo : AccountInfoModel
-    private lateinit var productInfo : ProductInfoModel
+    private lateinit var radioGroupCheckedListener: OnCheckedChangeListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +40,7 @@ class InformationActivity : AppCompatActivity() {
         mContext = this
         mActivity = this
 
-        mBinding.accountInfo.isChecked = true
+        setSetting()
 
         //헤더 설정
         mBinding.header.headerTitle.text = getString(R.string.menu09)
@@ -46,56 +50,89 @@ class InformationActivity : AppCompatActivity() {
             }
         })
 
+        mBinding.radioGroup.setOnCheckedChangeListener(radioGroupCheckedListener)
+
         // 거래처 검색
         mBinding.search.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupAccountSearch = PopupAccountSearch(mContext)
-                popupAccountSearch.onItemSelect = {
-                    mBinding.accountName.text = it.name
+                if(mBinding.etSearch.text.isEmpty()) {
+                    val popupNotice = PopupNotice(mContext, getString(R.string.etSearchEmpty))
+                    popupNotice.show()
+                } else {
+                    val list = ArrayList<SearchResultModel>()
+
+                    for(i: Int in 1..15) {
+                        list.add(SearchResultModel("(I00$i) 기본창고"))
+                    }
+
+                    val popupSearchResult = PopupSearchResult(mContext, list)
+                    popupSearchResult.onItemSelect = {
+                        if(mBinding.accountInfo.isChecked) {
+                            getAccountInfo()
+                        } else {
+                            getProductInfo()
+                        }
+                    }
+                    popupSearchResult.show()
                 }
-                popupAccountSearch.show()
             }
         })
 
-        getProductInfo()
-        getAccountInfo()
-
-        if (mBinding.phone.text.isNotEmpty()){
-            mBinding.phone.setOnClickListener {
+        mBinding.phone.setOnClickListener {
+            if(mBinding.phone.text.isNotEmpty()) {
                 checkPermission(mBinding.phone.text.toString())
             }
         }
 
-        if (mBinding.inChargeNum.text.isNotEmpty()){
-            mBinding.inChargeNum.setOnClickListener {
+        mBinding.inChargeNum.setOnClickListener {
+            if(mBinding.inChargeNum.text.isNotEmpty()) {
                 checkPermission(mBinding.inChargeNum.text.toString())
             }
         }
     }
 
-    fun onInformationActRadioButtonClicked(view: View) {
-        if (view is RadioButton) {
-            val checked = view.isChecked
+    private fun setSetting() {
+        radioGroupCheckedListener = OnCheckedChangeListener { group, checkedId ->
+            hideKeyboard()
 
-            when(view.id) {
+            when(checkedId) {
                 R.id.accountInfo -> {
-                    if (checked) {
-                        mBinding.accountInfoLayout.visibility = View.VISIBLE
-                        mBinding.productInfoLayout.visibility = View.GONE
-                    }
+                    mBinding.etSearch.hint = getString(R.string.accountHint)
+                    mBinding.accountInfoLayout.visibility = View.VISIBLE
+                    mBinding.productInfoLayout.visibility = View.GONE
+
+                    // 데이터 초기화
+                    mBinding.accountCode.text = ""
+                    mBinding.account.text = ""
+                    mBinding.represent.text = ""
+                    mBinding.businessNum.text = ""
+                    mBinding.phone.text = ""
+                    mBinding.fax.text = ""
+                    mBinding.address.text = ""
+                    mBinding.customer.text = ""
+                    mBinding.scale.text = ""
+                    mBinding.inCharge.text = ""
+                    mBinding.inChargeNum.text = ""
                 }
                 R.id.productInfo -> {
-                    if (checked) {
-                        mBinding.productInfoLayout.visibility = View.VISIBLE
-                        mBinding.accountInfoLayout.visibility = View.GONE
-                    }
+                    mBinding.etSearch.hint = getString(R.string.productHint)
+                    mBinding.productInfoLayout.visibility = View.VISIBLE
+                    mBinding.accountInfoLayout.visibility = View.GONE
+
+                    mBinding.manufacturer.text = ""
+                    mBinding.productCode.text = ""
+                    mBinding.productName.text = ""
+                    mBinding.barcode.text = ""
+                    mBinding.incomeQty.text = ""
+                    mBinding.Dimension.text = ""
+                    mBinding.tax.text = ""
                 }
             }
         }
     }
 
     private fun getAccountInfo() {
-        accountInfo = AccountInfoModel(
+        val accountInfo = AccountInfoModel(
             "000052",
             "파란마트",
             "김파란",
@@ -125,7 +162,7 @@ class InformationActivity : AppCompatActivity() {
     }
 
     private fun getProductInfo() {
-        productInfo = ProductInfoModel(
+        val productInfo = ProductInfoModel(
             "유한킴벌리(주)",
             "00223",
             "크리넥스 수앤수 20매*5",
@@ -142,6 +179,14 @@ class InformationActivity : AppCompatActivity() {
         mBinding.incomeQty.text = productInfo.incomeQty
         mBinding.Dimension.text = productInfo.dimension
         mBinding.tax.text = productInfo.tax
+    }
+
+    private fun hideKeyboard() {
+        mBinding.etSearch.setText("")
+        mBinding.etSearch.clearFocus()
+
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(mBinding.etSearch.windowToken, InputMethodManager.HIDE_IMPLICIT_ONLY)
     }
 
     private fun checkPermission(number: String){

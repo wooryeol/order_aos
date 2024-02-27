@@ -64,7 +64,7 @@ class InventoryActivity : AppCompatActivity() {
         mBinding.search.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 if(mBinding.accountName.text.toString().isEmpty()) {
-                    showNotice(getString(R.string.accountNameEmpty))
+                    showNotice(getString(R.string.accountHint))
                 } else {
                     val list = ArrayList<SearchResultModel>()
 
