@@ -38,6 +38,7 @@
     <string name="confirmSetting">설정</string>
     <string name="monthErr">월이 잘못 되었습니다.</string>
     <string name="dateErr">일이 잘못 되었습니다.</string>
+    <string name="accountNameEmpty">거래처를 검색해 주세요.</string>
 
     <!-- Login -->
     <string name="msg01">더 나은 생활을 향한 믿음!</string>
