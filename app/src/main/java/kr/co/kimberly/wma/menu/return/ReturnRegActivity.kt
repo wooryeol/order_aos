@@ -51,7 +51,7 @@ class ReturnRegActivity : AppCompatActivity() {
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 list.clear()
-                OrderRegActivity.list.clear()
+                // OrderRegActivity.list.clear()
                 finish()
 
                 // 주문 승인을 하지 않고 나갈 때 바로 나갈건지 혹은 팝업을 띄워서 리스트는 저장되지 않습니다라는 메세지 보여줄 지 물어보기
@@ -60,7 +60,7 @@ class ReturnRegActivity : AppCompatActivity() {
 
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : ${OrderRegActivity.accountName}\n총금액: ${decimal.format(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : \n총금액: ${decimal.format(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
                 if (list.isEmpty()) {
                     Toast.makeText(mContext, "제품이 등록되지 않았습니다.", Toast.LENGTH_SHORT).show()
                 } else {
@@ -70,8 +70,8 @@ class ReturnRegActivity : AppCompatActivity() {
                         }
 
                         override fun onOkClick() {
-                            list.clear()
-                            OrderRegActivity.list.clear()
+                            // list.clear()
+                            // OrderRegActivity.list.clear()
                             Toast.makeText(v.context, "반품주문이 전송되었습니다.", Toast.LENGTH_SHORT).show()
                             startActivity(Intent(mContext, PrinterOptionActivity::class.java))
                         }
@@ -81,13 +81,9 @@ class ReturnRegActivity : AppCompatActivity() {
             }
         })
 
-        returnAdapter = RegAdapter(mContext, mActivity, object : TotalValueListener {
-            @SuppressLint("SetTextI18n")
-            override fun onTotalValueChanged(totalValue: Int) {
-                mBinding.tvTotalAmount.text = "${decimal.format(totalValue)}원"
-                totalAmount = totalValue
-            }
-        })
+        returnAdapter = RegAdapter(mContext, mActivity) { item, name ->
+
+        }
         returnAdapter?.dataList = list
         mBinding.recyclerview.adapter = returnAdapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)

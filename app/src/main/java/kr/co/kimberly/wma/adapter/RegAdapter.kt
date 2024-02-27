@@ -29,14 +29,14 @@ import java.text.SimpleDateFormat
 import java.util.ArrayList
 import java.util.Date
 
-class RegAdapter(mContext: Context, activity: Activity, private val totalValueListener: TotalValueListener? = null): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RegAdapter(mContext: Context, activity: Activity, private val updateData: ((ArrayList<OrderRegModel>, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
     var dataList: ArrayList<OrderRegModel> = ArrayList()
-
 
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ITEM = 1
+
         var totalValue: Int = 0
     }
 
@@ -59,12 +59,8 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ViewHolder -> {
-
                 holder.bind(dataList[position - 1]) // 헤더가 있으므로 position - 1
                 val data = dataList[position-1]
-
-                val addValue = calculateTotalValue()
-                totalValueListener?.onTotalValueChanged(addValue)
 
                 holder.binding.deleteButton.setOnClickListener(object : OnSingleClickListener() {
                     override fun onSingleClick(v: View) {
@@ -75,11 +71,7 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
                             }
 
                             override fun onOkClick() {
-                                dataList.remove(data)
-                                notifyDataSetChanged()
-
-                                val removeValue = calculateTotalValue()
-                                totalValueListener?.onTotalValueChanged(removeValue)
+                                removeItem(data)
                             }
                         }
                         popupDoubleMessage.show()
@@ -135,11 +127,12 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
                     val popupAccountSearch = PopupAccountSearch(binding.root.context)
                     popupAccountSearch.onItemSelect = {
                         binding.accountName.text = it.name
-                        OrderRegActivity.accountName = it.name
-                        OrderRegActivity.list.clear()
-                        ReturnRegActivity.accountName = it.name
-                        ReturnRegActivity.list.clear()
-                        totalValueListener?.onTotalValueChanged(0)
+                        clear(it.name)
+                        // OrderRegActivity.accountName = it.name
+                        // OrderRegActivity.list.clear()
+                        // ReturnRegActivity.accountName = it.name
+                        // ReturnRegActivity.list.clear()
+                        // totalValueListener?.onTotalValueChanged(0)
                     }
                     popupAccountSearch.show()
                 }
@@ -154,8 +147,7 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
                         for (i: Int in 1..15) {
                             list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
                         }
-                        val popupSearchResult =
-                            PopupSearchResult(binding.root.context, list)
+                        val popupSearchResult = PopupSearchResult(binding.root.context, list)
                         popupSearchResult.onItemSelect = {
                             binding.searchResult.text = it.name
                             binding.etProductName.visibility = View.GONE
@@ -172,7 +164,7 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
             binding.btAddOrder.setOnClickListener(object : OnSingleClickListener() {
                 @SuppressLint("NotifyDataSetChanged")
                 override fun onSingleClick(v: View) {
-                    if (binding.etPrice.text.isNullOrEmpty() || binding.searchResult.text == "검색된 제품명") {
+                    if (binding.etPrice.text.isNullOrEmpty() || binding.searchResult.text == context.getString(R.string.searchResult)) {
                         Toast.makeText(v.context, "모든 항목을 채워주세요", Toast.LENGTH_SHORT).show()
                     } else {
                         try {
@@ -185,6 +177,7 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
                             }
 
                             val decimal = DecimalFormat("#,###")
+                            val accountName = binding.accountName.text.toString()
                             val box = binding.etBox.text.toString().toInt()
                             val each = binding.etEach.text.toString().toInt()
                             val unitPrice = binding.etPrice.text.toString().toInt()
@@ -192,50 +185,27 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
                             val totalAmount = totalQty * unitPrice
 
                             if (unitPrice == 0) {
-                                Toast.makeText(v.context, "단가에는 0이 들어갈 수 없습니다.", Toast.LENGTH_SHORT)
-                                    .show()
+                                Toast.makeText(context, "단가에는 0이 들어갈 수 없습니다.", Toast.LENGTH_SHORT).show()
                             } else {
                                 if (box == 0 && each == 0) {
-                                    Toast.makeText(
-                                        v.context,
-                                        "박스 혹은 낱개의 수량을 확인해주세요",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "박스 혹은 낱개의 수량을 확인해주세요", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    if (OrderRegActivity.orderAdapter != null) {
-                                        OrderRegActivity.list.add(
-                                            OrderRegModel(
-                                                list[list.size - 1].name,
-                                                decimal.format(box).toString(),
-                                                decimal.format(each).toString(),
-                                                decimal.format(unitPrice).toString(),
-                                                decimal.format(totalQty).toString(),
-                                                decimal.format(totalAmount).toString()
-                                            )
-                                        )
-                                        OrderRegActivity.orderAdapter?.notifyDataSetChanged()
-                                    }
+                                    val model = OrderRegModel(
+                                        list[list.size - 1].name,
+                                        decimal.format(box).toString(),
+                                        decimal.format(each).toString(),
+                                        decimal.format(unitPrice).toString(),
+                                        decimal.format(totalQty).toString(),
+                                        decimal.format(totalAmount).toString()
+                                    )
 
-                                    if (ReturnRegActivity.returnAdapter != null) {
-                                        ReturnRegActivity.list.add(
-                                            OrderRegModel(
-                                                list[list.size - 1].name,
-                                                decimal.format(box).toString(),
-                                                decimal.format(each).toString(),
-                                                decimal.format(unitPrice).toString(),
-                                                decimal.format(totalQty).toString(),
-                                                decimal.format(totalAmount).toString()
-                                            )
-                                        )
-                                        ReturnRegActivity.returnAdapter?.notifyDataSetChanged()
-                                    }
+                                    addItem(model, accountName)
 
                                     binding.etProductName.text = null
                                     binding.etProductName.visibility = View.VISIBLE
                                     binding.tvProductName.text = null
                                     binding.tvProductName.visibility = View.GONE
-                                    binding.searchResult.text =
-                                        v.context.getString(R.string.searchResult)
+                                    binding.searchResult.text = v.context.getString(R.string.searchResult)
                                     binding.etBox.text = null
                                     binding.etEach.text = null
                                     binding.etPrice.text = null
@@ -267,8 +237,26 @@ class RegAdapter(mContext: Context, activity: Activity, private val totalValueLi
                     binding.etProductName.hint = v.context.getString(R.string.productNameHint)
                 }
             })
-
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun addItem(item: OrderRegModel, accountName: String) {
+        dataList.add(item)
+        notifyDataSetChanged()
+        updateData(dataList, accountName)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun removeItem(item: OrderRegModel) {
+        dataList.remove(item)
+        notifyDataSetChanged()
+        updateData(dataList, "")
+    }
+
+    fun clear(accountName: String) {
+        dataList.clear()
+        updateData(dataList, accountName)
     }
 
     @SuppressLint("NotifyDataSetChanged")
