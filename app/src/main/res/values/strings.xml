@@ -22,6 +22,9 @@
     <string name="pinHint">(0000 또는 1234를 입력해보세요)</string>
     <string name="pinCheckBox">문자 또는 기호가 포함된 PIN</string>
     <string name="pinAdvice">다른 디바이스에도 PIN을 입력하세요</string>
+    <string name="notUseChk">사용여부를 체크해 주세요.</string>
+    <string name="notAccountCodeEmpty">대리점코드를 입력해 주세요.</string>
+    <string name="bluetoothSwOn">블루투스를 켜야 사용 가능합니다.</string>
 
     <!-- 공통 -->
     <string name="copyright">Copyrightⓒ유한킴벌리 Corp. All Rights Reserved.</string>
