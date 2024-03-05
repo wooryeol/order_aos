@@ -24,13 +24,14 @@ import kr.co.kimberly.wma.model.SearchResultModel
 import java.text.DecimalFormat
 import java.util.ArrayList
 
-class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val totalValueListener: TotalValueListener? = null): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val updateData: ((ArrayList<OrderRegModel>, String, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
     var dataList: ArrayList<OrderRegModel> = ArrayList()
 
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ITEM = 1
+
         var totalValue: Int = 0
     }
 
@@ -55,9 +56,6 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val 
                 holder.bind(dataList[position - 1]) // 헤더가 있으므로 position - 1
                 val data = dataList[position-1]
 
-                val addValue = calculateTotalValue()
-                totalValueListener?.onTotalValueChanged(addValue)
-
                 holder.binding.deleteButton.setOnClickListener(object : OnSingleClickListener() {
                     override fun onSingleClick(v: View) {
                         val popupDoubleMessage = PopupDoubleMessage(v.context, "제품 삭제", data.orderName, "선택한 제품이 주문리스트에서 삭제됩니다.\n삭제하시겠습니까?")
@@ -68,11 +66,7 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val 
 
                             @SuppressLint("NotifyDataSetChanged")
                             override fun onOkClick() {
-                                dataList.remove(data)
-                                notifyDataSetChanged()
-
-                                val removeValue = calculateTotalValue()
-                                totalValueListener?.onTotalValueChanged(removeValue)
+                                removeItem(data)
                             }
                         }
                         popupDoubleMessage.show()
@@ -126,9 +120,7 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val 
                     val popupSearchResult = PopupSearchResult(binding.root.context, list)
                     popupSearchResult.onItemSelect = {
                         binding.sapCode.text = it.name
-                        PurchaseRequestActivity.accountName = it.name
-                        PurchaseRequestActivity.list.clear()
-                        totalValueListener?.onTotalValueChanged(0)
+                        clear(it.name)
                     }
                     popupSearchResult.show()
                 }
@@ -144,7 +136,8 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val 
                     val popupSearchResult = PopupSearchResult(binding.root.context, list)
                     popupSearchResult.onItemSelect = {
                         binding.address.text = it.name
-                        PurchaseApprovalActivity.purchaseAddress = it.name
+                        // PurchaseApprovalActivity.purchaseAddress = it.name
+                        clear(it.name)
                     }
                     popupSearchResult.show()
                 }
@@ -185,6 +178,8 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val 
                     } else {
                         try {
                             val decimal = DecimalFormat("#,###")
+                            val sapName = binding.sapCode.text.toString()
+                            val address = binding.address.text.toString()
                             val box = binding.etBox.text.toString().toInt()
                             val unitPrice = binding.etPrice.text.toString().toInt()
                             val totalQty = 24 * box
@@ -201,19 +196,16 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val 
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 } else {
-                                    if (PurchaseRequestActivity.purchaseAdapter != null) {
-                                        PurchaseRequestActivity.list.add(
-                                            OrderRegModel(
-                                                list[list.size - 1].name,
-                                                decimal.format(box).toString(),
-                                                "0",
-                                                decimal.format(unitPrice).toString(),
-                                                decimal.format(totalQty).toString(),
-                                                decimal.format(totalAmount).toString()
-                                            )
-                                        )
-                                        PurchaseRequestActivity.purchaseAdapter?.notifyDataSetChanged()
-                                    }
+                                    val model = OrderRegModel(
+                                        list[list.size - 1].name,
+                                        decimal.format(box).toString(),
+                                        "0",
+                                        decimal.format(unitPrice).toString(),
+                                        decimal.format(totalQty).toString(),
+                                        decimal.format(totalAmount).toString()
+                                    )
+
+                                    addItem(model, sapName, address)
 
                                     binding.etProductName.text = null
                                     binding.etProductName.visibility = View.VISIBLE
@@ -253,12 +245,23 @@ class PurchaseRequestAdapter(mContext: Context, activity: Activity, private val 
             })
         }
     }
-    private fun calculateTotalValue(): Int {
-        totalValue = 0
-        for (data in dataList) {
-            val stringWithoutComma = data.totalAmount.replace(",", "")
-            totalValue += stringWithoutComma.toInt()
-        }
-        return totalValue
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun addItem(item: OrderRegModel, accountName: String, address: String) {
+        dataList.add(item)
+        notifyDataSetChanged()
+        updateData(dataList, accountName, address)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun removeItem(item: OrderRegModel) {
+        dataList.remove(item)
+        notifyDataSetChanged()
+        updateData(dataList, "", "")
+    }
+
+    fun clear(accountName: String) {
+        dataList.clear()
+        updateData(dataList, accountName, "")
     }
 }

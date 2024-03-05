@@ -2,27 +2,33 @@ package kr.co.kimberly.wma.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.TotalValueListener
+import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.model.OrderRegModel
 
-class SlipInquiryDetailAdapter(context: Context): RecyclerView.Adapter<SlipInquiryDetailAdapter.ViewHolder>() {
-    var dataList: List<OrderRegModel> = ArrayList()
+class SlipInquiryDetailAdapter(context: Context, private val updateData: ((ArrayList<OrderRegModel>, String) -> Unit)): RecyclerView.Adapter<SlipInquiryDetailAdapter.ViewHolder>() {
+    var dataList: ArrayList<OrderRegModel> = ArrayList()
     var mContext = context
 
     inner class ViewHolder(val binding: CellOrderRegBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: OrderRegModel) {
 
+            binding.orderName.text = itemModel.orderName
             binding.tvBox.text = itemModel.box
             binding.tvEach.text = itemModel.each
             binding.tvPrice.text = "${itemModel.unitPrice}원"
             binding.tvTotal.text = itemModel.totalQty
             binding.tvTotalAmount.text = "${itemModel.totalAmount}원"
+            binding.deleteButton.visibility = View.GONE
 
             itemView.setOnClickListener {
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)

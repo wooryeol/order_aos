@@ -36,8 +36,6 @@ class RegAdapter(mContext: Context, activity: Activity, private val updateData: 
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ITEM = 1
-
-        var totalValue: Int = 0
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -110,6 +108,7 @@ class RegAdapter(mContext: Context, activity: Activity, private val updateData: 
                 PopupProductPriceHistory.productPriceHistory.add(ProductPriceHistoryModel(formattedDate, "${binding.tvPrice.text}"))
             }
 
+            binding.orderName.text = item.orderName
             binding.tvBox.text = item.box
             binding.tvEach.text = item.each
             binding.tvPrice.text = "${item.unitPrice}원"
@@ -257,15 +256,5 @@ class RegAdapter(mContext: Context, activity: Activity, private val updateData: 
     fun clear(accountName: String) {
         dataList.clear()
         updateData(dataList, accountName)
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun calculateTotalValue(): Int {
-        totalValue = 0
-        for (data in dataList) {
-            val stringWithoutComma = data.totalAmount.replace(",", "")
-            totalValue += stringWithoutComma.toInt()
-        }
-        return totalValue
     }
 }

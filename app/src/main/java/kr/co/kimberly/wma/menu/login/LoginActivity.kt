@@ -55,7 +55,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         // 앱버전
-        mBinding.appVer.text = BuildConfig.VERSION_NAME
+        mBinding.appVer.text = "ver ${BuildConfig.VERSION_NAME}"
 
         // 테트스 환경 로그인 정보 자동 기입
         if(Define.IS_TEST) {

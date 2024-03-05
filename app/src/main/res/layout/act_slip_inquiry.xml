@@ -102,12 +102,14 @@
                 android:layout_height="40dp"
                 android:layout_weight="1"
                 android:textSize="16dp"
+                android:textColor="@color/color_1A1A1A"
                 android:background="@color/trans"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:singleLine="true"
+                android:gravity="start"
                 tools:ignore="SpUsage" />
 
             <ImageButton
@@ -175,7 +177,8 @@
     <LinearLayout
         android:id="@+id/noSearch"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
         tools:ignore="UseCompoundDrawables">
@@ -198,7 +201,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingHorizontal="16dp"
         android:clipToPadding="false"
         android:overScrollMode="never"

@@ -45,7 +45,6 @@ class OrderRegActivity : AppCompatActivity() {
         mBinding.header.headerTitle.text = getString(R.string.menu01)
         mBinding.bottom.bottomButton.text = getString(R.string.orderApproval)
 
-
         val orderAdapter = RegAdapter(mContext, mActivity) { items, name ->
             var totalMoney = 0
 
@@ -54,9 +53,7 @@ class OrderRegActivity : AppCompatActivity() {
                 totalMoney += stringWithoutComma.toInt()
             }
 
-            accountName = if(name.isNotEmpty()) {
-                name
-            } else {
+            accountName = name.ifEmpty {
                 accountName
             }
             totalAmount = totalMoney

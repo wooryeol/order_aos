@@ -13,6 +13,7 @@ import kr.co.kimberly.wma.adapter.LedgerAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
+import kr.co.kimberly.wma.custom.popup.PopupDatePicker02
 import kr.co.kimberly.wma.databinding.ActLedgerBinding
 import kr.co.kimberly.wma.model.AccountModel
 import kr.co.kimberly.wma.model.LedgerModel
@@ -44,13 +45,19 @@ class LedgerActivity : AppCompatActivity() {
 
         // 날짜 선택
         mBinding.dateArea.setOnClickListener {
-            val date = if(mBinding.tvDate.text.toString() == getString(R.string.monthHint)) {
+            /*val date = if(mBinding.tvDate.text.toString() == getString(R.string.monthHint)) {
                 null
             } else {
                 mBinding.tvDate.text.toString()
             }
-            val popupDatePicker = PopupDatePicker(mContext, false, date)
+            val popupDatePicker = PopupDatePicker(mContext, true, date)
             popupDatePicker.onDateSelect = {
+                mBinding.tvDate.text = it
+            }
+            popupDatePicker.show()*/
+
+            val popupDatePicker = PopupDatePicker02(mContext, true, false)
+            popupDatePicker.onSelectedDate = {
                 mBinding.tvDate.text = it
             }
             popupDatePicker.show()

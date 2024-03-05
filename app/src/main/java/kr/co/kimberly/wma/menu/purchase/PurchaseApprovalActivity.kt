@@ -22,10 +22,7 @@ class PurchaseApprovalActivity: AppCompatActivity() {
     private lateinit var mActivity: Activity
 
     private val decimal = DecimalFormat("#,###")
-
-    companion object {
-        var purchaseAddress = ""
-    }
+    var totalAmount = 0
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,13 +43,32 @@ class PurchaseApprovalActivity: AppCompatActivity() {
             }
         })
 
-        mBinding.tvTotalAmount.text = "${decimal.format(PurchaseRequestActivity.totalAmount)}원"
         mBinding.accountCode.text = PurchaseRequestActivity.accountName
-        mBinding.purchaseAddress.text = purchaseAddress
+        mBinding.purchaseAddress.text = PurchaseRequestActivity.purchaseAddress
 
-        val adapter = SlipInquiryDetailAdapter(mContext)
-        adapter.dataList = PurchaseRequestActivity.list
+        val adapter = SlipInquiryDetailAdapter(mContext) { items, _ ->
+            /*var totalMoney = 0
+
+            items.map {
+                val stringWithoutComma = it.totalAmount.replace(",", "")
+                totalMoney += stringWithoutComma.toInt()
+            }
+
+            val formatTotalMoney = decimal.format(totalMoney).toString()
+            mBinding.tvTotalAmount.text = "${formatTotalMoney}원"*/
+
+        }
+
+        adapter.dataList = PurchaseRequestActivity.purchaseAdapter!!.dataList
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
+
+        var totalMoney = 0
+        adapter.dataList.map {
+            val stringWithoutComma = it.totalAmount.replace(",", "")
+            totalMoney += stringWithoutComma.toInt()
+        }
+        val formatTotalMoney = decimal.format(totalMoney).toString()
+        mBinding.tvTotalAmount.text = "${formatTotalMoney}원"
     }
 }

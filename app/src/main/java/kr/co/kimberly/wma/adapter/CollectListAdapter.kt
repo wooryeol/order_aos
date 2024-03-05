@@ -37,6 +37,8 @@ class CollectListAdapter(context: Context, activity: Activity): RecyclerView.Ada
                 override fun onSingleClick(v: View) {
                     if(isSlipAct) { // 전표조회에서 진입했을 경우
                         val intent = Intent(mContext, SlipInquiryDetailActivity::class.java)
+                        intent.putExtra("receiptNumber", itemModel.receiptNumber)
+                        intent.putExtra("account", itemModel.account)
                         mContext.startActivity(intent)
                     }
                 }
