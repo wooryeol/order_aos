@@ -5,9 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -16,11 +13,10 @@ import kr.co.kimberly.wma.adapter.MainMenuAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.GridSpacingItemDecoration
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNotification
 import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActMainBinding
-import kr.co.kimberly.wma.menu.setting.SettingActivity
+import kr.co.kimberly.wma.menu.setting.SettingActivityV2
 import kr.co.kimberly.wma.model.MainMenuModel
 
 class MainActivity : AppCompatActivity() {
@@ -55,7 +51,7 @@ class MainActivity : AppCompatActivity() {
 
         mBinding.settingBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                startActivity(Intent(mContext, SettingActivity::class.java))
+                startActivity(Intent(mContext, SettingActivityV2::class.java))
             }
         })
 
