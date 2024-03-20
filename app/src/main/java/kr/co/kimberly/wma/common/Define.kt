@@ -26,4 +26,7 @@ object Define {
     const val MONTH = "month"
     const val DAY = "day"
     const val TODAY = "today"
+
+    const val EVENT_OK = 10000
+    const val EVENT_CANCEL = 10001
 }

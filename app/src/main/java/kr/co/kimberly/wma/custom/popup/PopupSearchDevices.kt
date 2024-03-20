@@ -3,50 +3,71 @@ package kr.co.kimberly.wma.custom.popup
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.view.Window
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SearchDevicesAdapter
-import kr.co.kimberly.wma.common.BluetoothCheck
+import kr.co.kimberly.wma.common.BluetoothV2
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSearchDevicesBinding
-import kr.co.kimberly.wma.menu.setting.SettingActivity
-import kr.co.kimberly.wma.model.DevicesModel
 
-open class PopupSearchDevices(private val mContext: AppCompatActivity, private val mActivity: Activity) {
+class PopupSearchDevices(private val mContext: Context, private val mActivity: Activity): Dialog(mContext) {
 
     private lateinit var mBinding: PopupSearchDevicesBinding
-    private val mDialog = Dialog(mContext)
-    private val mBluetooth = BluetoothCheck(mContext, mActivity)
-    open val adapter = SearchDevicesAdapter(mContext, mActivity)
+    private val searchedList : ArrayList<BluetoothDevice> = ArrayList()
+    val adapter = SearchDevicesAdapter(mContext, mActivity)
+    @SuppressLint("MissingPermission")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mBinding = PopupSearchDevicesBinding.inflate(layoutInflater)
+        setContentView(mBinding.root)
+
+        initView()
+    }
 
     @SuppressLint("NotifyDataSetChanged", "MissingPermission")
-    fun show() {
-        mBinding = PopupSearchDevicesBinding.inflate(mContext.layoutInflater)
-        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        mDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        mDialog.setContentView(mBinding.root)
-        mDialog.setCancelable(false)
+    private fun initView() {
+        setCancelable(false)
+
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val height = Resources.getSystem().displayMetrics.heightPixels * 0.5
-        mDialog.window?.setLayout(960, height.toInt())
+        window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, height.toInt())
 
-        //SettingActivity.searchedList.add(DevicesModel("KDC200[02070260]", "00:19:01:31:4E:91"))
+        val mBluetooth = BluetoothV2(mContext, mActivity, searchedList, adapter, false, mBinding.isPairing)
 
-        adapter.dataList = SettingActivity.searchedList
-        mBinding.recyclerview.adapter = adapter
-        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
-
-        mBluetooth.initBluetooth()
-
-        mBinding.closeBtn.setOnClickListener {
-            if (BluetoothCheck(mContext, mActivity).bluetoothAdapter.isDiscovering) {
-                BluetoothCheck(mContext, mActivity).bluetoothAdapter.cancelDiscovery()
+        mBinding.retry.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                mBluetooth.checkBluetoothAvailable()
             }
-            mDialog.dismiss()
+        })
+        mBluetooth.checkBluetoothAvailable()
+
+        adapter.dataList = searchedList
+        mBinding.recyclerview.adapter = adapter
+        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext).apply {
+            reverseLayout = true
+            stackFromEnd = true
         }
 
-        mDialog.show()
+        // 여기 대리님께 물어보기
+        mBinding.recyclerview.scrollToPosition(adapter.dataList.size)
+        mBinding.isPairing.playAnimation()
+
+        mBinding.closeBtn.setOnClickListener {
+            dismiss()
+            if (mBluetooth.mBluetoothAdapter.isDiscovering) {
+                mBluetooth.mBluetoothAdapter.cancelDiscovery()
+            }
+            mContext.unregisterReceiver(mBluetooth.mBluetoothReceiver)
+        }
     }
 }

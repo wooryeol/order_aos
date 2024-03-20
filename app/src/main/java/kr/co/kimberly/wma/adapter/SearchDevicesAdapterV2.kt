@@ -32,7 +32,7 @@ class SearchDevicesAdapterV2(context: Context, activity: Activity): RecyclerView
 
             itemView.setOnClickListener {
                 val paringDialog = PopupPairingDevice(mContext, mActivity)
-                paringDialog.show(itemModel.name, itemModel.address)
+                paringDialog.show(itemModel)
             }
         }
     }

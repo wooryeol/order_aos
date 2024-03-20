@@ -2,18 +2,23 @@ package kr.co.kimberly.wma.custom.popup
 
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.provider.Settings
 import android.view.View
 import android.widget.LinearLayout
+import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSingleMessageBinding
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kotlin.system.exitProcess
 
-class PopupSingleMessage(mContext: Context, private var title: String, private var msg: String? = null): Dialog(mContext) {
+class PopupSingleMessage(mContext: Context, private var title: String? = null, private var msg: String? = null, val mHandler: Handler? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupSingleMessageBinding
-
     private var context = mContext
 
     var itemClickListener: ItemClickListener? = null
@@ -51,6 +56,8 @@ class PopupSingleMessage(mContext: Context, private var title: String, private v
                 if (msg.isNullOrEmpty()) {
                     exitProcess(0)
                 }
+
+                mHandler?.sendEmptyMessage(Define.EVENT_OK)
             }
         })
 

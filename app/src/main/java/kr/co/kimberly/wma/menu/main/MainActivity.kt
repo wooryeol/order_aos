@@ -16,6 +16,7 @@ import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupNotification
 import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActMainBinding
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.menu.setting.SettingActivityV2
 import kr.co.kimberly.wma.model.MainMenuModel
 
@@ -51,7 +52,8 @@ class MainActivity : AppCompatActivity() {
 
         mBinding.settingBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                startActivity(Intent(mContext, SettingActivityV2::class.java))
+                //startActivity(Intent(mContext, SettingActivityV2::class.java))
+                startActivity(Intent(mContext, SettingActivity::class.java))
             }
         })
 
@@ -66,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         // 실행종료
-        val popupSingleMessage = PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?")
+        val popupSingleMessage = PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null)
         mBinding.finish.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 popupSingleMessage.show()

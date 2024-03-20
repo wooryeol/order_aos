@@ -10,16 +10,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.RegAdapter
-import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.ActOrderRegBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
-import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
-import kr.co.kimberly.wma.model.OrderRegModel
 import java.text.DecimalFormat
 
 

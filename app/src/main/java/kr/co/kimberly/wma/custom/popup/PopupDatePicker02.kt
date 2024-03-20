@@ -8,10 +8,8 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
-import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.databinding.PopupDatePickerBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar

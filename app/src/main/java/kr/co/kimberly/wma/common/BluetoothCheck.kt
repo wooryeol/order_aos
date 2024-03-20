@@ -24,6 +24,7 @@ import kr.co.kimberly.wma.menu.setting.SettingActivity
 class BluetoothCheck(context: AppCompatActivity, private val activity: Activity) {
     private val mContext = context
     private val mActivity = activity
+
     private val bluetoothManager: BluetoothManager by lazy {
         mContext.getSystemService(BluetoothManager::class.java)
     }
@@ -31,9 +32,9 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
         bluetoothManager.adapter
     }
     private var permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_FINE_LOCATION)
+        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
     } else {
-        arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_COARSE_LOCATION)
+        arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
     fun searchBluetooth(){
@@ -81,7 +82,7 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
         if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
             return
         } else {
-            SettingActivity.searchedList.clear()
+            //SettingActivity.searchedList.clear()
             bluetoothAdapter.startDiscovery()
         }
     }
@@ -94,12 +95,12 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
                     val device: BluetoothDevice? =
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     if (device?.name != null) {
-                        if (!SettingActivity.searchedList.contains(device)) SettingActivity.searchedList.add(device)
+                        // if (!SettingActivity.searchedList.contains(device)) SettingActivity.searchedList.add(device)
 
                         /*Log.d("wooryeol", "deviceName >>> $deviceName")
                         Log.d("wooryeol", "deviceHardwareAddress >>> $deviceHardwareAddress")*/
 
-                        PopupSearchDevices(mContext, mActivity).adapter.notifyDataSetChanged()
+                       //  PopupSearchDevices(mContext, mActivity).adapter.notifyDataSetChanged()
                     }
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
@@ -112,7 +113,7 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
 
                     if (paired?.bondState == BluetoothDevice.BOND_BONDED) {
-                        PopupSearchDevices(mContext, mActivity).adapter.notifyDataSetChanged()
+                        //PopupSearchDevices(mContext, mActivity).adapter.notifyDataSetChanged()
                     }
                 }
             }

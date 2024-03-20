@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/trans"
-    tools:context=".menu.setting.SettingActivity">
+    tools:context=".menu.setting.SettingActivity"
+    tools:ignore="MissingDefaultResource">
 
     <include
         android:id="@+id/header"

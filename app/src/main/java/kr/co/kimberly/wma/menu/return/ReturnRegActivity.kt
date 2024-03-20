@@ -12,13 +12,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.RegAdapter
-import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.ActReturnRegBinding
-import kr.co.kimberly.wma.menu.order.OrderRegActivity
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
-import kr.co.kimberly.wma.model.OrderRegModel
 import java.text.DecimalFormat
 
 

@@ -1,53 +1,43 @@
 package kr.co.kimberly.wma.menu.setting
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.gun0912.tedpermission.PermissionListener
-import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
-import kr.co.kimberly.wma.common.BluetoothCheck
-import kr.co.kimberly.wma.common.Define
-import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.common.BluetoothV2
+import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
 import kr.co.kimberly.wma.databinding.ActSettingBinding
-import kr.co.kimberly.wma.menu.main.MainActivity
-import kr.co.kimberly.wma.model.DevicesModel
 
 class SettingActivity : AppCompatActivity() {
-
     companion object {
         // 스캐너 라디오 버튼을 선택하면 1, 프린터는 2
         // 팝업으로 넘겨주어 UI 변경
         var isRadioChecked = 0
-        
-        // 검색된 기기 목록을 담는 리스트
-        val searchedList = ArrayList<BluetoothDevice>()
 
         // 연결된 기기 목록을 담는 리스트
-        val pairedList = ArrayList<DevicesModel>()
+        val pairedList : ArrayList<BluetoothDevice> = ArrayList()
+        val searchedList: ArrayList<BluetoothDevice> = ArrayList()
+
+        var checkScanner = false
+        var checkPrinter = false
     }
 
     private lateinit var mBinding: ActSettingBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
+
+    private var adapter : PairedDevicesAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,21 +55,17 @@ class SettingActivity : AppCompatActivity() {
             }
         })
 
-        mBinding.accountCode.setOnEditorActionListener { v, _, _ ->
-            v.inputType = EditorInfo.TYPE_NULL
-            true
-        }
-
         searchDevices()
         showPairedDevices()
+        useDevice()
     }
 
+    @SuppressLint("MissingPermission")
     private fun showPairedDevices() {
-        /*pairedList.add(DevicesModel("KDC200[02070260]", "00:19:01:31:4E:91"))
-        pairedList.add(DevicesModel("KDC200[02070260]", "00:19:01:31:4E:91"))*/
-
-        val adapter = PairedDevicesAdapter(mContext, mActivity)
-        adapter.dataList = pairedList
+        val mBluetooth = BluetoothV2(mContext, mActivity, pairedList, adapter, true)
+        mBluetooth.checkBluetoothAvailable()
+        adapter = PairedDevicesAdapter(mContext, mActivity)
+        adapter?.dataList = pairedList
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
 
@@ -90,31 +76,29 @@ class SettingActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun searchDevices(){
         mBinding.bottom.bottomButton.setOnClickListener {
-            val mBluetooth = BluetoothCheck(this, mActivity)
+            val dlg = PopupSearchDevices(mContext, mActivity)
             if (mBinding.accountCode.text.isEmpty()) {
                 Toast.makeText(mContext, "대리점 코드를 입력해주세요", Toast.LENGTH_LONG).show()
+            } else if(isRadioChecked == 0) {
+                Toast.makeText(mContext, "스캐너 또는 프린트를 선택해주세요", Toast.LENGTH_LONG).show()
             } else {
                 when (isRadioChecked) {
                     1 -> {
-                        val dlg = PopupSearchDevices(this, mActivity)
                         dlg.show()
                         Log.d("wooryeol", "스캐너 선택됨")
-                        /*mBluetooth.searchBluetooth()*/
                     }
                     2 -> {
-                        val dlg = PopupSearchDevices(this, mActivity)
                         dlg.show()
                         Log.d("wooryeol", "프린터 선택됨")
-                        /*mBluetooth.searchBluetooth()*/
-                    }
-                    else -> {
-                        Toast.makeText(mContext, "스캐너 혹은 프린터를 체크해주세요", Toast.LENGTH_LONG).show()
                     }
                 }
             }
         }
+
+        showPairedDevices()
     }
 
     fun onSettingActRadioButtonClicked(view: View): Int {
@@ -145,5 +129,32 @@ class SettingActivity : AppCompatActivity() {
             }
         }
         return isRadioChecked
+    }
+
+    private fun useDevice() {
+        val print = mBinding.checkBoxPrint
+        val scanner = mBinding.checkBoxScanner
+
+        print.isEnabled = false
+        scanner.isEnabled = false
+
+        scanner.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                checkScanner = scanner.isChecked
+            }
+        })
+
+        print.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val name = SharedData.getSharedData(mContext, SharedData.PRINTER_NAME, "")
+                val address = SharedData.getSharedData(mContext, SharedData.PRINTER_ADDR, "")
+                if (address == "" && name == "") {
+                    Toast.makeText(mContext, "프린터를 연결해주세요", Toast.LENGTH_SHORT).show()
+                } else {
+                    print.isEnabled = true
+                    checkPrinter = print.isChecked
+                }
+            }
+        })
     }
 }

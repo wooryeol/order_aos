@@ -55,4 +55,10 @@ dependencies {
 
     //gson
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // TSC 프린터
+    implementation(files("libs/bluetooth.jar"))
+
+    //lottie 라이브러리
+    implementation ("com.airbnb.android:lottie:3.7.0")
 }

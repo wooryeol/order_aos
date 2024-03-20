@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
@@ -19,8 +18,6 @@ import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
-import kr.co.kimberly.wma.menu.order.OrderRegActivity
-import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
 import kr.co.kimberly.wma.model.OrderRegModel
 import kr.co.kimberly.wma.model.ProductPriceHistoryModel
 import kr.co.kimberly.wma.model.SearchResultModel

@@ -1,7 +1,7 @@
 package kr.co.kimberly.wma.model
 
 class LedgerModel (
-    val date: String? = null,
-    val saleAmount: String? = null,
-    val collectAmount: String? = null,
+    val date: String,
+    val saleAmount: Int,
+    val collectAmount: Int,
 )

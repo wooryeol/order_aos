@@ -16,17 +16,11 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
-import kr.co.kimberly.wma.common.BluetoothCheck
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupNotice
-import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevicesV2
-import kr.co.kimberly.wma.databinding.ActSettingBinding
 import kr.co.kimberly.wma.databinding.ActSettingV2Binding
-import kr.co.kimberly.wma.model.DevicesModel
 
 class SettingActivityV2 : AppCompatActivity() {
     private lateinit var mBinding: ActSettingV2Binding

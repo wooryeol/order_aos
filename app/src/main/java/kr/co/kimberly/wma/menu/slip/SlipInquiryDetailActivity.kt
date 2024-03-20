@@ -13,14 +13,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SlipInquiryDetailAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.ActSlipInquiryDetailBinding
-import kr.co.kimberly.wma.menu.order.OrderRegActivity
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
-import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
-import kr.co.kimberly.wma.model.AccountModel
 import kr.co.kimberly.wma.model.OrderRegModel
+import kr.co.kimberly.wma.model.ReceiptModel
+import kr.co.kimberly.wma.model.ResultValuesModel
 import java.text.DecimalFormat
 
 class SlipInquiryDetailActivity : AppCompatActivity() {
@@ -30,6 +28,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
 
     private var receiptNumber = ""
     private var totalMoney = 0
+    private var formatTotalMoney = ""
 
     private val decimal = DecimalFormat("#,###")
 
@@ -89,7 +88,6 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
 
     private fun onClickPrint() {
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
-
             override fun onSingleClick(v: View) {
                 val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : ${accountName}\n총금액: ${decimal.format(totalMoney)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
                 popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
@@ -98,8 +96,12 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
                     }
 
                     override fun onOkClick() {
+                        val data = ReceiptModel(receiptNumber, accountName, decimal.format(totalMoney).toString())
+                        val intent = Intent(mContext, PrinterOptionActivity::class.java)
+                        intent.putExtra("data", data)
+                        intent.putExtra("list", list)
+                        startActivity(intent)
                         Toast.makeText(v.context, "주문이 전송되었습니다.", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(mContext, PrinterOptionActivity::class.java))
                     }
                 }
                 popupDoubleMessage.show()
@@ -110,7 +112,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
         mBinding.modify.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 val intent = Intent(mContext, SlipInquiryModifyActivity::class.java)
-                val formatTotalMoney = decimal.format(totalMoney).toString()
+                formatTotalMoney = decimal.format(totalMoney).toString()
                 intent.putExtra("totalMoney", formatTotalMoney)
                 startActivity(intent)
             }

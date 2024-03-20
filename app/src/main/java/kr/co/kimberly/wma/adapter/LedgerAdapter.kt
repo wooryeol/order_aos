@@ -3,21 +3,20 @@ package kr.co.kimberly.wma.adapter
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.os.Handler
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.databinding.CellLedgerBinding
-import kr.co.kimberly.wma.databinding.CellStorageBinding
 import kr.co.kimberly.wma.model.LedgerModel
+import java.text.DecimalFormat
 import java.util.ArrayList
 
 class LedgerAdapter(context: Context, activity: Activity): RecyclerView.Adapter<LedgerAdapter.ViewHolder>() {
 
-    var dataList: List<LedgerModel> = ArrayList()
+    var dataList: ArrayList<LedgerModel> = ArrayList()
     var mContext = context
     var mActivity = activity
+    val decimal = DecimalFormat("#,###")
 
 
     inner class ViewHolder(val binding: CellLedgerBinding): RecyclerView.ViewHolder(binding.root) {
@@ -25,9 +24,8 @@ class LedgerAdapter(context: Context, activity: Activity): RecyclerView.Adapter<
         fun bind(itemModel: LedgerModel) {
 
             binding.date.text = itemModel.date
-            binding.saleAmount.text = itemModel.saleAmount
-            binding.collectAmount.text = itemModel.collectAmount
-
+            binding.saleAmount.text = "${decimal.format(itemModel.saleAmount)}원"
+            binding.collectAmount.text = "${decimal.format(itemModel.collectAmount)}원"
         }
     }
 

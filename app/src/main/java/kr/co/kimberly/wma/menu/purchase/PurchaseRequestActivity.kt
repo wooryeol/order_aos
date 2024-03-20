@@ -12,11 +12,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.PurchaseRequestAdapter
-import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.ActPurchaseRequestBinding
-import kr.co.kimberly.wma.model.OrderRegModel
 import java.text.DecimalFormat
 
 class PurchaseRequestActivity: AppCompatActivity() {

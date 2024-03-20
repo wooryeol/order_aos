@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SlipInquiryModifyAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.ActOrderRegBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity

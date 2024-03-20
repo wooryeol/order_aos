@@ -11,14 +11,11 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.custom.TotalValueListener
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderPurchaseRequesetBinding
-import kr.co.kimberly.wma.menu.purchase.PurchaseApprovalActivity
-import kr.co.kimberly.wma.menu.purchase.PurchaseRequestActivity
 import kr.co.kimberly.wma.model.OrderRegModel
 import kr.co.kimberly.wma.model.SearchResultModel
 import java.text.DecimalFormat

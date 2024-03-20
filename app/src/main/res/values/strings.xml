@@ -15,7 +15,7 @@
     <string name="searchDevices">Search Devices</string>
     <string name="bluetoothDevices">Bluetooth Devices</string>
     <string name="printDevices">Print Devices</string>
-    <string name="pairing">pairing...</string>
+    <string name="pairing">pairing</string>
     <string name="requestBluetooth">블루투스 등록 요청</string>
     <string name="register">을(를) 등록하려면</string>
     <string name="pin">해당 디바이스의 PIN을 입력하세요:</string>
