@@ -38,11 +38,32 @@
             android:textSize="16dp"/>
 
         <TextView
+            android:visibility="gone"
+            android:id="@+id/tvMsg04"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/purchasePostMsg01"
+            android:textSize="16dp"
+            android:gravity="center"
+            tools:ignore="HardcodedText,SpUsage" />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tvMsg05"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/purchasePostMsg02"
+            android:textSize="16dp"
+            android:textColor="@color/color_1A1A1A"
+            android:gravity="center"
+            tools:ignore="HardcodedText,SpUsage" />
+
+        <TextView
             android:id="@+id/tvMsg02"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:text="위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?"
+            android:text=""
             android:textSize="16dp"
             android:gravity="center"
             tools:ignore="HardcodedText,SpUsage" />

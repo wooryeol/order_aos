@@ -7,7 +7,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteDatabase.CursorFactory
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import kr.co.kimberly.wma.model.OrderTempListModel
+import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.network.model.OrderTempListModel
 
 class DBHelper(
     context: Context?,
@@ -70,7 +71,7 @@ class DBHelper(
 
                     list.add(data)
                 }while (cursor.moveToNext())
-                Log.d("test log", "저장된 데이터 : $list")
+                Utils.Log("저장된 데이터 : $list")
             }
             db.close()
             return list
@@ -91,7 +92,7 @@ class DBHelper(
 
         db.insert(TABLE_NAME, null, values)
         db.close()
-        Log.d("test log", "데이터 저장 성공")
+        Utils.Log("데이터 저장 성공")
     }
 
     fun updateData(data: OrderTempListModel): Int{

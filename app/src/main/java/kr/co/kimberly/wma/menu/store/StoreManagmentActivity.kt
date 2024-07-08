@@ -13,6 +13,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -87,7 +88,7 @@ class StoreManagementActivity : AppCompatActivity() {
             override fun onSingleClick(v: View) {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
-                    mBinding.accountName.text = it.name
+                    mBinding.accountName.text = it.custNm
                 }
                 popupAccountSearch.show()
             }
@@ -135,36 +136,47 @@ class StoreManagementActivity : AppCompatActivity() {
             override fun onSingleClick(v: View) {
                 val popupSingleMessage = PopupSingleMessage(mContext, getString(R.string.storeManagementSend), getString(R.string.storeManagementSendMsg))
 
-                popupSingleMessage.itemClickListener = object: PopupSingleMessage.ItemClickListener {
-                    override fun onCancelClick() {
-                        Log.d("tttt", "취소 클릭함")
-                    }
-
-                    override fun onOkClick() {
-                        val popupDoubleMessageIcon = PopupDoubleMessageIcon(
-                            mContext,
-                            R.drawable.check_circle,
-                            getString(R.string.successMsg),
-                            getString(R.string.successMsg02),
-                            getString(R.string.successMsg03)
-                        )
-                        popupDoubleMessageIcon.itemClickListener = object: PopupDoubleMessageIcon.ItemClickListener {
-                            override fun onCancelClick() {
-                                popupDoubleMessageIcon.dismiss()
-                            }
-
-                            override fun onOkClick() {
-                                val intent =  Intent(mContext, MainActivity::class.java)
-                                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                                mContext.startActivity(intent)
-                            }
-
+                if (mBinding.accountName.text.isNullOrEmpty()) {
+                    Toast.makeText(mContext, "거래처를 검색해주세요", Toast.LENGTH_SHORT).show()
+                } else if(mBinding.title.text.isNullOrEmpty()) {
+                    Toast.makeText(mContext, "제목을 입력해주세요", Toast.LENGTH_SHORT).show()
+                } else if(mBinding.creator.text.isNullOrEmpty()) {
+                    Toast.makeText(mContext, "생성자를 입력해주세요", Toast.LENGTH_SHORT).show()
+                } else if(mBinding.before.text.isNullOrEmpty() || mBinding.after.text.isNullOrEmpty()) {
+                    Toast.makeText(mContext, "내용을 입력해주세요", Toast.LENGTH_SHORT).show()
+                } else if (mBinding.beforeImg.visibility == View.GONE || mBinding.afterImg.visibility == View.GONE) {
+                    Toast.makeText(mContext, "사진을 등록 해주세요", Toast.LENGTH_SHORT).show()
+                } else {
+                    popupSingleMessage.itemClickListener = object: PopupSingleMessage.ItemClickListener {
+                        override fun onCancelClick() {
+                            Log.d("tttt", "취소 클릭함")
                         }
-                        popupDoubleMessageIcon.show()
-                    }
-                }
 
-                popupSingleMessage.show()
+                        @SuppressLint("UseCompatLoadingForDrawables")
+                        override fun onOkClick() {
+                            val popupDoubleMessageIcon = PopupDoubleMessageIcon(
+                                mContext,
+                                getDrawable(R.drawable.check_circle)!!,
+                                getString(R.string.successMsg),
+                                getString(R.string.successMsg02),
+                                getString(R.string.successMsg03)
+                            )
+                            popupDoubleMessageIcon.itemClickListener = object: PopupDoubleMessageIcon.ItemClickListener {
+                                override fun onCancelClick() {
+                                    popupDoubleMessageIcon.dismiss()
+                                }
+                                override fun onOkClick() {
+                                    val intent =  Intent(mContext, MainActivity::class.java)
+                                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                                    mContext.startActivity(intent)
+                                }
+                            }
+                            popupDoubleMessageIcon.show()
+                        }
+                    }
+
+                    popupSingleMessage.show()
+                }
             }
         })
     }
@@ -257,7 +269,7 @@ class StoreManagementActivity : AppCompatActivity() {
     private fun addImageView(uri: Uri) {
         val exifInterface = Utils.getOrientationOfImage(mContext, uri)
         val bitmap = Utils.getRotatedBitmap(Utils.uriToBitmap(mActivity, uri), exifInterface.toFloat())
-        Log.d("testtest", "bitmap ===> $bitmap")
+        Utils.Log("bitmap ====> $bitmap")
 
         if (bitmap != null) {
             if (isAddImgSw == 0) {

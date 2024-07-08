@@ -13,7 +13,7 @@ import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActImgFullBinding
 import kr.co.kimberly.wma.databinding.ActSlipInquiryBinding
-import kr.co.kimberly.wma.model.AccountModel
+import kr.co.kimberly.wma.network.model.AccountModel
 
 class ImgFullActivity : AppCompatActivity() {
     private lateinit var mBinding: ActImgFullBinding

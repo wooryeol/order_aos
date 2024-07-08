@@ -35,11 +35,12 @@
            android:textColor="@color/color_1A1A1A" />
 
        <TextView
+           android:id="@+id/tvTotalAmount"
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:layout_gravity="center"
            android:layout_marginEnd="16dp"
-           android:text="9,999,999,999원"
+           android:text="0원"
            android:textSize="16dp"
            android:textStyle="normal"
            android:textColor="@color/color_1D6DE5"/>

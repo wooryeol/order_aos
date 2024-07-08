@@ -62,6 +62,7 @@
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
         android:orientation="horizontal">
+
         <TextView
             android:layout_width="80dp"
             android:layout_height="wrap_content"
@@ -71,22 +72,58 @@
             android:textColor="@color/color_7E828B"
             tools:ignore="SpUsage" />
 
-        <EditText
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="40dp"
             android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
             android:layout_marginEnd="8dp"
-            android:textSize="16dp"
             android:background="@drawable/et_round_c9cbd0"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="12dp"
-            android:imeOptions="actionDone"
-            android:inputType="text"
-            android:hint="@string/accountHint"
-            tools:ignore="Autofill,SpUsage,TextFields" />
+            >
+
+            <EditText
+                android:id="@+id/etAccountName"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:textSize="16dp"
+                android:paddingVertical="10dp"
+                android:paddingStart="12dp"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:background="@color/trans"
+                android:hint="@string/accountHint"
+                tools:ignore="Autofill,SpUsage,TextFields" />
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tvAccountName"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:textSize="16dp"
+                android:textColor="@color/color_1A1A1A"
+                android:background="@color/trans"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="12dp"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:singleLine="true"
+                android:gravity="start"
+                tools:ignore="SpUsage" />
+
+            <ImageButton
+                android:visibility="gone"
+                android:id="@+id/btAccountNameEmpty"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@color/trans"
+                android:src="@drawable/ic_empty" />
+
+        </LinearLayout>
 
         <Button
-            android:id="@+id/search"
+            android:id="@+id/btSearch"
             android:layout_width="60dp"
             android:layout_height="40dp"
             android:text="@string/search"
@@ -113,7 +150,7 @@
             android:layout_marginBottom="20dp"
             android:orientation="horizontal">
             <RadioButton
-                android:id="@+id/radioScanner01"
+                android:id="@+id/radioOrder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="20dp"
@@ -122,7 +159,7 @@
                 android:theme="@style/CustomRadioButton"/>
 
             <RadioButton
-                android:id="@+id/radioScanner"
+                android:id="@+id/radioReturn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/radioOption02"
@@ -140,10 +177,12 @@
     <LinearLayout
         android:id="@+id/noSearch"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
         tools:ignore="UseCompoundDrawables">
+
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
@@ -163,7 +202,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingHorizontal="16dp"
         android:clipToPadding="false"
         android:overScrollMode="never"

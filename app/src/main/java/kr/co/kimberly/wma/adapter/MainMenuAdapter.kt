@@ -18,7 +18,7 @@ import kr.co.kimberly.wma.menu.purchase.PurchaseRequestActivity
 import kr.co.kimberly.wma.menu.`return`.ReturnRegActivity
 import kr.co.kimberly.wma.menu.slip.SlipInquiryActivity
 import kr.co.kimberly.wma.menu.store.StoreManagementActivity
-import kr.co.kimberly.wma.model.MainMenuModel
+import kr.co.kimberly.wma.network.model.MainMenuModel
 import java.util.ArrayList
 
 class MainMenuAdapter(context: Context, activity: Activity): RecyclerView.Adapter<MainMenuAdapter.ViewHolder>() {

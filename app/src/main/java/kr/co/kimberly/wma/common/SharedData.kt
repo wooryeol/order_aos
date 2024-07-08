@@ -12,6 +12,15 @@ object SharedData {
     private const val SHARED_SHEARCH_HISTORY = "shared_search_history"
     private const val KEY_SEARCH_HISTORY = "key_search_history"
 
+    const val PRINTER_NAME = ""
+    const val PRINTER_ADDR = ""
+
+    const val SCANNER_NAME = "printer_name"
+    const val SCANNER_ADDR = "printer_addr"
+
+    const val WRH_NM = "wrh_nm"
+    const val LOGIN_DATA = "login_data"
+
     fun setSharedData(context: Context, strKey: String, objData: Any): Boolean {
         val prefs = context.getSharedPreferences(SHARED_NAME, Activity.MODE_PRIVATE)
         if (prefs == null || strKey == null || objData == null) {

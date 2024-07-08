@@ -3,6 +3,7 @@ package kr.co.kimberly.wma.custom.popup
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
@@ -10,7 +11,7 @@ import android.widget.LinearLayout
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupDoubleMessageBinding
 
-class PopupDoubleMessage(mContext: Context, private var title: String, private var msg01: String, private var msg02: String): Dialog(mContext) {
+class PopupDoubleMessage(mContext: Context, private var title: String, private var msg01: String, private var msg02: String? = null, private val purchase: Boolean? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupDoubleMessageBinding
 
     private var context = mContext
@@ -36,6 +37,17 @@ class PopupDoubleMessage(mContext: Context, private var title: String, private v
         mBinding.title.text = title
         mBinding.tvMsg01.text = msg01
         mBinding.tvMsg02.text = msg02
+
+        if (purchase != null) {
+            if (purchase) {
+                mBinding.tvMsg04.visibility = View.VISIBLE
+                mBinding.tvMsg05.visibility = View.VISIBLE
+                mBinding.tvMsg05.paintFlags = Paint.UNDERLINE_TEXT_FLAG
+            }
+        } else {
+            mBinding.tvMsg04.visibility = View.GONE
+            mBinding.tvMsg05.visibility = View.GONE
+        }
 
         mBinding.cancel.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {

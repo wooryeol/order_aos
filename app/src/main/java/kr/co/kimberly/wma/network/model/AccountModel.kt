@@ -1,4 +1,4 @@
-package kr.co.kimberly.wma.model
+package kr.co.kimberly.wma.network.model
 
 class AccountModel (
     val receiptNumber: String? = null,

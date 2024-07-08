@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
+import com.github.chrisbanes.photoview.BuildConfig
 import kr.co.kimberly.wma.databinding.ActSplashBinding
 import kr.co.kimberly.wma.menu.login.LoginActivity
 import kr.co.kimberly.wma.menu.main.MainActivity
@@ -18,6 +19,7 @@ class SplashActivity : AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActSplashBinding.inflate(layoutInflater)
@@ -25,6 +27,9 @@ class SplashActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+
+        // 앱버전
+        mBinding.appVer.text = "ver ${BuildConfig.VERSION_NAME}"
 
         Handler(Looper.getMainLooper()).postDelayed(Runnable {
             startActivity(Intent(mContext, LoginActivity::class.java))

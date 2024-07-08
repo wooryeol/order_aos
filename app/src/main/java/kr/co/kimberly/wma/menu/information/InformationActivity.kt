@@ -5,28 +5,42 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Paint
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.RadioButton
+import android.view.inputmethod.InputMethodManager
+import android.widget.RadioGroup.OnCheckedChangeListener
+import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.Gson
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
+import kr.co.kimberly.wma.custom.popup.PopupAccountInformation
+import kr.co.kimberly.wma.custom.popup.PopupAccountSearchV2
+import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.databinding.ActInformationBinding
-import kr.co.kimberly.wma.model.AccountInfoModel
-import kr.co.kimberly.wma.model.ProductInfoModel
+import kr.co.kimberly.wma.network.ApiClientService
+import kr.co.kimberly.wma.network.model.CustomerModel
+import kr.co.kimberly.wma.network.model.DataModel
+import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.SearchItemModel
+import retrofit2.Call
+import retrofit2.Response
 
 class InformationActivity : AppCompatActivity() {
-
     private lateinit var mBinding: ActInformationBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
-    private lateinit var accountInfo : AccountInfoModel
-    private lateinit var productInfo : ProductInfoModel
+    private lateinit var radioGroupCheckedListener: OnCheckedChangeListener
+
+    private lateinit var mLoginInfo: LoginResponseModel // 로그인 정보
+    private var mCustomerInfo: CustomerModel? = null // 거래처 정보
+    private var mItemInfo: SearchItemModel? = null // 제품 정보
+    private var mSearchType: String? = null // 조회 유형
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +49,9 @@ class InformationActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+        mLoginInfo = Utils.getLoginData()!!
 
-        mBinding.accountInfo.isChecked = true
+        setSetting()
 
         //헤더 설정
         mBinding.header.headerTitle.text = getString(R.string.menu09)
@@ -46,102 +61,161 @@ class InformationActivity : AppCompatActivity() {
             }
         })
 
+        mBinding.radioGroup.setOnCheckedChangeListener(radioGroupCheckedListener)
+
         // 거래처 검색
         mBinding.search.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupAccountSearch = PopupAccountSearch(mContext)
-                popupAccountSearch.onItemSelect = {
-                    mBinding.accountName.text = it.name
+                if(mBinding.etSearch.text.isEmpty()) {
+                    val popupNotice = PopupNotice(mContext, getString(R.string.etSearchEmpty))
+                    popupNotice.show()
+                } else {
+                    val popupAccountInformation = PopupAccountInformation(mContext, )
                 }
-                popupAccountSearch.show()
             }
         })
 
-        getProductInfo()
-        getAccountInfo()
-
-        if (mBinding.phone.text.isNotEmpty()){
-            mBinding.phone.setOnClickListener {
+        mBinding.phone.setOnClickListener {
+            if(mBinding.phone.text.isNotEmpty()) {
                 checkPermission(mBinding.phone.text.toString())
             }
         }
 
-        if (mBinding.inChargeNum.text.isNotEmpty()){
-            mBinding.inChargeNum.setOnClickListener {
+        mBinding.inChargeNum.setOnClickListener {
+            if(mBinding.inChargeNum.text.isNotEmpty()) {
                 checkPermission(mBinding.inChargeNum.text.toString())
             }
         }
     }
 
-    fun onInformationActRadioButtonClicked(view: View) {
-        if (view is RadioButton) {
-            val checked = view.isChecked
+    private fun setSetting() {
+        radioGroupCheckedListener = OnCheckedChangeListener { group, checkedId ->
+            hideKeyboard()
 
-            when(view.id) {
+            when(checkedId) {
                 R.id.accountInfo -> {
-                    if (checked) {
-                        mBinding.accountInfoLayout.visibility = View.VISIBLE
-                        mBinding.productInfoLayout.visibility = View.GONE
-                    }
+                    mBinding.etSearch.hint = getString(R.string.accountHint)
+                    mBinding.accountInfoLayout.visibility = View.VISIBLE
+                    mBinding.productInfoLayout.visibility = View.GONE
+                    mSearchType = Define.TYPE_CUSTOMER
+
+                    // 데이터 초기화
+                    mBinding.accountCode.text = ""
+                    mBinding.account.text = ""
+                    mBinding.represent.text = ""
+                    mBinding.businessNum.text = ""
+                    mBinding.phone.text = ""
+                    mBinding.fax.text = ""
+                    mBinding.address.text = ""
+                    mBinding.customer.text = ""
+                    mBinding.scale.text = ""
+                    mBinding.inCharge.text = ""
+                    mBinding.inChargeNum.text = ""
                 }
                 R.id.productInfo -> {
-                    if (checked) {
-                        mBinding.productInfoLayout.visibility = View.VISIBLE
-                        mBinding.accountInfoLayout.visibility = View.GONE
-                    }
+                    mBinding.etSearch.hint = getString(R.string.productHint)
+                    mBinding.productInfoLayout.visibility = View.VISIBLE
+                    mBinding.accountInfoLayout.visibility = View.GONE
+                    mSearchType = Define.TYPE_ITEM
+
+                    mBinding.manufacturer.text = ""
+                    mBinding.productCode.text = ""
+                    mBinding.productName.text = ""
+                    mBinding.barcode.text = ""
+                    mBinding.incomeQty.text = ""
+                    mBinding.Dimension.text = ""
+                    mBinding.tax.text = ""
                 }
             }
         }
     }
 
-    private fun getAccountInfo() {
-        accountInfo = AccountInfoModel(
-            "000052",
-            "파란마트",
-            "김파란",
-            "123-45-67890",
-            "010-1234-5678",
-            "02-123-4567",
-            "서울특별시 마포구 상암동",
-            "비즈위즈시스템",
-            "-",
-            "김우렬",
-            "010-6378-4307"
-        )
+    private fun getInfo(searchCondition: String) {
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+        //val call = service.masterInfo(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, mSearchType, searchCondition)
+        //test
+        val call = service.masterInfo("C000000", "mb2004", "C", "마트")
 
-        mBinding.accountCode.text = accountInfo.accountCode
-        mBinding.account.text = accountInfo.accountName
-        mBinding.represent.text = accountInfo.represent
-        mBinding.businessNum.text = accountInfo.businessNum
-        mBinding.phone.text = accountInfo.phone
-        mBinding.phone.paintFlags = Paint.UNDERLINE_TEXT_FLAG
-        mBinding.fax.text = accountInfo.fax
-        mBinding.address.text = accountInfo.address
-        mBinding.customer.text = accountInfo.customer
-        mBinding.scale.text = accountInfo.scale
-        mBinding.inCharge.text = accountInfo.inCharge
-        mBinding.inChargeNum.text = accountInfo.inChargeNum
-        mBinding.inChargeNum.paintFlags = Paint.UNDERLINE_TEXT_FLAG
+
+        call.enqueue(object : retrofit2.Callback<ListResultModel<DataModel<Unit>>> {
+            override fun onResponse(
+                call: Call<ListResultModel<DataModel<Unit>>>,
+                response: Response<ListResultModel<DataModel<Unit>>>
+            ) {
+                if (response.isSuccessful) {
+                    val item = response.body()
+                    if (item?.returnMsg == Define.SUCCESS) {
+                        if (item.data.isNullOrEmpty()) {
+                            PopupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.", null).show()
+                        } else {
+                            Utils.Log("info search success ====> ${Gson().toJson(item.data)}")
+
+                            if (mSearchType == Define.TYPE_CUSTOMER) {
+                                mCustomerInfo = item.data as CustomerModel
+
+                                val popupAccountInformation = PopupAccountInformation(mContext, )
+                                popupAccountInformation.onItemSelect = {
+                                    setInfo()
+                                }
+                                popupAccountInformation.show()
+
+                            } else {
+                                mItemInfo = item.data as SearchItemModel
+
+                            }
+                        }
+                    }
+                } else {
+                    Utils.Log("${response.code()} ====> ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ListResultModel<DataModel<Unit>>>, t: Throwable) {
+                Utils.Log("stock failed ====> ${t.message}")
+            }
+
+        })
     }
 
-    private fun getProductInfo() {
-        productInfo = ProductInfoModel(
-            "유한킴벌리(주)",
-            "00223",
-            "크리넥스 수앤수 20매*5",
-            "8801234567890",
-            "10",
-            "720x10x435 10.9",
-            "서울특별시 중구"
-        )
+    private fun setInfo(){
+        /*val popupSearchResult = PopupSearchResult(mContext, list)
+        popupSearchResult.onItemSelect = {
+            when(mSearchType) {
+                Define.TYPE_CUSTOMER -> {
+                    *//*mBinding.accountCode.text = mCustomerInfo?.custCd
+                    mBinding.account.text = mCustomerInfo?.custNm
+                    mBinding.represent.text = mCustomerInfo
+                    mBinding.businessNum.text = mCustomerInfo?.custCd
+                    mBinding.phone.text = mCustomerInfo?.custCd
+                    mBinding.phone.paintFlags = Paint.UNDERLINE_TEXT_FLAG
+                    mBinding.fax.text = mCustomerInfo?.custCd
+                    mBinding.address.text = mCustomerInfo?.custCd
+                    mBinding.customer.text = mCustomerInfo?.custCd
+                    mBinding.scale.text = mCustomerInfo?.custCd
+                    mBinding.inCharge.text = mCustomerInfo?.custCd
+                    mBinding.inChargeNum.text = mCustomerInfo?.custCd
+                    mBinding.inChargeNum.paintFlags = Paint.UNDERLINE_TEXT_FLAG*//*
+                }
+                Define.TYPE_ITEM -> {
+                    *//*mBinding.manufacturer.text = productInfo.manufacturer
+                    mBinding.productCode.text = productInfo.productCode
+                    mBinding.productName.text = productInfo.productName
+                    mBinding.barcode.text = productInfo.barcode
+                    mBinding.incomeQty.text = productInfo.incomeQty
+                    mBinding.Dimension.text = productInfo.dimension
+                    mBinding.tax.text = productInfo.tax*//*
+                }
+            }
+        }
+        popupSearchResult.show()*/
+    }
 
-        mBinding.manufacturer.text = productInfo.manufacturer
-        mBinding.productCode.text = productInfo.productCode
-        mBinding.productName.text = productInfo.productName
-        mBinding.barcode.text = productInfo.barcode
-        mBinding.incomeQty.text = productInfo.incomeQty
-        mBinding.Dimension.text = productInfo.dimension
-        mBinding.tax.text = productInfo.tax
+    private fun hideKeyboard() {
+        mBinding.etSearch.setText("")
+        mBinding.etSearch.clearFocus()
+
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(mBinding.etSearch.windowToken, InputMethodManager.HIDE_IMPLICIT_ONLY)
     }
 
     private fun checkPermission(number: String){

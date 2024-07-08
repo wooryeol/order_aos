@@ -59,6 +59,7 @@
             android:layout_marginBottom="24dp"
             android:gravity="center"
             android:orientation="vertical">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -69,6 +70,7 @@
                 android:textSize="12dp"/>
 
             <TextView
+                android:id="@+id/appVer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/appVer"

@@ -72,9 +72,9 @@ class CollectRegiActivity : AppCompatActivity() {
         }
 
         // 날짜 선택
-        val datePickerDialog = PopupDatePicker(this)
+        // val datePickerDialog = PopupDatePicker(this)
         mBinding.collectedDate.setOnClickListener {
-            datePickerDialog.initCustomDatePicker(mBinding.collectedDate)
+            // datePickerDialog.initCustomDatePicker(mBinding.collectedDate)
         }
 
         mBinding.accountArea.setOnClickListener(object: OnSingleClickListener() {
@@ -82,7 +82,7 @@ class CollectRegiActivity : AppCompatActivity() {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
                     mBinding.btEmpty.visibility = View.VISIBLE
-                    mBinding.accountName.text = it.name
+                    mBinding.accountName.text = it.custNm
                 }
                 popupAccountSearch.show()
             }

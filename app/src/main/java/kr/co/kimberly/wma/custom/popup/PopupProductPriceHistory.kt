@@ -3,28 +3,19 @@ package kr.co.kimberly.wma.custom.popup
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Point
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
-import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.adapter.ProductPriceHistoryAdapter
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.databinding.PopupAccountSearchBinding
 import kr.co.kimberly.wma.databinding.PopupProductPriceHistoryBinding
-import kr.co.kimberly.wma.model.AccountSearchModel
-import kr.co.kimberly.wma.model.ProductPriceHistoryModel
-import kr.co.kimberly.wma.model.SearchResultModel
+import kr.co.kimberly.wma.network.model.ProductPriceHistoryModel
 
-class PopupProductPriceHistory(mContext: Context): Dialog(mContext) {
+class PopupProductPriceHistory(mContext: Context, val list: List<ProductPriceHistoryModel>, val itemName: String): Dialog(mContext) {
     private lateinit var mBinding: PopupProductPriceHistoryBinding
-
     private var context = mContext
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,17 +34,16 @@ class PopupProductPriceHistory(mContext: Context): Dialog(mContext) {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
-        val list = ArrayList<ProductPriceHistoryModel>()
-        for(i: Int in 1..100) {
-            list.add(ProductPriceHistoryModel("2024/01/14", "${i}원"))
-        }
+        /*for(i: Int in 1..100) {
+            productPriceHistory.add(ProductPriceHistoryModel("2024/01/14", "${i}원"))
+        }*/
 
         val adapter = ProductPriceHistoryAdapter(context)
         adapter.dataList = list
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(context)
 
-        if(list.size > 10) {
+        if(list.size > 6) {
             Utils.dialogResize(context, window)
 
             val layoutParams = mBinding.recyclerview.layoutParams
@@ -61,6 +51,13 @@ class PopupProductPriceHistory(mContext: Context): Dialog(mContext) {
             layoutParams.height = Utils.dpToPx(context, height).toInt()
             mBinding.recyclerview.layoutParams = layoutParams
         }
+
+        if (list.isEmpty()) {
+            mBinding.recyclerview.visibility = View.GONE
+            mBinding.noSearch.visibility = View.VISIBLE
+        }
+
+        mBinding.productName.text = itemName
 
         mBinding.btConfirm.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {

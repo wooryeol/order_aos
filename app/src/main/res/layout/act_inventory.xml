@@ -23,27 +23,26 @@
             android:paddingHorizontal="16dp"
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
-
             <TextView
-                android:layout_width="80dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.3"
                 android:text="@string/branchHouse"
                 android:textSize="14dp"
                 android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="12dp"
                 tools:ignore="SpUsage" />
 
-            <Button
-                android:id="@+id/selectStorageBtn"
+            <TextView
+                android:id="@+id/tvBranchHouse"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
+                android:singleLine="true"
+                android:ellipsize="marquee"
                 android:background="@drawable/et_round_c9cbd0"
-                android:gravity="center"
-                android:hint="@string/branchHouseHint"
-                android:textColorHint="@color/color_1A1A1A"
-                android:paddingHorizontal="12dp"
                 android:paddingVertical="10dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/branchHouseHint"
                 android:textSize="16dp"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -58,27 +57,61 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="80dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.3"
                 android:text="@string/productName"
                 android:textSize="14dp"
                 android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="12dp"
                 tools:ignore="SpUsage" />
 
-            <TextView
-                android:id="@+id/accountName"
-                android:singleLine="true"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:layout_weight="1"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
+                android:orientation="horizontal"
+                android:layout_marginStart="16dp"
                 android:layout_marginEnd="8dp"
-                android:hint="@string/accountHint"
-                tools:ignore="Autofill,SpUsage,TextFields" />
+                android:layout_weight="1"
+                android:background="@drawable/et_round_c9cbd0"
+                android:layout_gravity="center_vertical">
+                <EditText
+                    android:id="@+id/etProductName"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:textSize="16dp"
+                    android:background="@color/trans"
+                    android:paddingVertical="10dp"
+                    android:paddingHorizontal="12dp"
+                    android:imeOptions="actionDone"
+                    android:singleLine="true"
+                    android:inputType="text"
+                    android:hint="@string/productNameHint"
+                    tools:ignore="Autofill,NestedWeights,SpUsage,TextFields" />
+
+                <TextView
+                    android:visibility="gone"
+                    android:id="@+id/tvProductName"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:textSize="16dp"
+                    android:background="@color/trans"
+                    android:paddingVertical="10dp"
+                    android:paddingHorizontal="12dp"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:singleLine="true"
+                    tools:ignore="SpUsage" />
+
+                <ImageButton
+                    android:visibility="gone"
+                    android:id="@+id/btProductNameEmpty"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@color/trans"
+                    android:src="@drawable/ic_empty" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/search"
@@ -133,7 +166,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:paddingHorizontal="16dp"
-        android:layout_marginBottom="16dp"
         android:visibility="gone"
         android:clipToPadding="false"
         android:overScrollMode="never" />

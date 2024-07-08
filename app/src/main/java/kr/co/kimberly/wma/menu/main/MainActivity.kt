@@ -1,19 +1,23 @@
 package kr.co.kimberly.wma.menu.main
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
+import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.github.chrisbanes.photoview.BuildConfig
+import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.MainMenuAdapter
 import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.common.SharedData
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.GridSpacingItemDecoration
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupNotice
@@ -21,12 +25,17 @@ import kr.co.kimberly.wma.custom.popup.PopupNotification
 import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActMainBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
-import kr.co.kimberly.wma.model.MainMenuModel
+import kr.co.kimberly.wma.menu.setting.SettingActivityV2
+import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.MainMenuModel
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mBinding: ActMainBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
+
+    private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
+    private var isVersionCheck = true // 앱 버전 체크 중복 방지
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +44,14 @@ class MainActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+
+        mLoginInfo = Utils.getLoginData()
+        Utils.Log("mainActivity mLoginInfo =====> ${Gson().toJson(mLoginInfo)}")
+
+        // 앱 버전 체크
+        if (isVersionCheck) {
+            appVersionCheck()
+        }
 
         val list = ArrayList<MainMenuModel>()
         list.add(MainMenuModel(R.drawable.menu01, getString(R.string.menu01), Define.MENU01))
@@ -55,22 +72,31 @@ class MainActivity : AppCompatActivity() {
 
         mBinding.settingBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
+                //startActivity(Intent(mContext, SettingActivityV2::class.java))
                 startActivity(Intent(mContext, SettingActivity::class.java))
             }
         })
 
-        val popupNotification = PopupNotification(mContext, "테스트 공지사항 팝업 입니다.")
-        popupNotification.show()
+        // 처음 진입 시 공지 사항
+        if (!mLoginInfo?.notice.isNullOrEmpty()) {
+            val popupNotification = PopupNotification(mContext, mLoginInfo?.notice!!)
+            popupNotification.show()
+        }
 
-        // 공지사항
+        // 버튼 눌렀을 때 공지 사항
         mBinding.notification.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                popupNotification.show()
+                if (mLoginInfo?.notice.isNullOrEmpty()) {
+                    Toast.makeText(mContext, "공지사항이 없습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    val popupNotification = PopupNotification(mContext, mLoginInfo?.notice!!)
+                    popupNotification.show()
+                }
             }
         })
 
         // 실행종료
-        val popupSingleMessage = PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?")
+        val popupSingleMessage = PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null)
         mBinding.finish.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 popupSingleMessage.show()
@@ -79,4 +105,52 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun Float.fromDpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+    private fun appVersionCheck() {
+        isVersionCheck = false
+        try {
+            val isNeedToUpdate = versionCheck()
+
+            if (isNeedToUpdate) {
+                val popupNotice = PopupNotice(this, "App 버전이 최신이 아닙니다. 업데이트 화면으로 이동합니다.")
+
+                popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+                    override fun onOkClick() {
+                        val url = mLoginInfo?.downloadUrl
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.kakao.talk"))
+                        //val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        startActivity(intent)
+                        isVersionCheck = true
+                    }
+                }
+                popupNotice.show()
+            }
+        } catch (error: Error) {
+            Utils.Log("error ====> $error")
+        }
+    }
+
+    private fun versionCheck(): Boolean {
+        val storeVersion = mLoginInfo?.appVersion
+        //val deviceVersion = BuildConfig.VERSION_NAME
+        val deviceVersion = "1.0.2"
+
+        Utils.Log("storeVersion ====> $storeVersion")
+        Utils.Log("deviceVersion ====> $deviceVersion")
+
+        return try {
+            storeVersion!! > deviceVersion
+        } catch (error: Error) {
+            Utils.Log("error ====> $error")
+            false
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (isVersionCheck) {
+            appVersionCheck()
+        }
+    }
 }

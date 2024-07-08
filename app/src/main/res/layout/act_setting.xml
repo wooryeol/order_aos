@@ -45,6 +45,7 @@
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:imeOptions="actionDone"
+                android:singleLine="true"
                 android:inputType="text"
                 android:hint="@string/settingTitleHint01"
                 tools:ignore="Autofill,SpUsage,TextFields" />
@@ -217,6 +218,7 @@
                 tools:ignore="SpUsage" />
 
             <TextView
+                android:id="@+id/scanerName"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
@@ -243,6 +245,7 @@
                 tools:ignore="SpUsage" />
 
             <TextView
+                android:id="@+id/scanerAddress"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
@@ -290,6 +293,7 @@
                 tools:ignore="SpUsage" />
 
             <TextView
+                android:id="@+id/printName"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"
@@ -316,6 +320,7 @@
                 tools:ignore="SpUsage" />
 
             <TextView
+                android:id="@+id/printAddress"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textSize="16dp"

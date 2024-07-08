@@ -4,6 +4,8 @@
     <!--환경설정-->
     <string name="settingTitle01">대리점</string>
     <string name="settingTitleHint01">대리점코드를 입력해주세요.</string>
+    <string name="settingTitle06">휴대폰</string>
+    <string name="settingTitleHint03">휴대폰 번호를 입력해주세요.</string>
     <string name="settingTitle02">장비선택</string>
     <string name="settingScanner">스캐너</string>
     <string name="settingPrint">프린트</string>
@@ -15,13 +17,16 @@
     <string name="searchDevices">Search Devices</string>
     <string name="bluetoothDevices">Bluetooth Devices</string>
     <string name="printDevices">Print Devices</string>
-    <string name="pairing">pairing...</string>
+    <string name="pairing">pairing</string>
     <string name="requestBluetooth">블루투스 등록 요청</string>
     <string name="register">을(를) 등록하려면</string>
     <string name="pin">해당 디바이스의 PIN을 입력하세요:</string>
     <string name="pinHint">(0000 또는 1234를 입력해보세요)</string>
     <string name="pinCheckBox">문자 또는 기호가 포함된 PIN</string>
     <string name="pinAdvice">다른 디바이스에도 PIN을 입력하세요</string>
+    <string name="notUseChk">사용여부를 체크해 주세요.</string>
+    <string name="notAccountCodeEmpty">대리점코드를 입력해 주세요.</string>
+    <string name="bluetoothSwOn">블루투스를 켜야 사용 가능합니다.</string>
 
     <!-- 공통 -->
     <string name="copyright">Copyrightⓒ유한킴벌리 Corp. All Rights Reserved.</string>
@@ -30,14 +35,13 @@
     <string name="search">검색</string>
     <string name="yes">예</string>
     <string name="no">아니요</string>
-    <string name="orderApproval">주문승인</string>
     <string name="notification">[공지사항]</string>
     <string name="printerOption">인쇄방식</string>
     <string name="printerMenuOption">메뉴별</string>
     <string name="printerIntegratedOption">통합</string>
     <string name="confirmSetting">설정</string>
-    <string name="monthErr">월이 잘못 되었습니다.\n다시 설정해 주세요.</string>
-    <string name="dateErr">일이 잘못 되었습니다.\n다시 설정해 주세요.</string>
+    <string name="dateErr">날짜를 확인해주세요</string>
+    <string name="etSearchEmpty">검색어를 입력해 주세요.</string>
 
     <!-- Login -->
     <string name="msg01">더 나은 생활을 향한 믿음!</string>
@@ -69,10 +73,12 @@
     <string name="productName">제품명</string>
     <string name="productNameHint">제품명을 검색해 주세요</string>
     <string name="searchResult">검색된 제품명</string>
+    <string name="zero">0</string>
     <string name="box">BOX</string>
     <string name="each">낱개</string>
     <string name="unitPrice">단가</string>
     <string name="addOrder">제품추가</string>
+    <string name="editOrder">제품수정</string>
     <string name="productPriceHistory">제품단가이력</string>
     <string name="orderRegSendingSuccess">주문전표가 저장되었습니다.</string>
 
@@ -123,14 +129,15 @@
     <!-- 전표조회 -->
     <string name="slipPrint">인쇄하기</string>
     <string name="slipModify">전표수정</string>
+    <string name="productModify">제품수정</string>
 
     <!-- 재고조회 -->
     <string name="branchHouse">대리점창고</string>
     <string name="branchHouseHint">대리점 창고를 선택해주세요.</string>
-    <string name="error">조회내력이 없습니다.</string>
-    <string name="box02">BOX:</string>
-    <string name="each02">낱개:</string>
-    <string name="total">총:</string>
+    <string name="error">조회내역이 없습니다.</string>
+    <string name="box02">BOX: </string>
+    <string name="each02">낱개: </string>
+    <string name="total">총: </string>
 
     <!-- 원장조회 -->
     <string name="month">조회월</string>
@@ -166,6 +173,7 @@
     <string name="Dimension">Dimension :</string>
     <string name="tax">과세구분</string>
     <string name="dataHint">데이터가 없습니다.</string>
+    <string name="productHint">제품을 검색해 주세요.</string>
 
     <!-- 매대관리 -->
     <string name="storeManaTitle">제목</string>
@@ -174,9 +182,8 @@
     <string name="storeManaConstructorHint">생성자를 입력해주세요.</string>
     <string name="addImage">사진등록</string>
     <string name="before">변경전</string>
-    <string name="beforeMsg">변경전 입니다.</string>
     <string name="after">변경후</string>
-    <string name="afterMsg">변경후 입니다.</string>
+    <string name="msgHint">내용을 입력해주세요.</string>
     <string name="popupAddImageTitle">사진등록</string>
     <string name="popupAddImage">사진 등록 방법을 선택해주세요.</string>
     <string name="bpPost">BP등록</string>
@@ -192,9 +199,15 @@
     <string name="PurchaseApproval">구매승인</string>
     <string name="purchaseAccountHint">SAP Code를 검색해주세요.</string>
     <string name="purchaseAddress">배송처</string>
-    <string name="purchaseAddressHint">배송처를 검색해주세요.</string>
-    <string name="purchasePostMsg">위와 같이 승인을 요청하였습니다.\n<u>본사 전송 이후 전송된 전표는 수정이 불가능합니다.</u>\n전송을 하시겠습니까?</string>
+    <string name="NoAddress">배송처 정보가 없습니다.</string>
+    <string name="purchaseAddressHint">배송처를 선택해주세요.</string>
+    <string name="purchasePostMsg01">위와 같이 승인을 요청하였습니다.</string>
+    <string name="purchasePostMsg02">본사 전송 이후 전송된 전표는 수정이 불가능합니다.</string>
+    <string name="purchasePostMsg03">전송을 하시겠습니까?</string>
     <string name="purchaseSlip">구매전표 :</string>
     <string name="distributorCode">대리점코드 :</string>
 
+    <!-- 프린트 -->
+    <string name="titleReturn">반품승인</string>
+    <string name="titleOrder">주문승인</string>
 </resources>
