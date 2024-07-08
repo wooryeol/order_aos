@@ -1,4 +1,4 @@
-package kr.co.kimberly.wma.model
+package kr.co.kimberly.wma.network.model
 
 data class AccountInfoModel(
     val accountCode: String? = null,

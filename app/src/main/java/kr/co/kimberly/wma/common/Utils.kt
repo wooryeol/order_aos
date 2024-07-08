@@ -20,12 +20,19 @@ import android.view.Window
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
+import com.google.gson.Gson
+import com.google.gson.JsonParseException
+import com.google.gson.reflect.TypeToken
+import kr.co.kimberly.wma.GlobalApplication
+import kr.co.kimberly.wma.network.model.LoginResponseModel
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 object Utils {
 
@@ -54,7 +61,7 @@ object Utils {
     fun dialogResize(context: Context, window: Window?) {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val width = 1.0f
-        val height = 0.7f
+        val height = 0.5f
 
         if (Build.VERSION.SDK_INT < 30) {
             val display = windowManager.defaultDisplay
@@ -177,5 +184,46 @@ object Utils {
                 simpleDateFormat.format(calendar.time)
             }
         }
+    }
+
+    fun Log(msg: String) {
+            android.util.Log.d("kimberly_aos", msg)
+    }
+
+    // 콤마를 제외한 정수 형식으로 변환하는 메서드
+    fun getIntValue(inputText: String): Int {
+        val stringWithoutCommas = inputText.replace(",", "")
+        return stringWithoutCommas.toInt()
+    }
+
+    // 로그인 정보 가져오기
+    fun getLoginData(): LoginResponseModel? {
+        val json = SharedData.getSharedData(
+            GlobalApplication.applicationContext(),
+            SharedData.LOGIN_DATA,
+            ""
+        )
+        return try {
+            val gson = Gson()
+            val typeToken = object : TypeToken<List<LoginResponseModel>>() {}.type
+            val list: List<LoginResponseModel> = gson.fromJson(json, typeToken)
+            list.firstOrNull()
+        } catch (e: JsonParseException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    // 날짜 가져오기
+    fun getCurrentDateFormatted(): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val currentDate = Date()
+        return dateFormat.format(currentDate)
+    }
+
+    // 원단위
+    fun decimal(number: Int):String {
+        val decimal = DecimalFormat("#,###")
+        return decimal.format(number)
     }
 }

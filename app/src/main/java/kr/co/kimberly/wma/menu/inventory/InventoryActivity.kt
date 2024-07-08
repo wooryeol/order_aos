@@ -4,26 +4,38 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.InventoryListAdapter
+import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupNotice
-import kr.co.kimberly.wma.custom.popup.PopupSearchResult
+import kr.co.kimberly.wma.custom.popup.PopupWarehouseList
 import kr.co.kimberly.wma.databinding.ActInventoryBinding
-import kr.co.kimberly.wma.model.InventoryModel
-import kr.co.kimberly.wma.model.SearchResultModel
+import kr.co.kimberly.wma.network.ApiClientService
+import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.WarehouseListModel
+import kr.co.kimberly.wma.network.model.WarehouseStockModel
+import retrofit2.Call
+import retrofit2.Response
 
 
 class InventoryActivity : AppCompatActivity() {
     private lateinit var mBinding: ActInventoryBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
+    private lateinit var mLoginInfo: LoginResponseModel // 로그인 정보
+    private lateinit var agencyCd : String // 대리점 코드
+    private lateinit var userId : String // 사용자 아이디
+    private var warehouseCd: String? = null // 창고 코드
+    private var itemList: ArrayList<WarehouseStockModel>? = null
+    private var adapter : InventoryListAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +44,9 @@ class InventoryActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+        mLoginInfo = Utils.getLoginData()!!
+        agencyCd =  mLoginInfo.agencyCd!!
+        userId = mLoginInfo.userId!!
 
         // 초기 셋팅
         setSetting()
@@ -45,80 +60,69 @@ class InventoryActivity : AppCompatActivity() {
             }
         })
 
-        // 진입 시 창고 리스트 팝업 활성화
-        mBinding.tvBranchHouse.setOnClickListener {
-            val list = ArrayList<SearchResultModel>()
-
-            for(i: Int in 1..15) {
-                list.add(SearchResultModel("(I00$i) 기본창고"))
-            }
-
-            val popupSearchResult = PopupSearchResult(mContext, list)
-            popupSearchResult.onItemSelect = {
-                showInventoryList()
-            }
-            popupSearchResult.show()
-        }
-
-        // 거래처 검색
+        // 아이템 검색
         mBinding.search.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                if(mBinding.accountName.text.toString().isEmpty()) {
+                if(mBinding.etProductName.text.toString().isEmpty()) {
                     showNotice(getString(R.string.accountHint))
                 } else {
-                    val list = ArrayList<SearchResultModel>()
-
-                    for(i: Int in 1..15) {
-                        list.add(SearchResultModel("(I00$i) 기본창고"))
-                    }
-
-                    val popupSearchResult = PopupSearchResult(mContext, list)
-                    popupSearchResult.onItemSelect = {
-                        showInventoryList()
-                    }
-                    popupSearchResult.show()
+                    warehouseStock(mBinding.etProductName.text.toString())
                 }
             }
+        })
+
+        // 창고 선택
+        mBinding.tvBranchHouse.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                warehouseList()
+                /*if (!mBinding.tvBranchHouse.text.isNullOrEmpty()) {
+
+                }*/
+            }
+
+        })
+
+        // 제품 삭제
+        mBinding.btProductNameEmpty.setOnClickListener(object :OnSingleClickListener() {
+            @SuppressLint("NotifyDataSetChanged")
+            override fun onSingleClick(v: View) {
+                mBinding.etProductName.text = null
+                mBinding.tvProductName.text = null
+                mBinding.tvProductName.visibility = View.GONE
+                mBinding.etProductName.visibility = View.VISIBLE
+                mBinding.btProductNameEmpty.visibility = View.GONE
+                mBinding.etProductName.hint = v.context.getString(R.string.productNameHint)
+                mBinding.noSearch.visibility = View.VISIBLE
+                itemList?.clear()
+                adapter?.notifyDataSetChanged()
+
+            }
+
         })
     }
 
     private fun setSetting() {
-        // 화면 진입 시 대리점 팝업 노출
-        val list = ArrayList<SearchResultModel>()
-
-        for(i: Int in 1..15) {
-            list.add(SearchResultModel("(I00$i) 기본창고"))
-        }
-
-        val popupSearchResult = PopupSearchResult(mContext, list)
-        popupSearchResult.onItemSelect = {
-            mBinding.tvBranchHouse.text = it.name
-        }
-        popupSearchResult.show()
-
         // 텍스트를 흘러가게 하기 위함
         mBinding.tvBranchHouse.isSelected = true
+
+        // 진입 시 창고 리스트 팝업 노출
+        warehouseList()
     }
 
     // 검색을 눌렀을 때
-    private fun showInventoryList() {
-        val inventoryList = ArrayList<InventoryModel>()
-        for(i: Int in 1..15) {
-            inventoryList.add(InventoryModel("(00234)크리넥스 수앤수 10매*3", "20", "0", "1000"))
-        }
-
-        val adapter = InventoryListAdapter(mContext, mActivity)
-        adapter.dataList = inventoryList
+    private fun showInventoryList(list: ArrayList<WarehouseStockModel>) {
+        adapter = InventoryListAdapter(mContext, mActivity)
+        adapter!!.dataList = list
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
 
-        if (inventoryList.isNotEmpty()){
+        if (list.isNotEmpty()){
             mBinding.noSearch.visibility = View.GONE
             mBinding.recyclerview.visibility = View.VISIBLE
 
             val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            inputMethodManager.hideSoftInputFromWindow(mBinding.accountName.windowToken, InputMethodManager.HIDE_IMPLICIT_ONLY)
-            mBinding.accountName.clearFocus()
+            inputMethodManager.hideSoftInputFromWindow(mBinding.etProductName.windowToken, InputMethodManager.HIDE_IMPLICIT_ONLY)
+            mBinding.etProductName.clearFocus()
         } else {
             showNotice(getString(R.string.searchNothing))
         }
@@ -127,5 +131,94 @@ class InventoryActivity : AppCompatActivity() {
     private fun showNotice(msg: String) {
         val popupNotice = PopupNotice(mContext, msg)
         popupNotice.show()
+    }
+
+    private fun warehouseList(){
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+        //val call = service.warehouseList(agencyCd, userId)
+
+        //test
+        val call = service.warehouseList("C000028", "mb2004")
+
+        call.enqueue(object : retrofit2.Callback<ListResultModel<WarehouseListModel>> {
+            @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
+            override fun onResponse(
+                call: Call<ListResultModel<WarehouseListModel>>,
+                response: Response<ListResultModel<WarehouseListModel>>
+            ) {
+                if (response.isSuccessful) {
+                    val item = response.body()
+                    if (item?.returnMsg == Define.SUCCESS) {
+                        Utils.Log("warehouse search success ====> ${Gson().toJson(item)}")
+                        val list = item.data as ArrayList<WarehouseListModel>
+                        val popupWarehouseList = PopupWarehouseList(mContext, list)
+                        popupWarehouseList.onItemSelect = {
+                            warehouseCd = it.warehouseCd
+                            mBinding.tvBranchHouse.text = "(${it.warehouseCd}) ${it.warehouseNm}"
+
+                            if (!itemList.isNullOrEmpty()) {
+                                mBinding.etProductName.text = null
+                                mBinding.tvProductName.text = null
+                                mBinding.tvProductName.visibility = View.GONE
+                                mBinding.etProductName.visibility = View.VISIBLE
+                                mBinding.btProductNameEmpty.visibility = View.GONE
+                                mBinding.etProductName.hint = mContext.getString(R.string.productNameHint)
+                                mBinding.noSearch.visibility = View.VISIBLE
+                                itemList?.clear()
+                                adapter?.notifyDataSetChanged()
+                            }
+                        }
+                        popupWarehouseList.show()
+                    }
+                } else {
+                    Utils.Log("${response.code()} ====> ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ListResultModel<WarehouseListModel>>, t: Throwable) {
+                Utils.Log("warehouse search failed ====> ${t.message}")
+            }
+
+        })
+    }
+
+    // 검색 아이템 리스트 조회
+    fun warehouseStock(searchCondition: String) {
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+        //val call = service.warehouseStock(agencyCd, userId, warehouseCd!!, searchCondition)
+        //test
+        val call = service.warehouseStock("C000028", "mb2004", "I001", "하기스")
+
+        call.enqueue(object : retrofit2.Callback<ListResultModel<WarehouseStockModel>> {
+            override fun onResponse(
+                call: Call<ListResultModel<WarehouseStockModel>>,
+                response: Response<ListResultModel<WarehouseStockModel>>
+            ) {
+                if (response.isSuccessful) {
+                    val item = response.body()
+                    if (item?.returnMsg == Define.SUCCESS) {
+                        if (item.data.isNullOrEmpty()) {
+                            PopupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.", null).show()
+                        } else {
+                            Utils.Log("stock search success ====> ${Gson().toJson(item.data)}")
+                            itemList = item.data as ArrayList<WarehouseStockModel>
+                            showInventoryList(itemList!!)
+
+                            mBinding.etProductName.visibility = View.GONE
+                            mBinding.tvProductName.text = searchCondition
+                            mBinding.tvProductName.visibility = View.VISIBLE
+                            mBinding.btProductNameEmpty.visibility = View.VISIBLE
+                        }
+                    }
+                } else {
+                    Utils.Log("${response.code()} ====> ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ListResultModel<WarehouseStockModel>>, t: Throwable) {
+                Utils.Log("stock failed ====> ${t.message}")
+            }
+
+        })
     }
 }

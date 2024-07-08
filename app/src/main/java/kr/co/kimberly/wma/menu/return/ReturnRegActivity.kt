@@ -10,12 +10,26 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.RegAdapter
+import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.databinding.ActReturnRegBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
+import kr.co.kimberly.wma.network.ApiClientService
+import kr.co.kimberly.wma.network.model.DataModel
+import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.ObjectResultModel
+import kr.co.kimberly.wma.network.model.SalesInfoModel
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Call
+import retrofit2.Response
 import java.text.DecimalFormat
 
 
@@ -23,11 +37,11 @@ class ReturnRegActivity : AppCompatActivity() {
     private lateinit var mBinding: ActReturnRegBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
+    private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
 
     private var accountName = ""
     private var totalAmount = 0
-
-    private val decimal = DecimalFormat("#,###")
+    private var returnAdapter: RegAdapter? = null
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,15 +51,16 @@ class ReturnRegActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+        mLoginInfo = Utils.getLoginData()
 
         mBinding.header.headerTitle.text = getString(R.string.menu03)
-        mBinding.bottom.bottomButton.text = getString(R.string.orderApproval)
+        mBinding.bottom.bottomButton.text = getString(R.string.titleOrder)
 
-        val returnAdapter = RegAdapter(mContext, mActivity) { items, name ->
+        returnAdapter = RegAdapter(mContext, mActivity) { items, name ->
             var totalMoney = 0
 
             items.map {
-                val stringWithoutComma = it.totalAmount.replace(",", "")
+                val stringWithoutComma = it.amount.toString().replace(",", "")
                 totalMoney += stringWithoutComma.toInt()
             }
 
@@ -54,9 +69,8 @@ class ReturnRegActivity : AppCompatActivity() {
             }
             totalAmount = totalMoney
 
-            val formatTotalMoney = decimal.format(totalMoney).toString()
+            val formatTotalMoney = Utils.decimal(totalMoney)
             mBinding.tvTotalAmount.text = "${formatTotalMoney}원"
-
         }
 
         mBinding.recyclerview.adapter = returnAdapter
@@ -72,23 +86,76 @@ class ReturnRegActivity : AppCompatActivity() {
 
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $accountName\n총금액: ${decimal.format(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
-                if (returnAdapter.dataList.isEmpty()) {
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $accountName\n총금액: ${Utils.decimal(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+                if (returnAdapter?.dataList!!.isEmpty()) {
                     Toast.makeText(mContext, "제품이 등록되지 않았습니다.", Toast.LENGTH_SHORT).show()
                 } else {
                     popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                         override fun onCancelClick() {
-                            Log.d("tttt", "취소 클릭함")
+                            Utils.Log("취소 클릭")
                         }
 
                         override fun onOkClick() {
-                            Toast.makeText(v.context, "반품주문이 전송되었습니다.", Toast.LENGTH_SHORT).show()
-                            startActivity(Intent(mContext, PrinterOptionActivity::class.java))
+                            returnItem()
                         }
                     }
                     popupDoubleMessage.show()
                 }
             }
+        })
+    }
+
+    private fun returnItem(){
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+        val jsonArray = Gson().toJsonTree(returnAdapter?.dataList!!).asJsonArray
+        val deliveryDate = Utils.getCurrentDateFormatted()
+
+        val json = JsonObject().apply {
+            addProperty("agencyCd", mLoginInfo?.agencyCd)
+            addProperty("userId", mLoginInfo?.userId)
+            addProperty("slipType", Define.RETURN)
+            addProperty("customerCd", returnAdapter?.customerCd)
+            addProperty("deliveryDate", deliveryDate)
+            addProperty("preSalesType", "N")
+            addProperty("totalAmount", totalAmount)
+        }
+
+        json.add("salesInfo", jsonArray)
+        Utils.Log("final order json ====> ${Gson().toJson(json)}")
+
+        val obj = json.toString()
+        val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
+        val call = service.order(body)
+
+        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<SalesInfoModel>>> {
+            override fun onResponse(
+                call: Call<ObjectResultModel<DataModel<SalesInfoModel>>>,
+                response: Response<ObjectResultModel<DataModel<SalesInfoModel>>>
+            ) {
+                if (response.isSuccessful) {
+                    val item = response.body()
+                    if (item?.returnMsg == Define.SUCCESS) {
+                        val data = returnAdapter?.dataList
+                        val slipNo = item.data?.slipNo
+                        Utils.Log("return success ====> ${Gson().toJson(item)}")
+                        Toast.makeText(mContext, "반품주문이 전송되었습니다.", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
+                            putExtra("data", data)
+                            putExtra("slipNo", slipNo)
+                            putExtra("title", mContext.getString(R.string.titleReturn))
+                        }
+                        startActivity(intent)
+                        finish()
+                    }
+                } else {
+                    Utils.Log("${response.code()} ====> ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ObjectResultModel<DataModel<SalesInfoModel>>>, t: Throwable) {
+                Utils.Log("order failed ====> ${t.message}")
+            }
+
         })
     }
 }

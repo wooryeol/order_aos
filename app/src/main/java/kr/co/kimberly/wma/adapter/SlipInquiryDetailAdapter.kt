@@ -6,23 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
-import kr.co.kimberly.wma.model.OrderRegModel
+import kr.co.kimberly.wma.network.model.SearchItemModel
 
-class SlipInquiryDetailAdapter(context: Context, private val updateData: ((ArrayList<OrderRegModel>, String) -> Unit)): RecyclerView.Adapter<SlipInquiryDetailAdapter.ViewHolder>() {
-    var dataList: ArrayList<OrderRegModel> = ArrayList()
+class SlipInquiryDetailAdapter(context: Context, private val updateData: ((ArrayList<SearchItemModel>, String) -> Unit)): RecyclerView.Adapter<SlipInquiryDetailAdapter.ViewHolder>() {
+    var dataList: ArrayList<SearchItemModel> = ArrayList()
     var mContext = context
 
     inner class ViewHolder(val binding: CellOrderRegBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
-        fun bind(itemModel: OrderRegModel) {
-
-            binding.orderName.text = itemModel.orderName
-            binding.tvBox.text = itemModel.box
-            binding.tvEach.text = itemModel.each
-            binding.tvPrice.text = "${itemModel.unitPrice}원"
-            binding.tvTotal.text = itemModel.totalQty
-            binding.tvTotalAmount.text = "${itemModel.totalAmount}원"
+        fun bind(itemModel: SearchItemModel) {
+            binding.orderName.text = itemModel.itemNm
+            binding.tvBoxEach.text = "BOX(${Utils.decimal(itemModel.getBox!!)}EA): "
+            binding.tvBox.text = Utils.decimal(itemModel.boxQty!!)
+            binding.tvEach.text = Utils.decimal(itemModel.unitQty!!)
+            binding.tvPrice.text = "${Utils.decimal(itemModel.netPrice!!)}원"
+            binding.tvTotal.text = Utils.decimal(itemModel.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimal(itemModel.amount!!)}원"
             binding.deleteButton.visibility = View.GONE
 
             itemView.setOnClickListener {

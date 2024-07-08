@@ -19,6 +19,7 @@ object SharedData {
     const val SCANNER_ADDR = "printer_addr"
 
     const val WRH_NM = "wrh_nm"
+    const val LOGIN_DATA = "login_data"
 
     fun setSharedData(context: Context, strKey: String, objData: Any): Boolean {
         val prefs = context.getSharedPreferences(SHARED_NAME, Activity.MODE_PRIVATE)

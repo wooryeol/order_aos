@@ -95,7 +95,6 @@
                     android:id="@+id/accountArea"
                     android:layout_width="0dp"
                     android:layout_height="40dp"
-                    android:layout_marginEnd="8dp"
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:background="@drawable/et_round_c9cbd0"
@@ -137,6 +136,7 @@
                     android:textColor="@color/white"
                     android:textStyle="bold"
                     android:textSize="16dp"
+                    android:layout_marginStart="8dp"
                     android:background="@drawable/bt_round_103c7e"
                     style="?android:attr/borderlessButtonStyle"/>
 

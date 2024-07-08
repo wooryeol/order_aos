@@ -88,7 +88,7 @@ class StoreManagementActivity : AppCompatActivity() {
             override fun onSingleClick(v: View) {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
-                    mBinding.accountName.text = it.name
+                    mBinding.accountName.text = it.custNm
                 }
                 popupAccountSearch.show()
             }
@@ -269,7 +269,7 @@ class StoreManagementActivity : AppCompatActivity() {
     private fun addImageView(uri: Uri) {
         val exifInterface = Utils.getOrientationOfImage(mContext, uri)
         val bitmap = Utils.getRotatedBitmap(Utils.uriToBitmap(mActivity, uri), exifInterface.toFloat())
-        Log.d("testtest", "bitmap ===> $bitmap")
+        Utils.Log("bitmap ====> $bitmap")
 
         if (bitmap != null) {
             if (isAddImgSw == 0) {

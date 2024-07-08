@@ -12,13 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.adapter.LedgerAdapter
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker02
 import kr.co.kimberly.wma.databinding.ActLedgerBinding
-import kr.co.kimberly.wma.model.AccountModel
-import kr.co.kimberly.wma.model.LedgerModel
+import kr.co.kimberly.wma.network.model.AccountModel
+import kr.co.kimberly.wma.network.model.LedgerModel
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -30,7 +31,6 @@ class LedgerActivity : AppCompatActivity() {
     private lateinit var mActivity: Activity
 
     private val ledgerList = ArrayList<LedgerModel>()
-    private val decimal = DecimalFormat("#,###")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,7 +75,7 @@ class LedgerActivity : AppCompatActivity() {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
                     mBinding.btEmpty.visibility = View.VISIBLE
-                    mBinding.accountName.text = it.name
+                    mBinding.accountName.text = it.custNm
                 }
                 popupAccountSearch.show()
             }
@@ -145,12 +145,12 @@ class LedgerActivity : AppCompatActivity() {
         val sumSalesAmount = sumAmount(formatSelectedDate, 1, list, true)
         val sumCollectAmount = sumAmount(formatSelectedDate, 1, list, false)
 
-        mBinding.saleSum.text = decimal.format(sumSalesAmount)
-        mBinding.performance.text = decimal.format(sumCollectAmount)
-        mBinding.lastMonth.text = decimal.format(previousBalance)
-        mBinding.balance.text = decimal.format(previousBalance+sumSalesAmount-sumCollectAmount)
+        mBinding.saleSum.text = Utils.decimal(sumSalesAmount)
+        mBinding.performance.text =Utils.decimal(sumCollectAmount)
+        mBinding.lastMonth.text = Utils.decimal(previousBalance)
+        mBinding.balance.text = Utils.decimal(previousBalance+sumSalesAmount-sumCollectAmount)
     }
-    private fun sumAmount(selectedDate: LocalDate, minusMonth: Long , list: List<LedgerModel>, sales: Boolean): Int {
+    private fun sumAmount(selectedDate: LocalDate, minusMonth: Long, list: List<LedgerModel>, sales: Boolean): Int {
         ledgerList.clear()
         var sumSalesAmount = 0 // 매출 합계
         var sumCollectAmount = 0 // 수금 실적

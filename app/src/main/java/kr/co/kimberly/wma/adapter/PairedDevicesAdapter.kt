@@ -15,7 +15,7 @@ import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupPairingDevice
 import kr.co.kimberly.wma.databinding.CellPairedDevicesBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
-import kr.co.kimberly.wma.model.OrderRegModel
+import kr.co.kimberly.wma.network.model.OrderRegModel
 import java.util.ArrayList
 
 class PairedDevicesAdapter(context: Context, activity: Activity): RecyclerView.Adapter<PairedDevicesAdapter.ViewHolder>() {
@@ -35,22 +35,6 @@ class PairedDevicesAdapter(context: Context, activity: Activity): RecyclerView.A
                 binding.deviceIcon.setImageResource(R.drawable.print)
             } else {
                 binding.deviceIcon.setImageResource(R.drawable.adf_scanner)
-            }
-
-            // 페어링 안되었을 때만 클릭이 가능하도록
-            if (itemModel.bondState == 10) {
-                itemView.setOnClickListener(object : OnSingleClickListener() {
-                    override fun onSingleClick(v: View) {
-                        val paringDialog = PopupPairingDevice(mContext, mActivity)
-                        paringDialog.show(itemModel)
-                    }
-                })
-            } else if(itemModel.bondState == 12) {
-                itemView.setOnClickListener(object : OnSingleClickListener() {
-                    override fun onSingleClick(v: View) {
-
-                    }
-                })
             }
         }
     }

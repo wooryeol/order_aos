@@ -3,31 +3,36 @@ package kr.co.kimberly.wma.menu.collect
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Message
 import android.view.View
-import android.widget.RadioButton
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
-import kr.co.kimberly.wma.custom.popup.PopupDatePicker
-import kr.co.kimberly.wma.custom.popup.PopupNoteType
+import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.databinding.ActCollectManageBinding
-import kr.co.kimberly.wma.menu.main.MainActivity
-import kr.co.kimberly.wma.model.AccountModel
+import kr.co.kimberly.wma.network.ApiClientService
+import kr.co.kimberly.wma.network.model.CollectModel
+import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.ListResultModel
+import retrofit2.Call
+import retrofit2.Response
 
 class CollectManageActivity : AppCompatActivity() {
 
     private lateinit var mBinding: ActCollectManageBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
-    private val collectList = ArrayList<AccountModel>()
+    private lateinit var mLoginInfo: LoginResponseModel // 로그인 정보
+
+    private var collectList: ArrayList<CollectModel>? = null
+    private var customerCd : String? = null
+    private var adapter : CollectListAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +41,7 @@ class CollectManageActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+        mLoginInfo = Utils.getLoginData()!!
 
         // 헤더 설정 변경
         mBinding.header.headerTitle.text = getString(R.string.menu02)
@@ -69,23 +75,30 @@ class CollectManageActivity : AppCompatActivity() {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
                     mBinding.btEmpty.visibility = View.VISIBLE
-                    mBinding.accountName.text = it.name
+                    mBinding.accountName.text = it.custNm
+                    customerCd = it.custCd
+                    searchCollectList()
                 }
                 popupAccountSearch.show()
             }
         })
 
         mBinding.btEmpty.setOnClickListener(object: OnSingleClickListener() {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onSingleClick(v: View) {
                 mBinding.accountName.text = getString(R.string.accountHint)
                 mBinding.btEmpty.visibility = View.INVISIBLE
+                collectList?.clear()
+                //showCollectList(collectList!!)
+                adapter?.notifyDataSetChanged()
             }
         })
 
         // 거래처 검색
+        mBinding.btSearch.visibility = View.GONE
         mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                showCollectList()
+                searchCollectList()
             }
         })
 
@@ -96,27 +109,68 @@ class CollectManageActivity : AppCompatActivity() {
     @SuppressLint("SimpleDateFormat")
     private fun setUI() {
         val format = "yyyy/MM/dd"
-        mBinding.startDate.text = Utils.getDateFormat(format, Define.TODAY)
-        mBinding.endDate.text = Utils.getDateFormat(format, Define.MONTH, 1)
+        mBinding.startDate.text = Utils.getDateFormat(format, Define.MONTH, -1)
+        mBinding.endDate.text = Utils.getDateFormat(format, Define.TODAY)
 
         mBinding.accountName.isSelected = true
     }
 
     // 검색을 눌렀을 때
-    private fun showCollectList() {
-        collectList.add(AccountModel("202312000131", "(000020) 경주마트", "30,000"))
-
-        val adapter = CollectListAdapter(mContext, mActivity)
-        adapter.dataList = collectList
+    private fun showCollectList(list: ArrayList<CollectModel>) {
+        adapter = CollectListAdapter(mContext, mActivity, list)
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
 
-        if (collectList.isNotEmpty()){
+        if (list.isNotEmpty()){
             mBinding.noSearch.visibility = View.GONE
             mBinding.recyclerview.visibility = View.VISIBLE
         } else {
             mBinding.noSearch.visibility = View.VISIBLE
             mBinding.recyclerview.visibility = View.GONE
         }
+    }
+
+    // 거래처 기간별 수금 목록 조회
+    fun searchCollectList() {
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+        /*val agencyCd = mLoginInfo.agencyCd!!
+        val userId = mLoginInfo.userId!!
+        val searchFromDate = mBinding.startDate.text.toString()
+        val searchToDate = mBinding.endDate.text.toString()*/
+
+        // wooryeol
+        val agencyCd = "C000028"
+        val userId = "mb2004"
+        val searchFromDate = "2010/01/01"
+        val searchToDate = "2024/05/31"
+        customerCd = "001910"
+
+        val call = service.collect(agencyCd, userId, searchFromDate, searchToDate, customerCd!!)
+        call.enqueue(object : retrofit2.Callback<ListResultModel<CollectModel>> {
+            override fun onResponse(
+                call: Call<ListResultModel<CollectModel>>,
+                response: Response<ListResultModel<CollectModel>>
+            ) {
+                if (response.isSuccessful) {
+                    val item = response.body()
+                    if (item?.returnMsg == Define.SUCCESS) {
+                        Utils.Log("item search success ====> ${Gson().toJson(item)}")
+                        if (item.data.isNullOrEmpty()) {
+                            PopupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.", null).show()
+                        } else {
+                            collectList = item.data as ArrayList<CollectModel>
+                            showCollectList(collectList!!)
+                        }
+                    }
+                } else {
+                    Utils.Log("${response.code()} ====> ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ListResultModel<CollectModel>>, t: Throwable) {
+                Utils.Log("item search failed ====> ${t.message}")
+            }
+
+        })
     }
 }

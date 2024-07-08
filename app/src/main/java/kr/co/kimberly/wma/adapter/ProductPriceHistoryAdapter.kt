@@ -1,39 +1,24 @@
 package kr.co.kimberly.wma.adapter
 
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
-import android.graphics.Color
-import android.graphics.Outline
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
-import android.view.animation.AnimationUtils
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import kr.co.kimberly.wma.common.Define
-import kr.co.kimberly.wma.databinding.CellAccountSearchBinding
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.CellProductPriceHistoryBinding
-import kr.co.kimberly.wma.menu.order.OrderRegActivity
-import kr.co.kimberly.wma.model.AccountSearchModel
-import kr.co.kimberly.wma.model.MainMenuModel
-import kr.co.kimberly.wma.model.ProductPriceHistoryModel
-import java.text.SimpleDateFormat
+import kr.co.kimberly.wma.network.model.ProductPriceHistoryModel
 import java.util.ArrayList
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 class ProductPriceHistoryAdapter(context: Context): RecyclerView.Adapter<ProductPriceHistoryAdapter.ViewHolder>() {
     var dataList: List<ProductPriceHistoryModel> = ArrayList()
     var mContext = context
 
     inner class ViewHolder(val binding: CellProductPriceHistoryBinding): RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("SetTextI18n")
         fun bind(itemModel: ProductPriceHistoryModel) {
-            binding.date.text = itemModel.date
-            binding.price.text = itemModel.price
+            binding.date.text = itemModel.saleDate
+            binding.price.text = "${Utils.decimal(itemModel.salePrice.toInt())}원"
 
             itemView.setOnClickListener {
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)

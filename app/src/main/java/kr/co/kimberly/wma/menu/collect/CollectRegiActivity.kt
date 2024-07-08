@@ -82,7 +82,7 @@ class CollectRegiActivity : AppCompatActivity() {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
                     mBinding.btEmpty.visibility = View.VISIBLE
-                    mBinding.accountName.text = it.name
+                    mBinding.accountName.text = it.custNm
                 }
                 popupAccountSearch.show()
             }

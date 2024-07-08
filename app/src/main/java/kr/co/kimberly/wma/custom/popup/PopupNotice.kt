@@ -20,6 +20,7 @@ import kr.co.kimberly.wma.menu.setting.SettingActivity
 class PopupNotice(mContext: Context, private val msg:String, private val isBluetooth: Boolean? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupNoticeBinding
     private val context = mContext
+    var itemClickListener: ItemClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +40,8 @@ class PopupNotice(mContext: Context, private val msg:String, private val isBluet
 
         mBinding.tvMsg.text = msg
         mBinding.btConfirm.setOnClickListener(object : OnSingleClickListener() {
-            @SuppressLint("MissingPermission")
             override fun onSingleClick(v: View) {
+                itemClickListener?.onOkClick()
                 hideDialog()
             }
         })
@@ -64,5 +65,9 @@ class PopupNotice(mContext: Context, private val msg:String, private val isBluet
                 }
             }
         }
+    }
+
+    interface ItemClickListener {
+        fun onOkClick()
     }
 }

@@ -150,7 +150,7 @@
             android:layout_marginBottom="20dp"
             android:orientation="horizontal">
             <RadioButton
-                android:id="@+id/radioScanner01"
+                android:id="@+id/radioOrder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="20dp"
@@ -159,7 +159,7 @@
                 android:theme="@style/CustomRadioButton"/>
 
             <RadioButton
-                android:id="@+id/radioScanner"
+                android:id="@+id/radioReturn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/radioOption02"

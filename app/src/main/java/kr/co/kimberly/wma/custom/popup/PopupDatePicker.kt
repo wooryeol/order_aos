@@ -44,8 +44,6 @@ class PopupDatePicker(val mContext: Context, private val isDate: Boolean, privat
 
     // 날짜 갱신 함수 정의
     private fun updateDate() {
-        /*today.set(year, month - 1, 1)
-        Log.d("test log", "444 >>> $date")*/
         val maxDate = today.getActualMaximum(Calendar.DAY_OF_MONTH)
         if (date > maxDate) {
             date = maxDate // 선택한 월의 마지막 날짜를 넘어가면 마지막 날짜로 설정
@@ -110,7 +108,6 @@ class PopupDatePicker(val mContext: Context, private val isDate: Boolean, privat
                         // 해당 월의 마지막 일을 가져와서 그 이상의 날짜를 적으면 해당 월의 마지막 날짜가 입력되도록 변경
                         val today = Calendar.getInstance()
                         today.set(year, month - 1, 1)
-                        Log.d("test log", "666 >>> $date")
                         val currentMaxDate = today.getActualMaximum(Calendar.DAY_OF_MONTH)
                         if (currentInputDate > currentMaxDate) {
                             // 입력된 값이 최대 일수를 초과하면 최대 일수로 설정
@@ -140,12 +137,10 @@ class PopupDatePicker(val mContext: Context, private val isDate: Boolean, privat
                 val splitStr = currentDate.split("-")
                 Log.d("splitStr", "splitStr ===> $splitStr")
                 setDate(splitStr[0].toInt(), splitStr[1].toInt(), 0)
-                Log.d("test log", "222 >>> $date")
             } else { // 일이 있을 경우
                 val splitStr = currentDate.split("/")
                 Log.d("splitStr", "splitStr ===> $splitStr")
                 setDate(splitStr[0].toInt(), splitStr[1].toInt(), splitStr[2].toInt())
-                Log.d("test log", "333 >>> $date")
             }
         }
 
@@ -287,7 +282,6 @@ class PopupDatePicker(val mContext: Context, private val isDate: Boolean, privat
         } else {
             today.get(Calendar.DATE)
         }
-        Log.d("test log", "111 >>> $date")
     }
 
     private fun showNoticePopup(msg: String) {

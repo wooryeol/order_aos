@@ -91,9 +91,6 @@ class BluetoothCheckV2(context: AppCompatActivity, private val activity: Activit
                     if (device?.name != null) {
                         if (!SettingActivity.searchedList.contains(device)) SettingActivity.searchedList.add(device)
 
-                        /*Log.d("wooryeol", "deviceName >>> $deviceName")
-                        Log.d("wooryeol", "deviceHardwareAddress >>> $deviceHardwareAddress")*/
-
                         PopupSearchDevices(mContext, mActivity).adapter.notifyDataSetChanged()
                     }
                 }

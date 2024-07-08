@@ -28,7 +28,7 @@ class CollectApprovalActivity : AppCompatActivity() {
         mActivity = this
 
         // 헤더 및 바텀 설정
-        mBinding.header.headerTitle.text = getString(R.string.orderApproval)
+        mBinding.header.headerTitle.text = getString(R.string.titleOrder)
         mBinding.header.scanBtn.visibility = View.GONE
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {

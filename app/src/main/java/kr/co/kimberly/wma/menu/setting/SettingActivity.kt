@@ -12,12 +12,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
-import kr.co.kimberly.wma.common.BluetoothV2
+import kr.co.kimberly.wma.adapter.PairedDevicesAdapterV2ByWoo
+import kr.co.kimberly.wma.common.BluetoothV2ByWoo
 import kr.co.kimberly.wma.common.SharedData
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
-import kr.co.kimberly.wma.databinding.ActSettingBinding
+import kr.co.kimberly.wma.databinding.ActSettingV3ByWooBinding
+import kr.co.kimberly.wma.network.model.LoginResponseModel
 
 class SettingActivity : AppCompatActivity() {
     companion object {
@@ -33,15 +35,20 @@ class SettingActivity : AppCompatActivity() {
         var checkPrinter = false
     }
 
-    private lateinit var mBinding: ActSettingBinding
+    //private lateinit var mBinding: ActSettingBinding
+    private lateinit var mBinding: ActSettingV3ByWooBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
 
-    private var adapter : PairedDevicesAdapter? = null
+    //private var adapter : PairedDevicesAdapter? = null
+    private var adapter : PairedDevicesAdapterV2ByWoo? = null
+
+    private var mAgencyCode: String? = null // 대리점 코드
+    private var mPhoneNumber : String? = null // 연락처
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = ActSettingBinding.inflate(layoutInflater)
+        mBinding = ActSettingV3ByWooBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         mContext = this
@@ -51,29 +58,46 @@ class SettingActivity : AppCompatActivity() {
         mBinding.header.scanBtn.visibility = View.GONE
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
+                // 대리점 코드 및 휴대폰 번호 저장
+                SharedData.setSharedData(mContext, "agencyCode", mBinding.accountCode.text.toString())
+                SharedData.setSharedData(mContext, "phoneNumber", mBinding.mobileNumber.text.toString())
                 finish()
             }
         })
 
-        searchDevices()
+        mBinding.bottom.bottomButton.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                searchDevices()
+            }
+
+        })
+
+        getInfo()
         showPairedDevices()
-        useDevice()
+        //useDevice()
+
     }
 
     @SuppressLint("MissingPermission")
     private fun showPairedDevices() {
-        val mBluetooth = BluetoothV2(mContext, mActivity, pairedList, adapter, true)
+        val mBluetooth = BluetoothV2ByWoo(mContext, mActivity, pairedList, true)
         mBluetooth.checkBluetoothAvailable()
-        adapter = PairedDevicesAdapter(mContext, mActivity)
+        mBluetooth.bluetoothListener = object : BluetoothV2ByWoo.BluetoothListener{
+            override fun hideLoadingImage() {
+            }
+
+            override fun showLoadingImage() {
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            override fun onChangeAdapterData() {
+                adapter?.notifyDataSetChanged()
+            }
+        }
+        adapter = PairedDevicesAdapterV2ByWoo(mContext, mActivity)
         adapter?.dataList = pairedList
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
-
-        if (pairedList.isNotEmpty()){
-            mBinding.bottomDivideLine.visibility = View.VISIBLE
-        } else {
-            mBinding.bottomDivideLine.visibility = View.GONE
-        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -81,24 +105,24 @@ class SettingActivity : AppCompatActivity() {
         mBinding.bottom.bottomButton.setOnClickListener {
             val dlg = PopupSearchDevices(mContext, mActivity)
             if (mBinding.accountCode.text.isEmpty()) {
-                Toast.makeText(mContext, "대리점 코드를 입력해주세요", Toast.LENGTH_LONG).show()
+                Toast.makeText(mContext, "대리점 코드를 입력해주세요", Toast.LENGTH_SHORT).show()
             } else if(isRadioChecked == 0) {
-                Toast.makeText(mContext, "스캐너 또는 프린트를 선택해주세요", Toast.LENGTH_LONG).show()
+                Toast.makeText(mContext, "스캐너 또는 프린트를 선택해주세요", Toast.LENGTH_SHORT).show()
             } else {
                 when (isRadioChecked) {
                     1 -> {
                         dlg.show()
-                        Log.d("wooryeol", "스캐너 선택됨")
+                        Utils.Log("scanner is selected")
                     }
                     2 -> {
                         dlg.show()
-                        Log.d("wooryeol", "프린터 선택됨")
+                        Utils.Log("printer is selected")
                     }
                 }
             }
+            val mBluetooth = BluetoothV2ByWoo(mContext, mActivity, searchedList, false)
+            mBluetooth.checkBluetoothAvailable()
         }
-
-        showPairedDevices()
     }
 
     fun onSettingActRadioButtonClicked(view: View): Int {
@@ -115,7 +139,7 @@ class SettingActivity : AppCompatActivity() {
                         mBinding.radioPrintBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
                         isRadioChecked = 1
                         mBinding.radioPrint.isChecked = false
-                        Log.d("wooryeol", "스캐너가 체크 되었습니다.")
+                        Utils.Log("scanner is checked")
                     }
                 R.id.radioPrint ->
                     if (checked) {
@@ -124,7 +148,7 @@ class SettingActivity : AppCompatActivity() {
                         mBinding.radioScannerBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
                         isRadioChecked = 2
                         mBinding.radioScanner.isChecked = false
-                        Log.d("wooryeol", "프린터가 체크 되었습니다.")
+                        Utils.Log("printer is checked")
                 }
             }
         }
@@ -135,17 +159,23 @@ class SettingActivity : AppCompatActivity() {
         val print = mBinding.checkBoxPrint
         val scanner = mBinding.checkBoxScanner
 
-        print.isEnabled = false
-        scanner.isEnabled = false
-
         scanner.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                checkScanner = scanner.isChecked
+                scanner.isEnabled = false
+                val name = SharedData.getSharedData(mContext, SharedData.SCANNER_NAME, "")
+                val address = SharedData.getSharedData(mContext, SharedData.SCANNER_ADDR, "")
+                if (address == "" && name == "") {
+                    Toast.makeText(mContext, "스캐너를 연결해주세요", Toast.LENGTH_SHORT).show()
+                } else {
+                    scanner.isEnabled = true
+                    checkScanner = scanner.isChecked
+                }
             }
         })
 
         print.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
+                print.isEnabled = false
                 val name = SharedData.getSharedData(mContext, SharedData.PRINTER_NAME, "")
                 val address = SharedData.getSharedData(mContext, SharedData.PRINTER_ADDR, "")
                 if (address == "" && name == "") {
@@ -156,5 +186,17 @@ class SettingActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+    private fun getInfo() {
+        mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
+        mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
+
+        if (mAgencyCode != "") {
+            mBinding.accountCode.setText(mAgencyCode.toString())
+        }
+
+        if (mPhoneNumber != "") {
+            mBinding.mobileNumber.setText(mPhoneNumber.toString())
+        }
     }
 }

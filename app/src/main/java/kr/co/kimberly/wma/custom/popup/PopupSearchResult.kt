@@ -3,28 +3,20 @@ package kr.co.kimberly.wma.custom.popup
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Point
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
-import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.adapter.SearchResultAdapter
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
-import kr.co.kimberly.wma.model.AccountSearchModel
-import kr.co.kimberly.wma.model.SearchResultModel
-import java.util.ArrayList
+import kr.co.kimberly.wma.network.model.SearchItemModel
 
-class PopupSearchResult(mContext: Context, val list: ArrayList<SearchResultModel>): Dialog(mContext) {
+class PopupSearchResult(mContext: Context, val list: List<SearchItemModel>): Dialog(mContext) {
     private lateinit var mBinding: PopupSearchResultBinding
-
     private var context = mContext
 
-    var onItemSelect: ((SearchResultModel) -> Unit)? = null
+    var onItemSelect: ((SearchItemModel) -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,12 +39,12 @@ class PopupSearchResult(mContext: Context, val list: ArrayList<SearchResultModel
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(context)
 
-        if(list.size > 10) {
+        if(list.size > 6) {
             Utils.dialogResize(context, window)
         }
 
         adapter.itemClickListener = object: SearchResultAdapter.ItemClickListener {
-            override fun onItemClick(item: SearchResultModel) {
+            override fun onItemClick(item: SearchItemModel) {
                 onItemSelect?.invoke(item)
                 hideDialog()
             }

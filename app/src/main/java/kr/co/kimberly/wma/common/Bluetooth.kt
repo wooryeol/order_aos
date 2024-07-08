@@ -53,7 +53,7 @@ class Bluetooth(context: Context, activity: Activity, private val list: ArrayLis
 
             when(intent.action) {
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
-                    Log.d("test log", "bluetooth 가능 기기를 탐색합니다.")
+                    Utils.Log("bluetooth 가능 기기를 탐색합니다.")
                 }
                 BluetoothDevice.ACTION_FOUND -> {
                     val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -68,15 +68,15 @@ class Bluetooth(context: Context, activity: Activity, private val list: ArrayLis
                                 list.add(it)
                             }*/
 
-                            Log.d("test log", "found name >>> ${device.name}")
-                            Log.d("test log", "found address >>> ${device.address}")
+                            Utils.Log("found name ====> ${device.name}")
+                            Utils.Log("found address ====> ${device.address}")
                             list?.add(it)
                             adapter?.notifyDataSetChanged()
                         }
                     }
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    Log.d("test log", "bluetooth 가능 기기 탐색을 종료합니다.")
+                    Utils.Log("bluetooth 가능 기기 탐색을 종료합니다.")
                     if (mBluetoothAdapter.isDiscovering) {
                         mBluetoothAdapter.cancelDiscovery()
                     }
@@ -193,8 +193,8 @@ class Bluetooth(context: Context, activity: Activity, private val list: ArrayLis
             val pairedDevices: Set<BluetoothDevice>? = mBluetoothAdapter.bondedDevices
             pairedDevices?.let {
                 it.forEach { device ->
-                    Log.d("test log", "pairedDevices name  >>> ${device.name}")
-                    Log.d("test log", "pairedDevices address >>> ${device.address}")
+                    Utils.Log("pairedDevices name  ====> ${device.name}")
+                    Utils.Log("pairedDevices address >>> ${device.address}")
                 }
             }
             mBluetoothAdapter.startDiscovery()

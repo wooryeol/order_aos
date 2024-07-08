@@ -96,10 +96,6 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     if (device?.name != null) {
                         // if (!SettingActivity.searchedList.contains(device)) SettingActivity.searchedList.add(device)
-
-                        /*Log.d("wooryeol", "deviceName >>> $deviceName")
-                        Log.d("wooryeol", "deviceHardwareAddress >>> $deviceHardwareAddress")*/
-
                        //  PopupSearchDevices(mContext, mActivity).adapter.notifyDataSetChanged()
                     }
                 }

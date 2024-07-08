@@ -1,22 +1,28 @@
 package kr.co.kimberly.wma.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.databinding.CellSearchResultBinding
-import kr.co.kimberly.wma.model.SearchResultModel
-import java.util.ArrayList
+import kr.co.kimberly.wma.network.model.CustomerModel
+import kr.co.kimberly.wma.network.model.SearchItemModel
 
 class SearchResultAdapter(context: Context): RecyclerView.Adapter<SearchResultAdapter.ViewHolder>() {
-    var dataList: List<SearchResultModel> = ArrayList()
+    var dataList: List<SearchItemModel> = ArrayList()
     var itemClickListener: ItemClickListener? = null
     var mContext = context
 
     inner class ViewHolder(val binding: CellSearchResultBinding): RecyclerView.ViewHolder(binding.root) {
-        fun bind(itemModel: SearchResultModel) {
-            binding.accountSearchName.text = itemModel.name
+        @SuppressLint("SetTextI18n")
+        fun bind(itemModel: SearchItemModel) {
+            if (itemModel.slipNo.isNullOrEmpty()){
+                binding.accountSearchName.text = "(${itemModel.itemCd}) ${itemModel.itemNm} [${itemModel.whStock}]"
+            } else {
+
+            }
 
             itemView.setOnClickListener {
                 itemClickListener?.onItemClick(itemModel)
@@ -52,6 +58,6 @@ class SearchResultAdapter(context: Context): RecyclerView.Adapter<SearchResultAd
     }
 
     interface ItemClickListener {
-        fun onItemClick(item: SearchResultModel)
+        fun onItemClick(item: SearchItemModel)
     }
 }

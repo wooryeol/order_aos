@@ -11,9 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SlipInquiryDetailAdapter
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActPurchaseApprovalBinding
-import kr.co.kimberly.wma.model.OrderRegModel
+import kr.co.kimberly.wma.network.model.OrderRegModel
 import java.text.DecimalFormat
 
 class PurchaseApprovalActivity: AppCompatActivity() {
@@ -21,7 +22,6 @@ class PurchaseApprovalActivity: AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
 
-    private val decimal = DecimalFormat("#,###")
     var totalAmount = 0
 
     @SuppressLint("SetTextI18n")
@@ -43,8 +43,8 @@ class PurchaseApprovalActivity: AppCompatActivity() {
             }
         })
 
-        mBinding.accountCode.text = PurchaseRequestActivity.accountName
-        mBinding.purchaseAddress.text = PurchaseRequestActivity.purchaseAddress
+        /*mBinding.accountCode.text = PurchaseRequestActivity.accountName
+        mBinding.purchaseAddress.text = PurchaseRequestActivity.purchaseAddress*/
 
         val adapter = SlipInquiryDetailAdapter(mContext) { items, _ ->
             /*var totalMoney = 0
@@ -59,16 +59,16 @@ class PurchaseApprovalActivity: AppCompatActivity() {
 
         }
 
-        adapter.dataList = PurchaseRequestActivity.purchaseAdapter!!.dataList
+        /*adapter.dataList = PurchaseRequestActivity.purchaseAdapter!!.dataList
         mBinding.recyclerview.adapter = adapter
-        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
+        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)*/
 
         var totalMoney = 0
         adapter.dataList.map {
-            val stringWithoutComma = it.totalAmount.replace(",", "")
-            totalMoney += stringWithoutComma.toInt()
+            /*val stringWithoutComma = it.totalAmount.replace(",", "")
+            totalMoney += stringWithoutComma.toInt()*/
         }
-        val formatTotalMoney = decimal.format(totalMoney).toString()
+        val formatTotalMoney = Utils.decimal(totalMoney)
         mBinding.tvTotalAmount.text = "${formatTotalMoney}원"
     }
 }

@@ -53,6 +53,38 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settingTitle06"
+                android:textSize="14dp"
+                android:textColor="@color/color_7E828B"
+                android:layout_marginEnd="35dp"
+                tools:ignore="SpUsage" />
+
+            <EditText
+                android:id="@+id/mobileNumber"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textSize="16dp"
+                android:background="@drawable/et_round_c9cbd0"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="12dp"
+                android:imeOptions="actionDone"
+                android:singleLine="true"
+                android:inputType="number"
+                android:hint="@string/settingTitleHint03"
+                tools:ignore="Autofill,SpUsage,TextFields" />
+
+        </LinearLayout>
+
         <RadioGroup
             android:id="@+id/radioGroup"
             android:layout_width="match_parent"
@@ -179,179 +211,13 @@
 
     </LinearLayout>
 
-    <View
-        android:id="@+id/headerDivideLine"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/color_DBDCDF"
-        android:layout_marginVertical="20dp"
-        android:orientation="horizontal" />
-
-    <LinearLayout
-        android:id="@+id/scannerBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settingScanner"
-            android:textSize="14dp"
-            android:textColor="@color/color_1A1A1A"
-            android:layout_marginBottom="8dp"
-            tools:ignore="SpUsage" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settingTitle03"
-                android:textSize="14dp"
-                android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="35dp"
-                tools:ignore="SpUsage" />
-
-            <TextView
-                android:id="@+id/scanerName"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:hint="@string/settingTitleHint02"
-                tools:ignore="Autofill,SpUsage,TextFields" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settingTitle04"
-                android:textSize="14dp"
-                android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="35dp"
-                tools:ignore="SpUsage" />
-
-            <TextView
-                android:id="@+id/scanerAddress"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:hint="@string/settingTitleHint02"
-                tools:ignore="Autofill,SpUsage,TextFields" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/printerBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/scannerBox">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settingTitle05"
-            android:textSize="14dp"
-            android:textColor="@color/color_1A1A1A"
-            android:layout_marginBottom="8dp"
-            tools:ignore="SpUsage" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settingTitle03"
-                android:textSize="14dp"
-                android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="35dp"
-                tools:ignore="SpUsage" />
-
-            <TextView
-                android:id="@+id/printName"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:hint="@string/settingTitleHint02"
-                tools:ignore="Autofill,SpUsage,TextFields" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settingTitle04"
-                android:textSize="14dp"
-                android:textColor="@color/color_7E828B"
-                android:layout_marginEnd="35dp"
-                tools:ignore="SpUsage" />
-
-            <TextView
-                android:id="@+id/printAddress"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:hint="@string/settingTitleHint02"
-                tools:ignore="Autofill,SpUsage,TextFields" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <View
-        android:id="@+id/bottomDivideLine"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/color_DBDCDF"
-        app:layout_constraintTop_toBottomOf="@id/printerBox"
-        android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="16dp" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:clipToPadding="false"
-        android:overScrollMode="never"
-        android:paddingTop="16dp"/>
+        android:overScrollMode="never" />
 
     <include
         android:id="@+id/bottom"

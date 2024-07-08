@@ -9,31 +9,28 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.flow.combine
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
-import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
 import kr.co.kimberly.wma.menu.slip.SlipInquiryDetailActivity
-import kr.co.kimberly.wma.model.OrderRegModel
-import kr.co.kimberly.wma.model.ProductPriceHistoryModel
-import kr.co.kimberly.wma.model.SearchResultModel
-import java.text.DecimalFormat
-import java.text.SimpleDateFormat
-import java.util.Date
+import kr.co.kimberly.wma.network.model.DataModel
+import kr.co.kimberly.wma.network.model.OrderRegModel
+import kr.co.kimberly.wma.network.model.SalesInfoModel
+import kr.co.kimberly.wma.network.model.SearchItemModel
+import kr.co.kimberly.wma.network.model.SearchResultModel
 
-class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (ArrayList<OrderRegModel>, String) -> Unit): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val customerNm: String, private val updateData: (ArrayList<SearchItemModel>) -> Unit): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
-    var dataList: ArrayList<OrderRegModel> = ArrayList()
+    var slipList: ArrayList<SearchItemModel>? = null // 받아온 아이템 리스트
     var onItemClickedListener: OnItemClickedListener? = null
     var headerViewHolder: HeaderViewHolder? = null
-    var editList: OrderRegModel? = null
-
-    private var headerData: OrderRegModel? = null
+    var editList: SearchItemModel? = null
+    var onItemSelect: ((SalesInfoModel) -> Unit)? = null
+    private var headerData: SearchItemModel? = null
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -63,14 +60,14 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is ViewHolder -> {
-                holder.bind(dataList[position - 1]) // 헤더가 있으므로 position - 1
+                holder.bind(slipList!![position - 1]) // 헤더가 있으므로 position - 1
 
-                val data = dataList[position-1]
+                val data = slipList!![position-1]
 
 
                 holder.binding.deleteButton.setOnClickListener(object : OnSingleClickListener() {
                     override fun onSingleClick(v: View) {
-                        val popupDoubleMessage = PopupDoubleMessage(v.context, "제품 삭제", data.orderName, "선택한 제품이 주문리스트에서 삭제됩니다.\n삭제하시겠습니까?")
+                        val popupDoubleMessage = PopupDoubleMessage(v.context, "제품 삭제", data.itemNm!!, "선택한 제품이 주문리스트에서 삭제됩니다.\n삭제하시겠습니까?")
                         popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                             override fun onCancelClick() {
                                 Log.d("tttt", "취소 클릭함")
@@ -91,66 +88,64 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                 }
             }
             is HeaderViewHolder -> {
-                holder.bind(headerData)
+                holder.bind()
             }
         }
     }
 
     override fun getItemCount(): Int {
-        return dataList.size + 1 // 헤더뷰를 포함
+        return slipList!!.size + 1 // 헤더뷰를 포함
     }
 
     inner class ViewHolder(val binding: CellOrderRegBinding, val onItemClickedListener: OnItemClickedListener) : RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SimpleDateFormat", "SetTextI18n")
-        fun bind(item: OrderRegModel) {
+        fun bind(item: SearchItemModel) {
 
             itemView.setOnClickListener(object : OnSingleClickListener(){
                 @SuppressLint("NotifyDataSetChanged")
                 override fun onSingleClick(v: View) {
-                    val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
+                    //onItemSelect?.invoke(item)
+                    /*val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
                     popupProductPriceHistory.show()
 
                     val date = Date()
                     val dateFormat = SimpleDateFormat("yyyy/MM/dd")
                     val formattedDate = dateFormat.format(date)
                     PopupProductPriceHistory.productPriceHistory.clear()
-                    PopupProductPriceHistory.productPriceHistory.add(ProductPriceHistoryModel(formattedDate, "${binding.tvPrice.text}"))
+                    PopupProductPriceHistory.productPriceHistory.add(ProductPriceHistoryModel(formattedDate, "${binding.tvPrice.text}"))*/
 
-                    editList = item
+                    editList = item!!
                     notifyDataSetChanged()
                 }
             })
 
-            binding.orderName.text = item.orderName
-            binding.tvBox.text = item.box
-            binding.tvEach.text = item.each
-            binding.tvPrice.text = "${item.unitPrice}원"
-            binding.tvTotal.text = item.totalQty
-            binding.tvTotalAmount.text = "${item.totalAmount}원"
+            binding.orderName.text = "(${item.itemCd}) ${item.itemNm}"
+            binding.tvBoxEach.text = "BOX(${item.getBox}EA): "
+            binding.tvBox.text = Utils.decimal(item.boxQty!!)
+            binding.tvEach.text = Utils.decimal(item.unitQty!!)
+            binding.tvPrice.text = "${Utils.decimal(item.netPrice!!)}원"
+            binding.tvTotal.text = Utils.decimal(item.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimal(item.amount!!)}원"
         }
     }
 
     inner class HeaderViewHolder(private val headerBinding: HeaderRegBinding) : RecyclerView.ViewHolder(headerBinding.root) {
-        fun bind(items: OrderRegModel?) {
-            /*if(item != null) {
-                headerBinding.searchResult.text = item.orderName
-                headerBinding.etBox.setText(item.box)
-                headerBinding.etEach.setText(item.each)
-                headerBinding.etPrice.setText(item.unitPrice)
-            }*/
+        @SuppressLint("SetTextI18n")
+        fun bind() {
+
+            headerBinding.accountName.text = "($customerCd) $customerNm"
 
             if (editList != null) {
-                headerBinding.searchResult.text = editList?.orderName
+                /*headerBinding.searchResult.text = editList?.orderName
                 headerBinding.etBox.setText((editList?.box)?.replace(",", ""))
                 headerBinding.etEach.setText((editList?.each?.replace(",", "")))
                 headerBinding.etPrice.setText((editList?.unitPrice)?.replace(",", ""))
-                headerBinding.btAddOrder.setText(R.string.productModify)
+                headerBinding.btAddOrder.setText(R.string.productModify)*/
 
                 headerBinding.btAddOrder.setOnClickListener(object: OnSingleClickListener() {
                     @SuppressLint("NotifyDataSetChanged")
                     override fun onSingleClick(v: View) {
 
-                        val decimal = DecimalFormat("#,###")
                         val accountName = headerBinding.accountName.text.toString()
                         val box = headerBinding.etBox.text.toString().toInt()
                         val each = headerBinding.etEach.text.toString().toInt()
@@ -158,7 +153,8 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                         val totalQty = 24 * box + each
                         val totalAmount = totalQty * unitPrice
 
-                        val model = OrderRegModel(
+                        /*val model = OrderRegModel(
+                            accountName,
                             headerBinding.searchResult.text.toString(),
                             decimal.format(box).toString(),
                             decimal.format(each).toString(),
@@ -169,7 +165,7 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
 
                         dataList.removeIf{it.orderName == model.orderName}
 
-                        addItem(model, accountName)
+                        addItem(model, accountName)*/
 
                         headerBinding.etPrice.text = null
                         headerBinding.etEach.text = null
@@ -183,7 +179,7 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                 editList = null
             } else {
 
-                headerBinding.accountName.text = SlipInquiryDetailActivity.accountName
+                //headerBinding.accountName.text = SlipInquiryDetailActivity.accountName
 
                 val list = ArrayList<SearchResultModel>()
 
@@ -192,11 +188,7 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                         if (headerBinding.etProductName.text.isNullOrEmpty()) {
                             Toast.makeText(v.context, "제품명을 입력해주세요", Toast.LENGTH_SHORT).show()
                         } else {
-                            list.clear()
-                            for (i: Int in 1..15) {
-                                list.add(SearchResultModel("(38293) 하기스 프리미어 물티슈 60*3+1 [$i]"))
-                            }
-                            val popupSearchResult = PopupSearchResult(headerBinding.root.context, list)
+                            /*val popupSearchResult = PopupSearchResult(headerBinding.root.context, list)
                             popupSearchResult.onItemSelect = {
                                 headerBinding.searchResult.text = it.name
                                 headerBinding.etProductName.visibility = View.GONE
@@ -208,7 +200,7 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                                 headerBinding.etEach.text = null
                                 headerBinding.etPrice.text = null
                             }
-                            popupSearchResult.show()
+                            popupSearchResult.show()*/
                         }
                     }
                 })
@@ -232,7 +224,6 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                                     headerBinding.etEach.setText("0")
                                 }
 
-                                val decimal = DecimalFormat("#,###")
                                 val accountName = headerBinding.accountName.text.toString()
                                 val box = headerBinding.etBox.text.toString().toInt()
                                 val each = headerBinding.etEach.text.toString().toInt()
@@ -254,7 +245,8 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     } else {
-                                        val model = OrderRegModel(
+                                        /*val model = OrderRegModel(
+                                            accountName,
                                             list[list.size - 1].name,
                                             decimal.format(box).toString(),
                                             decimal.format(each).toString(),
@@ -263,7 +255,7 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                                             decimal.format(totalAmount).toString()
                                         )
 
-                                        addItem(model, accountName)
+                                        addItem(model, accountName)*/
 
                                         headerBinding.etProductName.text = null
                                         headerBinding.etProductName.visibility = View.VISIBLE
@@ -277,7 +269,7 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
                                     }
                                 }
                             } catch (e: Exception) {
-                                Log.d("test log", "e >>> $e")
+                                Utils.Log("error ====> $e")
                                 Toast.makeText(v.context, "올바른 값을 입력해주세요", Toast.LENGTH_SHORT)
                                     .show()
                             }
@@ -309,25 +301,25 @@ class SlipInquiryModifyAdapter(mContext: Context, private val updateData: (Array
         }
     }
 
-    fun headerUpdate(item: OrderRegModel) {
+    fun headerUpdate(item: SearchItemModel) {
         headerData = item
     }
 
     interface OnItemClickedListener {
-        fun onItemClicked(item: OrderRegModel)
+        fun onItemClicked(item: SearchItemModel)
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun addItem(item: OrderRegModel, accountName: String) {
-        dataList.add(item)
+    fun addItem(item: SearchItemModel) {
+        slipList!!.add(item)
         notifyDataSetChanged()
-        updateData(dataList, accountName)
+        updateData(slipList!!)
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun removeItem(item: OrderRegModel) {
-        dataList.remove(item)
+    fun removeItem(item: SearchItemModel) {
+        slipList!!.remove(item)
         notifyDataSetChanged()
-        updateData(dataList, "")
+        updateData(slipList!!)
     }
 }

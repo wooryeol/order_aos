@@ -26,20 +26,21 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_marginStart="16dp">
+
             <TextView
                 android:id="@+id/sapCode"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:gravity="center"
                 android:ellipsize="marquee"
                 android:focusable="true"
+                android:gravity="center"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp"
                 android:singleLine="true"
-                android:textSize="16dp"
                 android:text="@string/purchaseAccountHint"
                 android:textColor="@color/black"
+                android:textSize="16dp"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
         </RelativeLayout>
@@ -68,7 +69,7 @@
             android:layout_marginStart="16dp"
             android:layout_gravity="center_vertical">
             <TextView
-                android:id="@+id/address"
+                android:id="@+id/shipping"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:background="@drawable/et_round_c9cbd0"
@@ -80,7 +81,6 @@
                 android:singleLine="true"
                 android:textSize="16dp"
                 android:text="@string/purchaseAddressHint"
-                android:textColor="@color/black"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
         </RelativeLayout>
@@ -194,17 +194,19 @@
             android:layout_marginEnd="15dp"
             tools:ignore="SpUsage" />
 
-        <EditText
+        <kr.co.kimberly.wma.custom.IntComma
             android:id="@+id/etBox"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:layout_marginEnd="10dp"
             android:textSize="16dp"
+            android:text="0"
+            android:gravity="end"
             android:background="@drawable/et_round_c9cbd0"
             android:paddingVertical="10dp"
             android:paddingHorizontal="12dp"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionDone"
             android:inputType="number"
             tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -217,17 +219,17 @@
             android:layout_marginEnd="15dp"
             tools:ignore="SpUsage" />
 
-        <EditText
+        <TextView
             android:id="@+id/etPrice"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:textSize="16dp"
-            android:background="@drawable/et_round_c9cbd0"
+            android:text="0"
+            android:gravity="end"
+            android:background="@drawable/ll_round_f2f2f2"
             android:paddingVertical="10dp"
             android:paddingHorizontal="12dp"
-            android:imeOptions="actionDone"
-            android:inputType="number"
             tools:ignore="Autofill,SpUsage,TextFields" />
     </LinearLayout>
 

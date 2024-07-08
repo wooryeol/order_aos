@@ -13,14 +13,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.media.Image
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.util.Log
 import android.view.View
-import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -30,16 +25,13 @@ import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
-import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.adapter.SearchDevicesAdapter
 import kr.co.kimberly.wma.custom.popup.PopupNotice
-import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
-import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 
-class BluetoothV2(context: Context, activity: Activity, private val list: ArrayList<BluetoothDevice>? = null, private val adapter: RecyclerView.Adapter<*>? = null, private val isPaired: Boolean, private val loading: ImageView? = null) {
+class BluetoothV2ByWoo(context: Context, activity: Activity, private val list: ArrayList<BluetoothDevice>? = null, private val isPaired: Boolean) {
     private val mContext = context
     private val mActivity = activity
+    var bluetoothListener: BluetoothListener? = null
 
     private val bluetoothManager:BluetoothManager by lazy {
         mContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -64,62 +56,59 @@ class BluetoothV2(context: Context, activity: Activity, private val list: ArrayL
     val mBluetoothReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         @SuppressLint("MissingPermission", "NotifyDataSetChanged")
         override fun onReceive(context: Context, intent: Intent) {
-            if (!isPaired) {
-                when(intent.action) {
-                    BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
-                        Log.d("test log", "bluetooth 가능 기기를 탐색합니다.")
-                        Toast.makeText(mContext, "bluetooth 가능 기기를 탐색합니다.", Toast.LENGTH_SHORT).show()
-                    }
-                    BluetoothDevice.ACTION_FOUND -> {
-                        val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
-                        } else {
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                        }
-
+            val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+            } else {
+                intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+            }
+            when(intent.action) {
+                BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
+                    Utils.Log("bluetooth 가능 기기를 탐색합니다.")
+                    //Toast.makeText(mContext, "bluetooth 가능 기기를 탐색합니다.", Toast.LENGTH_SHORT).show()
+                }
+                BluetoothDevice.ACTION_FOUND -> {
+                    if (!isPaired) {
                         device?.let {
                             if (it.name != null) {
-                                Log.d("test log", "found name >>> ${device.name}")
-                                Log.d("test log", "found address >>> ${device.address}")
-
                                 if (it.bondState == 10 && list?.contains(it) == false) {
                                     if (it.name.startsWith("Alpha") && SettingActivity.isRadioChecked == 2) {
                                         list.add(it)
+                                        bluetoothListener?.onChangeAdapterData()
                                     }
                                     /*else if (it.name.startsWith("KDC") && SettingActivity.isRadioChecked == 1) {
                                         list.add(it)
                                     }*/
                                     else if (!it.name.startsWith("Alpha") && SettingActivity.isRadioChecked == 1) {
                                         list.add(it)
+                                        bluetoothListener?.onChangeAdapterData()
                                     }
                                 }
-                                adapter?.notifyDataSetChanged()
                             }
                         }
                     }
-                    BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                        Log.d("test log", "bluetooth 가능 기기 탐색을 종료합니다.")
-                        Toast.makeText(mContext, "bluetooth 가능 기기 탐색을 종료합니다.", Toast.LENGTH_SHORT).show()
-                        loading?.visibility = View.GONE
-                        if (mBluetoothAdapter.isDiscovering) {
-                            mBluetoothAdapter.cancelDiscovery()
-                        }
+                }
+                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                    Utils.Log("bluetooth 가능 기기 탐색을 종료합니다.")
+                    //Toast.makeText(mContext, "bluetooth 가능 기기 탐색을 종료합니다.", Toast.LENGTH_SHORT).show()
+                    bluetoothListener?.hideLoadingImage()
+                    if (mBluetoothAdapter.isDiscovering) {
+                        mBluetoothAdapter.cancelDiscovery()
                     }
-                    BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
-                        val paired = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            intent.getParcelableExtra(
-                                BluetoothDevice.EXTRA_DEVICE,
-                                BluetoothDevice::class.java
-                            )
-                        } else {
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                }
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+                    if (isPaired) {
+                        device?.let {
+                            if (device.bondState == BluetoothDevice.BOND_BONDED && list?.contains(device) == false) {
+                                list.add(device)
+                            }
                         }
+                        bluetoothListener?.onChangeAdapterData()
+                    }
 
-                        if (paired?.bondState == BluetoothDevice.BOND_BONDED) {
-                            SharedData.setSharedData(mContext, SharedData.PRINTER_NAME, paired.name)
-                            SharedData.setSharedData(mContext, SharedData.PRINTER_ADDR, paired.address)
-                        }
-                    }
+                    /*if (paired?.bondState == BluetoothDevice.BOND_BONDED) {
+                        SharedData.setSharedData(mContext, SharedData.PRINTER_NAME, paired.name)
+                        SharedData.setSharedData(mContext, SharedData.PRINTER_ADDR, paired.address)
+                    }*/
                 }
             }
         }
@@ -162,10 +151,10 @@ class BluetoothV2(context: Context, activity: Activity, private val list: ArrayL
                         checkBluetooth().launch(intent)
                     }
                 }
+                bluetoothListener?.showLoadingImage()
+                mContext.registerReceiver(mBluetoothReceiver, searchFilter)
             }
         }
-        loading?.visibility = View.VISIBLE
-        mContext.registerReceiver(mBluetoothReceiver, searchFilter)
     }
 
     @SuppressLint("MissingPermission", "NotifyDataSetChanged")
@@ -181,14 +170,12 @@ class BluetoothV2(context: Context, activity: Activity, private val list: ArrayL
                 val pairedDevices: Set<BluetoothDevice>? = mBluetoothAdapter.bondedDevices
                 pairedDevices?.let {
                     it.forEach { device ->
-                        Log.d("test log", "pairedDevices name  >>> ${device.name}")
-                        Log.d("test log", "pairedDevices address >>> ${device.address}")
                         list?.add(device)
-                        adapter?.notifyDataSetChanged()
                     }
                 }
             }
-            loading?.visibility = View.VISIBLE
+            bluetoothListener?.onChangeAdapterData()
+            bluetoothListener?.showLoadingImage()
             mBluetoothAdapter.startDiscovery()
         }
     }
@@ -202,4 +189,10 @@ class BluetoothV2(context: Context, activity: Activity, private val list: ArrayL
                 popupNotice.show()
             }
         }
+
+    interface BluetoothListener {
+        fun hideLoadingImage()
+        fun showLoadingImage()
+        fun onChangeAdapterData()
+    }
 }
