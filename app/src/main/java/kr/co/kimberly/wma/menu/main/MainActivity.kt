@@ -1,6 +1,5 @@
 package kr.co.kimberly.wma.menu.main
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,15 +7,11 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import com.github.chrisbanes.photoview.BuildConfig
-import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.MainMenuAdapter
 import kr.co.kimberly.wma.common.Define
-import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.GridSpacingItemDecoration
 import kr.co.kimberly.wma.custom.OnSingleClickListener
@@ -25,7 +20,6 @@ import kr.co.kimberly.wma.custom.popup.PopupNotification
 import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActMainBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
-import kr.co.kimberly.wma.menu.setting.SettingActivityV2
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.MainMenuModel
 
@@ -46,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         mActivity = this
 
         mLoginInfo = Utils.getLoginData()
-        Utils.Log("mainActivity mLoginInfo =====> ${Gson().toJson(mLoginInfo)}")
+        Utils.Log("mainActivity mLoginInfo =====> $mLoginInfo")
 
         // 앱 버전 체크
         if (isVersionCheck) {
@@ -87,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         mBinding.notification.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 if (mLoginInfo?.notice.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "공지사항이 없습니다.", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "공지사항이 없습니다.")
                 } else {
                     val popupNotification = PopupNotification(mContext, mLoginInfo?.notice!!)
                     popupNotification.show()
@@ -113,7 +107,6 @@ class MainActivity : AppCompatActivity() {
 
             if (isNeedToUpdate) {
                 val popupNotice = PopupNotice(this, "App 버전이 최신이 아닙니다. 업데이트 화면으로 이동합니다.")
-
                 popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
                     override fun onOkClick() {
                         val url = mLoginInfo?.downloadUrl

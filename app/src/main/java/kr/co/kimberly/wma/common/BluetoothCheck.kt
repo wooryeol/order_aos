@@ -64,7 +64,7 @@ class BluetoothCheck(context: AppCompatActivity, private val activity: Activity)
     @SuppressLint("HardwareIds")
     fun checkBluetooth() {
         if (bluetoothAdapter == null) {
-            Toast.makeText(mContext, "블루투스를 지원하지 않는 기기입니다.", Toast.LENGTH_SHORT).show()
+            Utils.popupNotice(mContext, "블루투스를 지원하지 않는 기기입니다.")
         } else {
             if (!bluetoothAdapter.isEnabled) {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)

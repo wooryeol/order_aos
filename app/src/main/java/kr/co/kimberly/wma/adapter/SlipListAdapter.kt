@@ -63,10 +63,10 @@ class SlipListAdapter(context: Context, activity: Activity, val dataList: ArrayL
         val agencyCd = mLoginInfo?.agencyCd!!
         val userId = mLoginInfo?.userId!!
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        //val call = service.orderSlipDetail(agencyCd, userId, slipNo)
+        val call = service.orderSlipDetail(agencyCd, userId, slipNo)
 
         //test
-        val call = service.orderSlipDetail("C000028", "mb2004", "20240600015")
+        //val call = service.orderSlipDetail("C000028", "mb2004", "20240600015")
         call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<SearchItemModel>>> {
             override fun onResponse(
                 call: Call<ObjectResultModel<DataModel<SearchItemModel>>>,
@@ -74,7 +74,7 @@ class SlipListAdapter(context: Context, activity: Activity, val dataList: ArrayL
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         Utils.Log("OrderSlipDetail search success ====> ${Gson().toJson(item)}")
                         val data = item.data
                         if (data != null) {

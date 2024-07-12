@@ -42,7 +42,7 @@ class CollectApprovalActivity : AppCompatActivity() {
                 val dlg = PopupPrintDone(this, mActivity)
                 dlg.show()
             } else {
-                Toast.makeText(mContext, "인쇄 수량을 적어주세요.", Toast.LENGTH_SHORT).show()
+                Utils.popupNotice(mContext, "인쇄 수량을 적어주세요.")
             }
         }
     }

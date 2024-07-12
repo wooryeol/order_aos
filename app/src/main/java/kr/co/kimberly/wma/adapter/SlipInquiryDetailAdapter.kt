@@ -20,8 +20,12 @@ class SlipInquiryDetailAdapter(context: Context, private val updateData: ((Array
             binding.orderName.text = itemModel.itemNm
             binding.tvBoxEach.text = "BOX(${Utils.decimal(itemModel.getBox!!)}EA): "
             binding.tvBox.text = Utils.decimal(itemModel.boxQty!!)
-            binding.tvEach.text = Utils.decimal(itemModel.unitQty!!)
-            binding.tvPrice.text = "${Utils.decimal(itemModel.netPrice!!)}원"
+            //binding.tvEach.text = Utils.decimal(itemModel.unitQty!!)
+            if (itemModel.netPrice == null){
+                binding.tvPrice.text = "${Utils.decimal(itemModel.orderPrice!!)}원"
+            } else {
+                binding.tvPrice.text = "${Utils.decimal(itemModel.netPrice)}원"
+            }
             binding.tvTotal.text = Utils.decimal(itemModel.saleQty!!)
             binding.tvTotalAmount.text = "${Utils.decimal(itemModel.amount!!)}원"
             binding.deleteButton.visibility = View.GONE

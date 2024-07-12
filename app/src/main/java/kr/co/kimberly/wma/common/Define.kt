@@ -35,12 +35,12 @@ object Define {
 
     const val REQUEST_CODE = 1
 
+    // 로컬 주소
+    //const val DEV_URL = "http://192.168.0.50"
+    const val DEV_PORT = "80"
+
     // 개발 주소
-    const val DEV_URL = "http://192.168.0.50"
-
-    // 개발 포트
-    const val DEV_PORT = "1433"
-
+    const val DEV_URL = "http://58.229.132.250"
 
     const val URL = DEV_URL
     const val URL_PORT = DEV_PORT
@@ -52,8 +52,8 @@ object Define {
     // 주문 유형
     const val ORDER = "NN" // 주문
     const val RETURN = "RR" // 반품
-    const val PURCHASE_YES = "Y" // 발주
-    const val PURCHASE_NO = "N" // 발주
+    const val PURCHASE_YES = "Y" // 발주 할 때
+    const val PURCHASE_NO = "N" // 주문 혹은 반품 할 때
 
     // 리스트 아이템 삭제
     const val OK = 1000

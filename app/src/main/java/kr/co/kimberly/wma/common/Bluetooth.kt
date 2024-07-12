@@ -17,16 +17,12 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
-import kr.co.kimberly.wma.adapter.SearchDevicesAdapter
-import kr.co.kimberly.wma.custom.popup.PopupNotice
-import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
 import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 
 class Bluetooth(context: Context, activity: Activity, private val list: ArrayList<BluetoothDevice>? = null, private val adapter: RecyclerView.Adapter<*>? = null) {
@@ -175,8 +171,7 @@ class Bluetooth(context: Context, activity: Activity, private val list: ArrayLis
 
                 @SuppressLint("MissingPermission")
                 override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
-                    val popupNotice = PopupNotice(mContext, "블루투스 권한을 확인해주세요.")
-                    popupNotice.show()
+                    Utils.popupNotice(mContext, "블루투스 권한을 확인해주세요.")
                 }
             })
             //.setDeniedMessage("블루투스 권한을 허용해주세요.\n[설정] > [애플리케이션] > [앱 권한]")

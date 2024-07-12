@@ -6,9 +6,11 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.R
@@ -35,6 +37,14 @@ class SettingActivity : AppCompatActivity() {
         var checkPrinter = false
     }
 
+    val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            SharedData.setSharedData(mContext, "agencyCode", mBinding.accountCode.text.toString())
+            SharedData.setSharedData(mContext, "phoneNumber", mBinding.mobileNumber.text.toString())
+            finish()
+        }
+    }
+
     //private lateinit var mBinding: ActSettingBinding
     private lateinit var mBinding: ActSettingV3ByWooBinding
     private lateinit var mContext: Context
@@ -53,6 +63,8 @@ class SettingActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+
+        this.onBackPressedDispatcher.addCallback(this, callback)
 
         // 헤더 설정 변경
         mBinding.header.scanBtn.visibility = View.GONE
@@ -105,9 +117,9 @@ class SettingActivity : AppCompatActivity() {
         mBinding.bottom.bottomButton.setOnClickListener {
             val dlg = PopupSearchDevices(mContext, mActivity)
             if (mBinding.accountCode.text.isEmpty()) {
-                Toast.makeText(mContext, "대리점 코드를 입력해주세요", Toast.LENGTH_SHORT).show()
+                Utils.popupNotice(mContext, "대리점 코드를 입력해주세요")
             } else if(isRadioChecked == 0) {
-                Toast.makeText(mContext, "스캐너 또는 프린트를 선택해주세요", Toast.LENGTH_SHORT).show()
+                Utils.popupNotice(mContext, "스캐너 또는 프린트를 선택해주세요")
             } else {
                 when (isRadioChecked) {
                     1 -> {
@@ -165,7 +177,7 @@ class SettingActivity : AppCompatActivity() {
                 val name = SharedData.getSharedData(mContext, SharedData.SCANNER_NAME, "")
                 val address = SharedData.getSharedData(mContext, SharedData.SCANNER_ADDR, "")
                 if (address == "" && name == "") {
-                    Toast.makeText(mContext, "스캐너를 연결해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "스캐너를 연결해주세요")
                 } else {
                     scanner.isEnabled = true
                     checkScanner = scanner.isChecked
@@ -179,7 +191,7 @@ class SettingActivity : AppCompatActivity() {
                 val name = SharedData.getSharedData(mContext, SharedData.PRINTER_NAME, "")
                 val address = SharedData.getSharedData(mContext, SharedData.PRINTER_ADDR, "")
                 if (address == "" && name == "") {
-                    Toast.makeText(mContext, "프린터를 연결해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "프린터를 연결해주세요")
                 } else {
                     print.isEnabled = true
                     checkPrinter = print.isChecked

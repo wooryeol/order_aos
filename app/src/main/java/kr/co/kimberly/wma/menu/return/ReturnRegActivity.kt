@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,14 +22,11 @@ import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.ObjectResultModel
-import kr.co.kimberly.wma.network.model.SalesInfoModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Response
-import java.text.DecimalFormat
 
 
 class ReturnRegActivity : AppCompatActivity() {
@@ -78,9 +74,7 @@ class ReturnRegActivity : AppCompatActivity() {
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                finish()
-
-                // 주문 승인을 하지 않고 나갈 때 바로 나갈건지 혹은 팝업을 띄워서 리스트는 저장되지 않습니다라는 메세지 보여줄 지 물어보기
+                Utils.backBtnPopup(mContext, mActivity, returnAdapter?.dataList!!)
             }
         })
 
@@ -88,7 +82,7 @@ class ReturnRegActivity : AppCompatActivity() {
             override fun onSingleClick(v: View) {
                 val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $accountName\n총금액: ${Utils.decimal(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
                 if (returnAdapter?.dataList!!.isEmpty()) {
-                    Toast.makeText(mContext, "제품이 등록되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "제품이 등록되지 않았습니다.")
                 } else {
                     popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                         override fun onCancelClick() {
@@ -127,18 +121,18 @@ class ReturnRegActivity : AppCompatActivity() {
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
         val call = service.order(body)
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<SalesInfoModel>>> {
+        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<Unit>>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<DataModel<SalesInfoModel>>>,
-                response: Response<ObjectResultModel<DataModel<SalesInfoModel>>>
+                call: Call<ObjectResultModel<DataModel<Unit>>>,
+                response: Response<ObjectResultModel<DataModel<Unit>>>
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         val data = returnAdapter?.dataList
                         val slipNo = item.data?.slipNo
                         Utils.Log("return success ====> ${Gson().toJson(item)}")
-                        Toast.makeText(mContext, "반품주문이 전송되었습니다.", Toast.LENGTH_SHORT).show()
+                        Utils.toast(mContext, "반품주문이 전송되었습니다.")
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
                             putExtra("data", data)
                             putExtra("slipNo", slipNo)
@@ -152,7 +146,7 @@ class ReturnRegActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<DataModel<SalesInfoModel>>>, t: Throwable) {
+            override fun onFailure(call: Call<ObjectResultModel<DataModel<Unit>>>, t: Throwable) {
                 Utils.Log("order failed ====> ${t.message}")
             }
 

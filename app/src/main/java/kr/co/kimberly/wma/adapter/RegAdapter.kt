@@ -9,7 +9,7 @@ import android.os.Message
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.view.inputmethod.EditorInfo
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -31,22 +31,21 @@ import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.ObjectResultModel
 import kr.co.kimberly.wma.network.model.ProductPriceHistoryModel
-import kr.co.kimberly.wma.network.model.SalesInfoModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import retrofit2.Call
 import retrofit2.Response
 import kotlin.math.ceil
 
-class RegAdapter(mContext: Context, mActivity: Activity, private val updateData: ((ArrayList<SalesInfoModel>, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RegAdapter(mContext: Context, mActivity: Activity, private val updateData: ((ArrayList<SearchItemModel>, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
     var activity = mActivity
-    var dataList: ArrayList<SalesInfoModel> = ArrayList()
-    var selectedItem: SearchItemModel? = null // 선택된 제품을 담는 리스트
+    var dataList: ArrayList<SearchItemModel> = ArrayList()
+    var selectedItem: SearchItemModel? = null // 선택된 제품
     var historyList: List<ProductPriceHistoryModel>? = null // 제품 단가 이력 리스트
     var popupSearchResult : PopupSearchResult? = null // 아이템 리스트
     var popupProductPriceHistory : PopupProductPriceHistory? = null // 단가 이력 팝업
     var popupResultNothing : PopupNotice? = null // 조회 내역 없을 때
-    var onItemSelect: ((SalesInfoModel) -> Unit)? = null
+    var onItemSelect: ((SearchItemModel) -> Unit)? = null
     var customerCd: String ? = null
 
     private var accountName : String? = null
@@ -117,20 +116,11 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
 
     inner class ViewHolder(val binding: CellOrderRegBinding) : RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n", "SimpleDateFormat")
-        fun bind(item: SalesInfoModel) {
+        fun bind(item: SearchItemModel) {
             // 데이터 바인딩
             // 예: binding.textView.text = data.someText
             itemView.setOnClickListener {
                 onItemSelect?.invoke(item)
-
-                /*val popupProductPriceHistory = PopupProductPriceHistory(binding.root.context)
-                popupProductPriceHistory.show()
-                val date = Date()
-                val dateFormat = SimpleDateFormat("yyyy/MM/dd")
-                val formattedDate = dateFormat.format(date)
-                PopupProductPriceHistory.productPriceHistory.clear()
-                PopupProductPriceHistory.productPriceHistory.add(ProductPriceHistoryModel(formattedDate, "${binding.tvPrice.text}"))
-                editItem(item, accountName!!)*/
             }
             binding.orderName.text = item.itemNm
             binding.tvBoxEach.text = "BOX(${item.getBox}EA): "
@@ -181,35 +171,35 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                 }
             })
 
+            binding.etProductName.setOnEditorActionListener { v, actionId, event ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    binding.btSearch.performClick()
+                    true
+                } else {
+                    false
+                }
+            }
+
+            binding.etPrice.setOnEditorActionListener { v, actionId, event ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    binding.btAddOrder.performClick()
+                    true
+                } else {
+                    false
+                }
+            }
+
             binding.btSearch.setOnClickListener(object : OnSingleClickListener() {
                 @SuppressLint("SetTextI18n")
                 override fun onSingleClick(v: View) {
-                    if (binding.accountName.text == context.getString(R.string.accountHint)) {
+                    if (binding.accountName.text.isNullOrEmpty()) {
                         PopupNotice(context,"거래처를 먼저 검색해주세요").show()
                     } else {
                         if (binding.etProductName.text.isNullOrEmpty()) {
-                            Toast.makeText(v.context, "제품명을 입력해주세요", Toast.LENGTH_SHORT).show()
+                            Utils.popupNotice(v.context, "제품명을 입력해주세요")
                         } else {
                             // 아이템 리스트 검색
                             searchItem(binding.etProductName.text.toString(), binding.root.context)
-
-                            // 팝업 선택 시
-                            /*popupSearchResult?.onItemSelect = {
-                                binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                binding.etProductName.visibility = View.GONE
-                                binding.tvProductName.visibility = View.VISIBLE
-                                binding.tvProductName.isSelected = true
-                                binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                selectedItem = SearchItemModel(
-                                    it.itemCd,
-                                    it.itemNm,
-                                    it.aliasNm,
-                                    it.whStock,
-                                    it.getBox,
-                                    it.vatYn,
-                                    it.netPrice
-                                )
-                            }*/
                         }
                     }
                 }
@@ -237,7 +227,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                 @SuppressLint("NotifyDataSetChanged")
                 override fun onSingleClick(v: View) {
                     if (binding.etPrice.text.isNullOrEmpty() || binding.searchResult.text == context.getString(R.string.searchResult)) {
-                        Toast.makeText(v.context, "모든 항목을 채워주세요", Toast.LENGTH_SHORT).show()
+                        Utils.popupNotice(v.context, "모든 항목을 채워주세요")
                     } else {
                         try {
                             if (binding.etBox.text.isNullOrEmpty()) {
@@ -263,16 +253,16 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                             val vat = amount - supplyPrice
 
                             if (netPrice == 0) {
-                                Toast.makeText(context, "단가에는 0이 들어갈 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                Utils.popupNotice(context, "단가에는 0이 들어갈 수 없습니다.")
                             } else {
                                 if (boxQty == 0 && unitQty == 0) {
-                                    Toast.makeText(context, "박스 혹은 낱개의 수량을 확인해주세요", Toast.LENGTH_SHORT).show()
+                                    Utils.popupNotice(context, "박스 혹은 낱개의 수량을 확인해주세요")
                                 } else {
-                                    val model = SalesInfoModel(
+                                    val model = SearchItemModel(
                                         itemNm = itemName,
                                         itemCd = itemCd!!,
                                         netPrice = netPrice,
-                                        getBox = selectedItem?.getBox!!.toString(),
+                                        getBox = selectedItem?.getBox!!,
                                         boxQty = boxQty,
                                         unitQty = unitQty,
                                         saleQty = saleQty,
@@ -296,10 +286,18 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                             }
                         } catch (e: Exception) {
                             Utils.Log("error >>> $e")
-                            Toast.makeText(v.context, "올바른 값을 입력해주세요", Toast.LENGTH_SHORT).show()
+                            Utils.popupNotice(v.context, "올바른 값을 입력해주세요")
                         }
                     }
                     binding.btAddOrder.text = context.getString(R.string.addOrder)
+                }
+            })
+
+            binding.etProductName.setOnClickListener(object : OnSingleClickListener() {
+                override fun onSingleClick(v: View) {
+                    if (accountName.isNullOrEmpty()) {
+                        PopupNotice(context, "거래처를 검색해주세요").show()
+                    }
                 }
             })
 
@@ -319,6 +317,9 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                     binding.tvProductName.visibility = View.GONE
                     binding.etProductName.visibility = View.VISIBLE
                     binding.etProductName.hint = v.context.getString(R.string.productNameHint)
+                    binding.etBox.setText(context.getText(R.string.zero))
+                    binding.etEach.setText(context.getText(R.string.zero))
+                    binding.etPrice.setText(context.getText(R.string.zero))
                 }
             })
         }
@@ -335,7 +336,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                 ) {
                     if (response.isSuccessful) {
                         val item = response.body()
-                        if (item?.returnMsg == Define.SUCCESS) {
+                        if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                             Utils.Log("price history search success ====> ${Gson().toJson(item)}")
                             historyList = item.data
                             popupProductPriceHistory = PopupProductPriceHistory(context, historyList!!, selectedItem!!.itemNm!!)
@@ -370,7 +371,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                 ) {
                     if (response.isSuccessful) {
                         val item = response.body()
-                        if (item?.returnMsg == Define.SUCCESS) {
+                        if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                             //Utils.Log("item search success ====> ${Gson().toJson(item.data?.firstOrNull()?.itemList)}")
                             Utils.Log("item search success ====> ${Gson().toJson(item.data)}")
                             if (item.data?.itemList.isNullOrEmpty()) {
@@ -399,7 +400,8 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                                 }
                             }
                         } else {
-                            PopupNotice(context, item?.returnMsg!!)
+                            PopupNotice(context, item?.returnMsg!!).show()
+
                             Utils.Log("returnMsg ====> ${item.returnMsg}")
                         }
                     } else {
@@ -410,13 +412,12 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                 override fun onFailure(call: Call<ObjectResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
                     Utils.Log("item search failed ====> ${t.message}")
                 }
-
             })
         }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun addItem(item: SalesInfoModel, accountName: String) {
+    fun addItem(item: SearchItemModel, accountName: String) {
         dataList.removeAll{ it.itemCd == item.itemCd}
         dataList.add(item)
         Utils.Log("updateData dataList ====> ${Gson().toJson(dataList)}")
@@ -425,7 +426,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun removeItem(item: SalesInfoModel) {
+    fun removeItem(item: SearchItemModel) {
         dataList.remove(item)
         notifyDataSetChanged()
         updateData(dataList, "")

@@ -61,6 +61,7 @@
             android:name=".menu.login.LoginActivity"
             android:exported="false"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
             tools:ignore="LockedOrientationActivity" />
 
         <!-- 메인 화면 -->
@@ -88,6 +89,7 @@
         <activity
             android:name=".menu.order.OrderRegActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -95,6 +97,7 @@
         <activity
             android:name=".menu.return.ReturnRegActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -102,24 +105,28 @@
         <activity
             android:name=".menu.slip.SlipInquiryActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <!-- 전표조회 상세 화면 -->
         <activity
             android:name=".menu.slip.SlipInquiryDetailActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <!-- 전표조회 수정 -->
         <activity
             android:name=".menu.slip.SlipInquiryModifyActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <!-- 전표 조회 -->
         <activity
             android:name=".menu.ledger.LedgerActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -127,6 +134,7 @@
         <activity
             android:name=".menu.inventory.InventoryActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -134,6 +142,7 @@
         <activity
             android:name=".menu.information.InformationActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -141,6 +150,7 @@
         <activity
             android:name=".menu.collect.CollectApprovalActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -148,6 +158,7 @@
         <activity
             android:name=".menu.collect.CollectManageActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -155,6 +166,7 @@
         <activity
             android:name=".menu.collect.CollectRegiActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -162,6 +174,7 @@
         <activity
             android:name=".menu.printer.PrinterOptionActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -169,12 +182,14 @@
         <activity
             android:name=".menu.store.StoreManagementActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <!-- 이미지 전체 화면-->
         <activity
             android:name=".menu.store.ImgFullActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -182,12 +197,14 @@
         <activity
             android:name=".menu.purchase.PurchaseRequestActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
         <!-- 구매승인 -->
         <activity
             android:name=".menu.purchase.PurchaseApprovalActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
 
@@ -195,6 +212,7 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="kr.co.kimberly.wma.fileprovider"
             android:exported="false"
+            android:windowSoftInputMode="adjustPan"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"

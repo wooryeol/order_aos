@@ -5,18 +5,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SlipInquiryDetailAdapter
 import kr.co.kimberly.wma.common.Define
@@ -28,14 +21,12 @@ import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
-import kr.co.kimberly.wma.network.model.SalesInfoModel
+import kr.co.kimberly.wma.network.model.ObjectResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Response
-import java.lang.Exception
 
 class SlipInquiryDetailActivity : AppCompatActivity() {
     private lateinit var mBinding: ActSlipInquiryDetailBinding
@@ -115,6 +106,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
 
                     override fun onOkClick() {
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
+                            //test
                             //putExtra("slipNo", slipNo)
                             putExtra("slipNo", "20240600015")
                             putExtra("customerCd", customerCd)
@@ -123,7 +115,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
                             putExtra("orderSlipList", orderSlipList)
                         }
                         startActivity(intent)
-                        Toast.makeText(v.context, "주문이 전송되었습니다.", Toast.LENGTH_SHORT).show()
+                        Utils.toast(v.context, "주문이 전송되었습니다.")
                     }
                 }
                 popupDoubleMessage.show()
@@ -132,6 +124,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
     }
     private fun moveToEditPage() {
         val intent = Intent(mContext, SlipInquiryModifyActivity::class.java).apply {
+            //test
             //putExtra("slipNo", slipNo)
             putExtra("slipNo", "20240600015")
             putExtra("customerCd", customerCd)
@@ -141,7 +134,6 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
             putExtra("orderSlipList", orderSlipList)
         }
         startActivity(intent)
-        finish()
     }
 
     @SuppressLint("SetTextI18n")
@@ -189,27 +181,29 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
         val call = service.delete(body)
 
-        call.enqueue(object : retrofit2.Callback<ListResultModel<DataModel<Unit>>> {
+        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<Unit>>> {
             override fun onResponse(
-                call: Call<ListResultModel<DataModel<Unit>>>,
-                response: Response<ListResultModel<DataModel<Unit>>>
+                call: Call<ObjectResultModel<DataModel<Unit>>>,
+                response: Response<ObjectResultModel<DataModel<Unit>>>
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         Utils.Log("delete success ====> ${Gson().toJson(item)}")
-                        Toast.makeText(mContext, "전표가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                        Utils.toast(mContext, "전표가 삭제되었습니다.")
                         Intent().putExtra("deletedSlipNo", slipNo).apply {
                             setResult(Activity.RESULT_OK, this)
                         }
                         finish()
+                    } else {
+                        Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
                     Utils.Log("${response.code()} ====> ${response.message()}")
                 }
             }
 
-            override fun onFailure(call: Call<ListResultModel<DataModel<Unit>>>, t: Throwable) {
+            override fun onFailure(call: Call<ObjectResultModel<DataModel<Unit>>>, t: Throwable) {
                 Utils.Log("delete failed ====> ${t.message}")
             }
         })

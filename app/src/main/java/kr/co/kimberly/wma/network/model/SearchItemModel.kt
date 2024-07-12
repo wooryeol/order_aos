@@ -3,7 +3,7 @@ package kr.co.kimberly.wma.network.model
 import java.io.Serializable
 
 data class SearchItemModel (
-    val itemCd: String? = null, // 품목 코드
+    var itemCd: String? = null, // 품목 코드
     val itemNm: String? = null, // 품목 명
     val whStock: String? = null, // 재고 수량
     val getBox: Int? = null, // 박스 입수량
@@ -17,6 +17,8 @@ data class SearchItemModel (
     val unitQty: Int? = null, // 낱개 수량
     val saleQty: Int? = null, // 판매 수량
     val amount: Int? = null, // 합계
-    val enableOrderYn: String? = null, // 본사 발주 가능여부
-    val orderPrice: Int? = null, // 발주 단가
+    var enableOrderYn: String? = null, // 본사 발주 가능여부
+    var orderPrice: Int? = null, // 발주 단가
+    var supplyPrice: Int? = null, // 공급가
+    var vat: Int? = null, // 부가세
 ):Serializable

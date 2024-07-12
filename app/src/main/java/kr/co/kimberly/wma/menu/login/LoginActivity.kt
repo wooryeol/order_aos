@@ -5,21 +5,23 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import com.github.chrisbanes.photoview.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.databinding.ActLoginBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.ObjectResultModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -80,11 +82,54 @@ class LoginActivity : AppCompatActivity() {
             mBinding.etId.setText("c000000")
             mBinding.etPw.setText("@mirae2024")
         }
+
+        val loginTextWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (isLogin()) {
+                    mBinding.btLogin.setBackgroundResource(R.drawable.bt_round_1d6de5) // 활성화 상태 색상
+                } else {
+                    mBinding.btLogin.setBackgroundResource(R.drawable.bt_round_c9cbd0) // 비활성화 상태 색상
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        }
+
+        if (isLogin()) {
+            mBinding.btLogin.setBackgroundResource(R.drawable.bt_round_1d6de5) // 활성화 상태 색상
+        } else {
+            mBinding.btLogin.setBackgroundResource(R.drawable.bt_round_c9cbd0) // 비활성화 상태 색상
+        }
+
+        mBinding.etId.addTextChangedListener(loginTextWatcher)
+        mBinding.etPw.addTextChangedListener(loginTextWatcher)
+
+        mBinding.etPw.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                mBinding.btLogin.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
+    }
+
+    private fun isLogin(): Boolean{
+        val idInput = mBinding.etId.text.toString().trim()
+        val pwInput = mBinding.etPw.text.toString().trim()
+        val isInputValid = idInput.isNotEmpty() && pwInput.isNotEmpty()
+
+        mBinding.btLogin.isEnabled = isInputValid
+        return mBinding.btLogin.isEnabled
     }
 
     private fun loginCheck() {
         if (mAgencyCode == null || mPhoneNumber == null || mAgencyCode == "" || mPhoneNumber == "") {
-            PopupNotice(this, "환경설정에서 대리점코드 혹은 휴대폰 번호를 확인해주세요").show()
+            Utils.popupNotice(this, "환경설정에서 대리점코드 혹은 휴대폰 번호를 확인해주세요")
         } else {
             if (mBinding.etId.text.isNotEmpty() && mBinding.etPw.text.isNotEmpty()) {
 
@@ -99,7 +144,7 @@ class LoginActivity : AppCompatActivity() {
                     SharedData.setSharedData(mContext, "loginId", "")
                 }
             } else {
-                PopupNotice(this, "아이디 또는 비밀번호를 확인해주세요").show()
+                Utils.popupNotice(this, "아이디 또는 비밀번호를 확인해주세요")
             }
         }
     }
@@ -128,28 +173,27 @@ class LoginActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
-                        Utils.Log("login success")
-                        SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, item.data!!)
+                    if (item?.returnCd == Define.RETURN_CD_00) {
+                        Utils.Log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
+                        SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, Gson().toJson(item.data))
                         val intent = Intent(mContext,  MainActivity::class.java)
                         startActivity(intent)
                         finish()
+                    } else {
+                        Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
                     Utils.Log("${response.code()} ====> ${response.message()}")
-                    PopupNotice(mContext, "로그인 정보를 확인해주세요", null).show()
+                    Utils.popupNotice(mContext, "로그인 정보를 확인해주세요")
                 }
             }
 
             override fun onFailure(call: Call<ObjectResultModel<LoginResponseModel>>, t: Throwable) {
                 Utils.Log("login failed ====> ${t.message}")
-                PopupNotice(mContext, "잠시 후 다시 시도해주세요", null).show()
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
         })
-        val intent = Intent(mContext,  MainActivity::class.java)
-        startActivity(intent)
-        finish()
     }
 
     override fun onResume() {

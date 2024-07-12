@@ -1,24 +1,16 @@
 package kr.co.kimberly.wma.custom.popup
 
-import android.annotation.SuppressLint
 import android.app.Dialog
-import android.bluetooth.BluetoothAdapter
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.provider.Settings
 import android.view.View
 import android.widget.LinearLayout
-import kr.co.kimberly.wma.common.Bluetooth
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.databinding.PopupNoticeBinding
 import kr.co.kimberly.wma.databinding.PopupNoticeV2Binding
-import kr.co.kimberly.wma.menu.setting.SettingActivity
 
 class PopupNoticeV2(mContext: Context, private val msg:String, val mHandler: Handler): Dialog(mContext) {
     private lateinit var mBinding: PopupNoticeV2Binding

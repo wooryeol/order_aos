@@ -5,8 +5,10 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import kr.co.kimberly.wma.R
@@ -60,11 +62,40 @@ class InventoryActivity : AppCompatActivity() {
             }
         })
 
+        mBinding.etProductName.addTextChangedListener {
+            if (mBinding.etProductName.text.isNullOrEmpty()) {
+                mBinding.btProductNameEmpty.visibility = View.GONE
+            } else {
+                mBinding.btProductNameEmpty.visibility = View.VISIBLE
+            }
+        }
+
+        mBinding.btProductNameEmpty.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                mBinding.btProductNameEmpty.visibility = View.GONE
+                mBinding.tvProductName.text = null
+                mBinding.tvProductName.visibility = View.GONE
+                mBinding.etProductName.text = null
+                mBinding.etProductName.visibility = View.VISIBLE
+
+            }
+
+        })
+
+        mBinding.etProductName.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE){
+                mBinding.search.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
         // 아이템 검색
         mBinding.search.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 if(mBinding.etProductName.text.toString().isEmpty()) {
-                    showNotice(getString(R.string.accountHint))
+                    Utils.popupNotice(mContext, getString(R.string.productNameHint))
                 } else {
                     warehouseStock(mBinding.etProductName.text.toString())
                 }
@@ -75,11 +106,7 @@ class InventoryActivity : AppCompatActivity() {
         mBinding.tvBranchHouse.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 warehouseList()
-                /*if (!mBinding.tvBranchHouse.text.isNullOrEmpty()) {
-
-                }*/
             }
-
         })
 
         // 제품 삭제
@@ -97,7 +124,6 @@ class InventoryActivity : AppCompatActivity() {
                 adapter?.notifyDataSetChanged()
 
             }
-
         })
     }
 
@@ -124,21 +150,16 @@ class InventoryActivity : AppCompatActivity() {
             inputMethodManager.hideSoftInputFromWindow(mBinding.etProductName.windowToken, InputMethodManager.HIDE_IMPLICIT_ONLY)
             mBinding.etProductName.clearFocus()
         } else {
-            showNotice(getString(R.string.searchNothing))
+            Utils.popupNotice(mContext, getString(R.string.searchNothing))
         }
-    }
-
-    private fun showNotice(msg: String) {
-        val popupNotice = PopupNotice(mContext, msg)
-        popupNotice.show()
     }
 
     private fun warehouseList(){
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        //val call = service.warehouseList(agencyCd, userId)
+        val call = service.warehouseList(agencyCd, userId)
 
         //test
-        val call = service.warehouseList("C000028", "mb2004")
+        //val call = service.warehouseList("C000028", "mb2004")
 
         call.enqueue(object : retrofit2.Callback<ListResultModel<WarehouseListModel>> {
             @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
@@ -148,7 +169,7 @@ class InventoryActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         Utils.Log("warehouse search success ====> ${Gson().toJson(item)}")
                         val list = item.data as ArrayList<WarehouseListModel>
                         val popupWarehouseList = PopupWarehouseList(mContext, list)
@@ -185,9 +206,9 @@ class InventoryActivity : AppCompatActivity() {
     // 검색 아이템 리스트 조회
     fun warehouseStock(searchCondition: String) {
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        //val call = service.warehouseStock(agencyCd, userId, warehouseCd!!, searchCondition)
+        val call = service.warehouseStock(agencyCd, userId, warehouseCd!!, searchCondition)
         //test
-        val call = service.warehouseStock("C000028", "mb2004", "I001", "하기스")
+        //val call = service.warehouseStock("C000028", "mb2004", "I001", "하기스")
 
         call.enqueue(object : retrofit2.Callback<ListResultModel<WarehouseStockModel>> {
             override fun onResponse(
@@ -196,9 +217,9 @@ class InventoryActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         if (item.data.isNullOrEmpty()) {
-                            PopupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.", null).show()
+                            Utils.popupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.")
                         } else {
                             Utils.Log("stock search success ====> ${Gson().toJson(item.data)}")
                             itemList = item.data as ArrayList<WarehouseStockModel>
@@ -209,6 +230,8 @@ class InventoryActivity : AppCompatActivity() {
                             mBinding.tvProductName.visibility = View.VISIBLE
                             mBinding.btProductNameEmpty.visibility = View.VISIBLE
                         }
+                    } else {
+                        Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
                     Utils.Log("${response.code()} ====> ${response.message()}")

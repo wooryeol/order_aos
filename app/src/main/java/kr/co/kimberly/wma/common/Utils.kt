@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -14,16 +13,17 @@ import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import android.util.DisplayMetrics
+import android.os.Looper
+import android.os.Message
 import android.util.TypedValue
 import android.view.Window
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.google.gson.Gson
-import com.google.gson.JsonParseException
-import com.google.gson.reflect.TypeToken
 import kr.co.kimberly.wma.GlobalApplication
+import kr.co.kimberly.wma.custom.popup.PopupNotice
+import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -203,15 +203,8 @@ object Utils {
             SharedData.LOGIN_DATA,
             ""
         )
-        return try {
-            val gson = Gson()
-            val typeToken = object : TypeToken<List<LoginResponseModel>>() {}.type
-            val list: List<LoginResponseModel> = gson.fromJson(json, typeToken)
-            list.firstOrNull()
-        } catch (e: JsonParseException) {
-            e.printStackTrace()
-            null
-        }
+
+        return Gson().fromJson(json, LoginResponseModel::class.java)
     }
 
     // 날짜 가져오기
@@ -225,5 +218,35 @@ object Utils {
     fun decimal(number: Int):String {
         val decimal = DecimalFormat("#,###")
         return decimal.format(number)
+    }
+
+    // 기본 경고 팝업
+    fun popupNotice(context: Context, msg: String){
+        val popupNotice = PopupNotice(context, msg)
+        popupNotice.show()
+    }
+
+    // 주문 완료 하지 않고 뒤로 가기 눌렀을 때
+    fun backBtnPopup(context: Context, activity: Activity, list: ArrayList<*>,){
+        if (list.isEmpty()) {
+            activity.finish()
+        } else {
+            PopupNoticeV2(context, "기존 주문이 완료되지 않았습니다.\n이전 화면으로 이동하시겠습니까??",
+                object : Handler(Looper.getMainLooper()) {
+                    @SuppressLint("NotifyDataSetChanged")
+                    override fun handleMessage(msg: Message) {
+                        when (msg.what) {
+                            Define.OK -> {
+                                activity.finish()
+                            }
+                        }
+                    }
+                }).show()
+        }
+    }
+
+    // 토스트 메세지
+    fun toast(context: Context, msg: String){
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
 }

@@ -43,43 +43,55 @@
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
 
-                    <RelativeLayout
+                    <LinearLayout
                         android:id="@+id/accountArea"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
+                        android:orientation="horizontal"
                         android:layout_marginEnd="8dp"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="1"
-                        android:background="@drawable/et_round_c9cbd0"
-                        tools:ignore="NestedWeights">
+                        android:background="@drawable/et_round_c9cbd0">
+
+                        <EditText
+                            android:id="@+id/etAccount"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:background="@color/trans"
+                            android:hint="@string/accountHint"
+                            android:imeOptions="actionDone"
+                            android:singleLine="true"
+                            android:inputType="text"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="10dp"
+                            android:textSize="16dp"
+                            tools:ignore="Autofill,NestedWeights,SpUsage,TextFields" />
 
                         <TextView
-                            android:id="@+id/accountName"
-                            android:layout_width="match_parent"
+                            android:visibility="gone"
+                            android:id="@+id/tvAccountName"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:layout_marginStart="16dp"
-                            android:layout_toStartOf="@id/btEmpty"
+                            android:layout_weight="1"
+                            android:textSize="16dp"
+                            android:background="@color/trans"
+                            android:paddingVertical="10dp"
+                            android:paddingHorizontal="12dp"
                             android:ellipsize="marquee"
-                            android:marqueeRepeatLimit="marquee_forever"
                             android:focusable="true"
                             android:singleLine="true"
-                            android:text="@string/accountHint"
-                            android:textSize="15dp"
-                            tools:ignore="Autofill,SpUsage,TextFields" />
+                            tools:ignore="SpUsage" />
 
                         <ImageButton
                             android:id="@+id/btEmpty"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:layout_centerHorizontal="true"
                             android:background="@color/trans"
                             android:visibility="gone"
                             android:src="@drawable/ic_empty" />
 
-                    </RelativeLayout>
+                    </LinearLayout>
 
                     <Button
                         android:id="@+id/search"
@@ -105,12 +117,12 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:text="@string/uncollected"
-                        android:textSize="14dp"
+                        android:textSize="16dp"
                         android:textColor="@color/color_7E828B"
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
 
-                    <EditText
+                    <TextView
                         android:singleLine="true"
                         android:id="@+id/uncollected"
                         android:layout_width="0dp"
@@ -118,9 +130,9 @@
                         android:layout_weight="1"
                         android:textSize="16dp"
                         android:background="@drawable/et_round_c9cbd0"
-                        android:paddingVertical="10dp"
                         android:paddingHorizontal="12dp"
-                        android:inputType="number"
+                        android:hint="@string/accountHint"
+                        android:gravity="center_vertical"
                         tools:ignore="Autofill,SpUsage,TextFields" />
 
                 </LinearLayout>
@@ -136,22 +148,21 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:text="@string/collectedDate"
-                        android:textSize="14dp"
+                        android:textSize="16dp"
                         android:textColor="@color/color_7E828B"
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
 
-                    <Button
-                        android:singleLine="true"
+                    <TextView
                         android:id="@+id/collectedDate"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
-                        android:textSize="16dp"
                         android:background="@drawable/et_round_c9cbd0"
-                        android:paddingVertical="10dp"
                         android:paddingHorizontal="12dp"
-                        android:gravity="center"
+                        android:textSize="16dp"
+                        android:hint="@string/accountHint"
+                        android:gravity="center_vertical"
                         tools:ignore="Autofill,SpUsage,TextFields" />
 
                 </LinearLayout>
@@ -167,22 +178,22 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:text="@string/totalAmount"
-                        android:textSize="14dp"
+                        android:textSize="16dp"
                         android:textColor="@color/color_7E828B"
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
 
-                    <EditText
+                    <TextView
                         android:singleLine="true"
                         android:id="@+id/totalAmount"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
                         android:textSize="16dp"
+                        android:hint="@string/accountHint"
+                        android:gravity="center_vertical"
                         android:background="@drawable/et_round_c9cbd0"
-                        android:paddingVertical="10dp"
                         android:paddingHorizontal="12dp"
-                        android:inputType="number"
                         tools:ignore="Autofill,SpUsage,TextFields" />
 
                 </LinearLayout>
@@ -253,7 +264,7 @@
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
 
-                    <EditText
+                    <kr.co.kimberly.wma.custom.IntComma
                         android:singleLine="true"
                         android:id="@+id/cashAmountText"
                         android:layout_width="0dp"

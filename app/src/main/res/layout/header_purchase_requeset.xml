@@ -220,7 +220,7 @@
             tools:ignore="SpUsage" />
 
         <TextView
-            android:id="@+id/etPrice"
+            android:id="@+id/tvPrice"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"

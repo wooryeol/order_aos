@@ -135,21 +135,20 @@ class StoreManagementActivity : AppCompatActivity() {
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 val popupSingleMessage = PopupSingleMessage(mContext, getString(R.string.storeManagementSend), getString(R.string.storeManagementSendMsg))
-
                 if (mBinding.accountName.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "거래처를 검색해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "거래처를 검색해주세요")
                 } else if(mBinding.title.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "제목을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "제목을 입력해주세요")
                 } else if(mBinding.creator.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "생성자를 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "생성자를 입력해주세요")
                 } else if(mBinding.before.text.isNullOrEmpty() || mBinding.after.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "내용을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "내용을 입력해주세요")
                 } else if (mBinding.beforeImg.visibility == View.GONE || mBinding.afterImg.visibility == View.GONE) {
-                    Toast.makeText(mContext, "사진을 등록 해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "사진을 등록 해주세요")
                 } else {
                     popupSingleMessage.itemClickListener = object: PopupSingleMessage.ItemClickListener {
                         override fun onCancelClick() {
-                            Log.d("tttt", "취소 클릭함")
+                            Utils.Log("취소 클릭함")
                         }
 
                         @SuppressLint("UseCompatLoadingForDrawables")
