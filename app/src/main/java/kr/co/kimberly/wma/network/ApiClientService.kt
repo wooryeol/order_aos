@@ -1,14 +1,15 @@
 package kr.co.kimberly.wma.network
 
 import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.network.model.BalanceModel
 import kr.co.kimberly.wma.network.model.CollectModel
 import kr.co.kimberly.wma.network.model.CustomerModel
 import kr.co.kimberly.wma.network.model.DataModel
+import kr.co.kimberly.wma.network.model.DetailInfoModel
 import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.ObjectResultModel
 import kr.co.kimberly.wma.network.model.ProductPriceHistoryModel
-import kr.co.kimberly.wma.network.model.SalesInfoModel
 import kr.co.kimberly.wma.network.model.SapModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
@@ -24,7 +25,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
-import java.util.concurrent.TimeUnit
 
 interface ApiClientService {
     // 로그인
@@ -34,22 +34,28 @@ interface ApiClientService {
     ): Call<ObjectResultModel<LoginResponseModel>>
 
     // 주문&반품 전표 등록
-    @POST("wma/orderSlip")
+    @POST("wma/orderSlip/add")
     fun order(
         @Body requestBody: RequestBody
-    ): Call<ObjectResultModel<DataModel<SalesInfoModel>>>
+    ): Call<ObjectResultModel<DataModel<Unit>>>
 
     // 주문 전표 삭제
     @POST("wma/orderSlip/delete")
     fun delete(
         @Body requestBody: RequestBody
-    ): Call<ListResultModel<DataModel<Unit>>>
+    ): Call<ObjectResultModel<DataModel<Unit>>>
 
     // 주문 전표 수정
     @POST("wma/orderSlip/update")
     fun update(
         @Body requestBody: RequestBody
-    ): Call<ListResultModel<DataModel<Unit>>>
+    ): Call<ObjectResultModel<DataModel<Unit>>>
+
+    // 본사 구매 전표
+    @POST("wma/poOrderSlip/save")
+    fun headOfficeOrderSlip(
+        @Body requestBody: RequestBody
+    ): Call<ObjectResultModel<DataModel<Unit>>>
 
     // 고객 조회
     @GET("wma/customer/list")
@@ -126,22 +132,22 @@ interface ApiClientService {
     ): Call<ListResultModel<WarehouseStockModel>>
 
     // 기준정보 조회
-    @GET("wma/customer/list")
+    @GET("wma/masterInfo/info")
     fun masterInfo(
         @Query("agencyCd") agencyCd: String,
         @Query("userId") userId: String,
         @Query("searchType") searchType: String,
         @Query("searchCondition") searchCondition: String,
-    ): Call<ListResultModel<DataModel<Unit>>> // unit에는 customerModel or searchItemModel
+    ): Call<ObjectResultModel<DataModel<Any>>> // unit에는 customerModel or searchItemModel
 
     // 기준정보 상세조회
-    @GET("wma/customerDetail/list")
+    @GET("wma/masterInfoDetail/info")
     fun masterInfoDetail(
         @Query("agencyCd") agencyCd: String,
         @Query("userId") userId: String,
         @Query("searchType") searchType: String,
         @Query("searchCd") searchCd: String,
-    ): Call<ListResultModel<Unit>> // unit에는 customerModel or searchItemModel
+    ): Call<ObjectResultModel<DetailInfoModel>> // unit에는 customerModel or searchItemModel
 
     // 대리점 SAP 거래처 코드 조회
     @GET("wma/sapCode/info")
@@ -158,6 +164,14 @@ interface ApiClientService {
         @Query("sapCustomerCd") sapCustomerCd: String,
     ): Call<ListResultModel<SapModel>>
 
+    // 수금관리 거래처 선택 후 조회
+    @GET("wma/custBondSts/info")
+    fun customerBond(
+        @Query("agencyCd") agencyCd: String,
+        @Query("userId") userId: String,
+        @Query("customerCd") customerCd: String,
+    ): Call<ObjectResultModel<BalanceModel>>
+
     companion object {
         private val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -165,9 +179,9 @@ interface ApiClientService {
 
         private val client = OkHttpClient.Builder()
             .addInterceptor(logging)
-            .connectTimeout(30, TimeUnit.SECONDS)
+            /*.connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)*/
             .build()
 
         val retrofit: Retrofit = Retrofit.Builder()

@@ -23,7 +23,7 @@ import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.databinding.ActPrinterOptionBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.model.OrderRegModel
-import kr.co.kimberly.wma.network.model.SalesInfoModel
+import kr.co.kimberly.wma.network.model.SearchItemModel
 
 class PrinterOptionActivity : AppCompatActivity() {
     private lateinit var mBinding: ActPrinterOptionBinding
@@ -33,7 +33,7 @@ class PrinterOptionActivity : AppCompatActivity() {
     private lateinit var slipNo: String
     private lateinit var title: String
 
-    private var mReceipt: ArrayList<SalesInfoModel>? = null // 최종 아이템 데이터
+    private var mReceipt: ArrayList<SearchItemModel>? = null // 최종 아이템 데이터
 
     private val tscDll = TSCActivity()
 
@@ -48,9 +48,9 @@ class PrinterOptionActivity : AppCompatActivity() {
         mBinding.header.scanBtn.visibility = View.GONE
 
         mReceipt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getSerializableExtra("data") as? ArrayList<SalesInfoModel>
+            intent.getSerializableExtra("data") as? ArrayList<SearchItemModel>
         }else{
-            intent.getSerializableExtra("data") as? ArrayList<SalesInfoModel>
+            intent.getSerializableExtra("data") as? ArrayList<SearchItemModel>
         }
         slipNo = intent.getStringExtra("slipNo")!!
         title = intent.getStringExtra("title")!!
@@ -85,7 +85,7 @@ class PrinterOptionActivity : AppCompatActivity() {
                 if (!SettingActivity.checkPrinter) {
                     popupNotice("환경설정에서 프린터 사용여부를 확인 주세요.")
                 } else if (mBinding.printQuantity.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "인쇄 수량을 적어주세요.", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "인쇄 수량을 적어주세요.")
                     connectPrinter()
                 } else {
                     /*val receiptNumber = "TEXT 30, 10, \"K.BF2\", 0, 0, 1, \"전표 번호: ${mReceipt}\"\r\n"

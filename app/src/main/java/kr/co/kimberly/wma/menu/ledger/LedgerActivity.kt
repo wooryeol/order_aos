@@ -84,9 +84,9 @@ class LedgerActivity : AppCompatActivity() {
         mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 if (mBinding.tvDate.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "날짜를 선택해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "날짜를 선택해주세요")
                 } else if (mBinding.accountName.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "거래처를 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "거래처를 입력해주세요")
                 } else {
                     showCollectList()
                 }

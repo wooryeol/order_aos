@@ -14,12 +14,11 @@ import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
-import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.databinding.ActCollectManageBinding
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.CollectModel
-import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.LoginResponseModel
 import retrofit2.Call
 import retrofit2.Response
 
@@ -88,9 +87,9 @@ class CollectManageActivity : AppCompatActivity() {
             override fun onSingleClick(v: View) {
                 mBinding.accountName.text = getString(R.string.accountHint)
                 mBinding.btEmpty.visibility = View.INVISIBLE
-                collectList?.clear()
+                //collectList?.clear()
                 //showCollectList(collectList!!)
-                adapter?.notifyDataSetChanged()
+                //adapter?.notifyDataSetChanged()
             }
         })
 
@@ -138,7 +137,7 @@ class CollectManageActivity : AppCompatActivity() {
         val searchFromDate = mBinding.startDate.text.toString()
         val searchToDate = mBinding.endDate.text.toString()*/
 
-        // wooryeol
+        //test
         val agencyCd = "C000028"
         val userId = "mb2004"
         val searchFromDate = "2010/01/01"
@@ -153,14 +152,17 @@ class CollectManageActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         Utils.Log("item search success ====> ${Gson().toJson(item)}")
                         if (item.data.isNullOrEmpty()) {
-                            PopupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.", null).show()
+                            Utils.popupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.")
                         } else {
+                            collectList?.clear()
                             collectList = item.data as ArrayList<CollectModel>
                             showCollectList(collectList!!)
                         }
+                    } else {
+                        Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
                     Utils.Log("${response.code()} ====> ${response.message()}")

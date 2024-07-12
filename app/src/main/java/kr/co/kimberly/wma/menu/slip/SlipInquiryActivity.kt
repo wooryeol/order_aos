@@ -6,25 +6,23 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.adapter.SlipListAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupAccountSearchV2
+import kr.co.kimberly.wma.custom.popup.PopupAccountSlipSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker02
-import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.databinding.ActSlipInquiryBinding
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.CustomerModel
-import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
 import retrofit2.Response
@@ -36,7 +34,7 @@ class SlipInquiryActivity : AppCompatActivity() {
     private lateinit var mActivity: Activity
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
     private val orderSlipList = ArrayList<SlipOrderListModel>() // 주문&반품 전표 조회 리스트
-    private var popupSearchResult : PopupAccountSearchV2 ? = null
+    private var popupSearchResult : PopupAccountSlipSearch ? = null
     var slipAdapter: SlipListAdapter? = null
 
     @SuppressLint("SimpleDateFormat")
@@ -71,6 +69,15 @@ class SlipInquiryActivity : AppCompatActivity() {
                 mBinding.endDate.text = it
             }
             popupDatePicker.show()
+        }
+
+        mBinding.etAccountName.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE){
+                mBinding.btSearch.performClick()
+                true
+            } else {
+                false
+            }
         }
     }
     private fun dateToNumber(selectedDate: String): Int {
@@ -131,13 +138,12 @@ class SlipInquiryActivity : AppCompatActivity() {
         mBinding.btSearch.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 if (mBinding.startDate.text.isNullOrEmpty() || mBinding.endDate.text.isNullOrEmpty()) {
-                    Toast.makeText(v.context, "조회하실 날짜를 선택해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "조회하실 날짜를 선택해주세요")
                 } else if(mBinding.startDate.text.isNotEmpty() && mBinding.endDate.text.isNotEmpty()){
                     if (dateToNumber(mBinding.startDate.text.toString()) > dateToNumber(mBinding.endDate.text.toString())) {
-                        val popupNotice = PopupNotice(mContext, "입력한 날짜를 확인해주세요")
-                        popupNotice.show()
+                        Utils.popupNotice(mContext, "입력한 날짜를 확인해주세요")
                     } else if (mBinding.etAccountName.text.isNullOrEmpty()) {
-                        Toast.makeText(v.context, "거래처를 입력해주세요", Toast.LENGTH_SHORT).show()
+                        Utils.popupNotice(mContext, "거래처를 입력해주세요")
                     } else {
                         // 거래처 검색
                         searchCustomer()
@@ -159,20 +165,21 @@ class SlipInquiryActivity : AppCompatActivity() {
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnMsg == Define.SUCCESS) {
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         Utils.Log("account search success ====> ${Gson().toJson(item)}")
                         if (item.data.isNullOrEmpty()) {
-                            PopupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.", null).show()
+                            Utils.popupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.")
                         } else {
                             val list = item.data as ArrayList<CustomerModel>
                             val searchFromDate = mBinding.startDate.text.toString()
                             val searchToDate = mBinding.endDate.text.toString()
-                            popupSearchResult = PopupAccountSearchV2(mBinding.root.context, list, searchFromDate, searchToDate, mBinding.radioOrder.isChecked)
+                            popupSearchResult = PopupAccountSlipSearch(mBinding.root.context, list, searchFromDate, searchToDate, mBinding.radioOrder.isChecked)
                             popupSearchResult?.onTitleSelect = {
                                 mBinding.tvAccountName.isSelected = true
                                 mBinding.tvAccountName.text = it.custNm
                                 mBinding.etAccountName.visibility = View.GONE
                                 mBinding.tvAccountName.visibility = View.VISIBLE
+
 
                                 if (!mBinding.tvAccountName.text.isNullOrEmpty()) {
                                     showCollectList()

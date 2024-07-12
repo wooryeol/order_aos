@@ -210,4 +210,5 @@
     <!-- 프린트 -->
     <string name="titleReturn">반품승인</string>
     <string name="titleOrder">주문승인</string>
+    <string name="payMethod">결제방법</string>
 </resources>

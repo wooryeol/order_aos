@@ -9,12 +9,16 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SlipInquiryDetailAdapter
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActPurchaseApprovalBinding
+import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.network.model.OrderRegModel
+import kr.co.kimberly.wma.network.model.SapModel
+import kr.co.kimberly.wma.network.model.SearchItemModel
 import java.text.DecimalFormat
 
 class PurchaseApprovalActivity: AppCompatActivity() {
@@ -22,13 +26,23 @@ class PurchaseApprovalActivity: AppCompatActivity() {
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
 
-    var totalAmount = 0
+    private var slipNo: String? = null // 전표 번호
+    private var sapModel: SapModel? = null // SAP Code 정보
+    private var purchaseList: ArrayList<SearchItemModel>? = null // 구매 아이템 리스트
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActPurchaseApprovalBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
+
+        slipNo = intent.getStringExtra("slipNo")
+        sapModel = intent.getSerializableExtra("sapModel") as SapModel
+        purchaseList = intent.getSerializableExtra("purchaseList") as ArrayList<SearchItemModel>
+
+        Utils.Log("slipNo ====> ${Gson().toJson(slipNo)}")
+        Utils.Log("sapModel ====> ${Gson().toJson(sapModel)}")
+        Utils.Log("purchaseList ====> ${Gson().toJson(purchaseList)}")
 
         mContext = this
         mActivity = this
@@ -38,37 +52,33 @@ class PurchaseApprovalActivity: AppCompatActivity() {
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                startActivity(Intent(mContext, PurchaseRequestActivity::class.java))
+                startActivity(Intent(mContext, MainActivity::class.java)).apply {
+                }
                 finish()
             }
         })
 
-        /*mBinding.accountCode.text = PurchaseRequestActivity.accountName
-        mBinding.purchaseAddress.text = PurchaseRequestActivity.purchaseAddress*/
-
         val adapter = SlipInquiryDetailAdapter(mContext) { items, _ ->
             /*var totalMoney = 0
-
             items.map {
                 val stringWithoutComma = it.totalAmount.replace(",", "")
                 totalMoney += stringWithoutComma.toInt()
             }
-
             val formatTotalMoney = decimal.format(totalMoney).toString()
             mBinding.tvTotalAmount.text = "${formatTotalMoney}원"*/
-
         }
 
-        /*adapter.dataList = PurchaseRequestActivity.purchaseAdapter!!.dataList
+        adapter.dataList = purchaseList!!
         mBinding.recyclerview.adapter = adapter
-        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)*/
+        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
 
-        var totalMoney = 0
-        adapter.dataList.map {
-            /*val stringWithoutComma = it.totalAmount.replace(",", "")
-            totalMoney += stringWithoutComma.toInt()*/
-        }
-        val formatTotalMoney = Utils.decimal(totalMoney)
-        mBinding.tvTotalAmount.text = "${formatTotalMoney}원"
+        val totalMoney = purchaseList!!.mapNotNull {
+            it.amount
+        }.sum()
+
+        mBinding.tvTotalAmount.text = "${Utils.decimal(totalMoney)}원"
+        mBinding.accountCode.text = "(${sapModel?.sapCustomerCd}) ${sapModel?.sapCustomerNm}"
+        mBinding.purchaseAddress.text = "(${sapModel?.arriveCd}) ${sapModel?.arriveNm}"
+
     }
 }

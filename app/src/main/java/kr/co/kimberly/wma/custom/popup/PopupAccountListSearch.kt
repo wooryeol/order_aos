@@ -1,46 +1,42 @@
 package kr.co.kimberly.wma.custom.popup
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.databinding.PopupAccountSearchBinding
+import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
+import kr.co.kimberly.wma.menu.slip.SlipInquiryActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.CustomerModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
 import retrofit2.Response
 
 @SuppressLint("NotifyDataSetChanged")
-class PopupAccountSearch(mContext: Context): Dialog(mContext) {
-    private lateinit var mBinding: PopupAccountSearchBinding
+class PopupAccountListSearch(mContext: Context, private val searchCondition: String): Dialog(mContext) {
+    private lateinit var mBinding: PopupSearchResultBinding
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
     private var context = mContext
-
     var onItemSelect: ((CustomerModel) -> Unit)? = null
-    var list : List<CustomerModel>? = null
     var adapter: AccountSearchAdapter? = null
+    var dataList: ArrayList<CustomerModel> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = PopupAccountSearchBinding.inflate(layoutInflater)
+        mBinding = PopupSearchResultBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         initViews()
@@ -56,40 +52,14 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
+        mBinding.title.text = context.getString(R.string.account)
+
+        // 아이템 검색
+        searchCustomer(searchCondition)
+
         adapter = AccountSearchAdapter(context)
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(context)
-
-        mBinding.btLogin.setOnClickListener(object : OnSingleClickListener() {
-            @SuppressLint("NotifyDataSetChanged")
-            override fun onSingleClick(v: View) {
-                if (mBinding.etAccount.text.isNullOrEmpty()) {
-                    Utils.popupNotice(context, "거래처를 입력해주세요")
-                } else {
-                    searchCustomer() // 거래처 검색 통신
-                    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                    inputMethodManager.hideSoftInputFromWindow(mBinding.etAccount.windowToken, 0)
-                }
-            }
-        })
-
-        mBinding.etAccount.addTextChangedListener {
-            if (mBinding.etAccount.text.isNullOrEmpty()) {
-                mBinding.btProductNameEmpty.visibility = View.GONE
-            } else {
-                mBinding.btProductNameEmpty.visibility = View.VISIBLE
-            }
-        }
-
-        mBinding.btProductNameEmpty.setOnClickListener(object : OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
-                mBinding.etAccount.text = null
-                adapter?.dataList = emptyList()
-                mBinding.noSearch.visibility = View.GONE
-                mBinding.recyclerview.visibility = View.VISIBLE
-                adapter?.notifyDataSetChanged()
-            }
-        })
 
         adapter?.itemClickListener = object: AccountSearchAdapter.ItemClickListener {
             override fun onItemClick(item: CustomerModel) {
@@ -98,20 +68,11 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
             }
         }
 
-        mBinding.btnClose.setOnClickListener(object : OnSingleClickListener(){
+        mBinding.btnClose.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 hideDialog()
             }
         })
-
-        mBinding.etAccount.setOnEditorActionListener { v, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE){
-                mBinding.btLogin.performClick()
-                true
-            } else {
-                false
-            }
-        }
     }
 
     fun hideDialog() {
@@ -119,18 +80,9 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
             dismiss()
         }
     }
-    fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-            val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager?
-            imm!!.hideSoftInputFromWindow(mBinding.btLogin.windowToken, 0) //hide keyboard
-            return true
-        }
-        return false
-    }
 
-    private fun searchCustomer() {
+    private fun searchCustomer(searchCondition: String) {
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        val searchCondition = mBinding.etAccount.text.toString()
         val call = service.client(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, searchCondition)
 
         call.enqueue(object : retrofit2.Callback<ListResultModel<CustomerModel>> {
@@ -143,21 +95,15 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         Utils.Log("account search success ====> ${Gson().toJson(item)}")
 
-                        if (item.data.isNullOrEmpty()) {
-                            Utils.popupNotice(context, "조회 결과가 없습니다.\n다시 검색해주세요.")
-                        } else {
-                            list = item.data
-                            adapter?.dataList = list!!
-                            adapter?.notifyDataSetChanged()
+                        dataList = item.data as ArrayList<CustomerModel>
 
-                            if (list.isNullOrEmpty()) {
-                                mBinding.recyclerview.visibility = View.GONE
-                                mBinding.noSearch.visibility = View.VISIBLE
-                            } else {
-                                mBinding.recyclerview.visibility = View.VISIBLE
-                                mBinding.noSearch.visibility = View.GONE
-                            }
+                        if(dataList.size > 6) {
+                            Utils.dialogResize(context, window)
                         }
+
+                        adapter?.dataList = dataList
+                        adapter?.notifyDataSetChanged()
+
                     } else {
                         Utils.popupNotice(context, item?.returnMsg!!)
                     }
@@ -173,5 +119,4 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
 
         })
     }
-
 }

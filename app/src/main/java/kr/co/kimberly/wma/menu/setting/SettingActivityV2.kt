@@ -1,24 +1,18 @@
 package kr.co.kimberly.wma.menu.setting
 
 import android.app.Activity
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.RadioGroup.OnCheckedChangeListener
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevicesV2
 import kr.co.kimberly.wma.databinding.ActSettingV2Binding
 
@@ -30,8 +24,7 @@ class SettingActivityV2 : AppCompatActivity() {
 
     private val bluetoothOnResultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_CANCELED) {
-            val popupNotice = PopupNotice(mContext, "블루투스를 켜야 사용 가능합니다.")
-            popupNotice.show()
+            Utils.popupNotice(mContext, "블루투스를 켜야 사용 가능합니다.")
         }
     }
 

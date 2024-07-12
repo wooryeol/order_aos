@@ -11,7 +11,7 @@ android {
         applicationId = "kr.co.kimberly.wma"
         minSdk = 28
         targetSdk = 34
-        versionCode = 24070801
+        versionCode = 24071201
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -19,6 +19,7 @@ android {
     }
 
     buildTypes {
+
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -80,4 +81,7 @@ dependencies {
     //코루틴
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
+
+    //이미지 로딩
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
 }

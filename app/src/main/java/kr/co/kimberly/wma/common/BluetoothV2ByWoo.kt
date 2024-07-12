@@ -14,15 +14,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
-import android.view.View
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.recyclerview.widget.RecyclerView
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.custom.popup.PopupNotice
@@ -64,7 +59,6 @@ class BluetoothV2ByWoo(context: Context, activity: Activity, private val list: A
             when(intent.action) {
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
                     Utils.Log("bluetooth 가능 기기를 탐색합니다.")
-                    //Toast.makeText(mContext, "bluetooth 가능 기기를 탐색합니다.", Toast.LENGTH_SHORT).show()
                 }
                 BluetoothDevice.ACTION_FOUND -> {
                     if (!isPaired) {
@@ -135,8 +129,7 @@ class BluetoothV2ByWoo(context: Context, activity: Activity, private val list: A
     @SuppressLint("MissingPermission")
     fun checkBluetoothAvailable() {
         if (mBluetoothAdapter == null) {
-            val popupNotice = PopupNotice(mContext, "블루투스를 지원하지 않는 기기입니다.")
-            popupNotice.show()
+            Utils.popupNotice(mContext, "블루투스를 지원하지 않는 기기입니다.")
         } else {
             if (!mBluetoothAdapter.isEnabled) {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -185,8 +178,7 @@ class BluetoothV2ByWoo(context: Context, activity: Activity, private val list: A
             if (it.resultCode == RESULT_OK) {
                 discovery()
             } else if (it.resultCode == RESULT_CANCELED) {
-                val popupNotice = PopupNotice(mContext, "블루투스 기능이 켜져있는지 확인 해주세요")
-                popupNotice.show()
+                Utils.popupNotice(mContext, "블루투스 기능이 켜져있는지 확인 해주세요")
             }
         }
 

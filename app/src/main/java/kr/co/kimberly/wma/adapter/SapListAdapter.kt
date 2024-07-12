@@ -28,41 +28,17 @@ class SapListAdapter(context: Context, val returnCd: String): RecyclerView.Adapt
                     binding.accountSearchName.text = "(${itemModel.sapCustomerCd}) ${itemModel.sapCustomerNm}"
 
                     itemView.setOnClickListener {
-                        Utils.Log("selected sapCustomerNm ====> (${itemModel.sapCustomerCd}) ${itemModel.sapCustomerNm}")
+                        //Utils.Log("selected sapCustomerNm ====> (${itemModel.sapCustomerCd}) ${itemModel.sapCustomerNm}")
                         itemClickListener?.onItemClick(itemModel)
-                        /*val intent = Intent(itemView.context, MessageActivity::class.java)
-                        intent.putExtra(Define.UNIQUE, itemModel.name)
-                        intent.putExtra(Define.D_COUNT, binding.dCount.text.toString())
-                        intent.putExtra(Define.MEMBER_TYPE, itemModel.type)
-                        intent.putExtra(Define.MAIN_COLOR, itemModel.color)
-                        intent.putExtra(Define.MAIN_NAME, itemModel.name_kor)
-                        intent.putExtra(Define.TOP_THUMB, itemModel.top_thumbnail)
-                        intent.putExtra(Define.TOP_THUMB_LINK, itemModel.top_thumbnail_link)
-                        intent.putExtra(Define.CHANGE_THUMB, itemModel.change_thumb)
-                        intent.putExtra(Define.MENU_SW, isMenuSw)
-                        itemView.context.startActivity(intent)
-                        mActivity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right)*/
                     }
                 }
 
                 Define.RETURN_CD_91 -> {
-                    binding.accountSearchName.text = "(${itemModel.arriveNm}) ${itemModel.arriveCd}"
+                    binding.accountSearchName.text = "(${itemModel.arriveCd}) ${itemModel.arriveNm}"
 
                     itemView.setOnClickListener {
-                        Utils.Log("selected arriveNm ====> (${itemModel.sapCustomerCd}) ${itemModel.sapCustomerNm}")
+                        //Utils.Log("selected arriveNm ====> (${itemModel.arriveCd}) ${itemModel.arriveNm}")
                         itemClickListener?.onItemClick(itemModel)
-                        /*val intent = Intent(itemView.context, MessageActivity::class.java)
-                        intent.putExtra(Define.UNIQUE, itemModel.name)
-                        intent.putExtra(Define.D_COUNT, binding.dCount.text.toString())
-                        intent.putExtra(Define.MEMBER_TYPE, itemModel.type)
-                        intent.putExtra(Define.MAIN_COLOR, itemModel.color)
-                        intent.putExtra(Define.MAIN_NAME, itemModel.name_kor)
-                        intent.putExtra(Define.TOP_THUMB, itemModel.top_thumbnail)
-                        intent.putExtra(Define.TOP_THUMB_LINK, itemModel.top_thumbnail_link)
-                        intent.putExtra(Define.CHANGE_THUMB, itemModel.change_thumb)
-                        intent.putExtra(Define.MENU_SW, isMenuSw)
-                        itemView.context.startActivity(intent)
-                        mActivity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right)*/
                     }
                 }
             }

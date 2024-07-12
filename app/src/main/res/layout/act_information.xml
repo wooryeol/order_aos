@@ -56,19 +56,52 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <EditText
-                android:id="@+id/etSearch"
-                android:singleLine="true"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:layout_weight="1"
-                android:textSize="16dp"
-                android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
+                android:orientation="horizontal"
+                android:layout_marginStart="16dp"
                 android:layout_marginEnd="8dp"
-                android:hint="@string/accountHint"
-                tools:ignore="Autofill,SpUsage,TextFields" />
+                android:layout_weight="1"
+                android:background="@drawable/et_round_c9cbd0"
+                android:layout_gravity="center_vertical">
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:singleLine="true"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="40dp"
+                    android:textSize="16dp"
+                    android:background="@color/trans"
+                    android:paddingVertical="10dp"
+                    android:paddingHorizontal="12dp"
+                    android:inputType="text"
+                    android:hint="@string/accountHint"
+                    tools:ignore="Autofill,NestedWeights,SpUsage,TextFields" />
+
+                <TextView
+                    android:visibility="gone"
+                    android:id="@+id/tvProductName"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:textSize="16dp"
+                    android:background="@color/trans"
+                    android:paddingVertical="10dp"
+                    android:paddingHorizontal="12dp"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:singleLine="true"
+                    tools:ignore="SpUsage" />
+
+                <ImageButton
+                    android:visibility="gone"
+                    android:id="@+id/btProductNameEmpty"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@color/trans"
+                    android:src="@drawable/ic_empty" />
+                </LinearLayout>
 
             <Button
                 android:id="@+id/search"
@@ -538,6 +571,8 @@
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
                 android:gravity="end"
+                android:singleLine="true"
+                android:ellipsize="marquee"
                 tools:ignore="SpUsage" />
 
         </LinearLayout>

@@ -6,8 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.CellSearchResultBinding
-import kr.co.kimberly.wma.network.model.CustomerModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 
 class SearchResultAdapter(context: Context): RecyclerView.Adapter<SearchResultAdapter.ViewHolder>() {
@@ -18,13 +19,20 @@ class SearchResultAdapter(context: Context): RecyclerView.Adapter<SearchResultAd
     inner class ViewHolder(val binding: CellSearchResultBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: SearchItemModel) {
-            if (itemModel.slipNo.isNullOrEmpty()){
-                binding.accountSearchName.text = "(${itemModel.itemCd}) ${itemModel.itemNm} [${itemModel.whStock}]"
-            } else {
-
-            }
+            binding.accountSearchName.text = "(${itemModel.itemCd}) ${itemModel.itemNm} [${itemModel.whStock}]"
 
             itemView.setOnClickListener {
+                Utils.Log("clicked item ====> ${Gson().toJson(itemModel)}")
+                // 본사 발주 가능일 때
+                /*if(itemModel.enableOrderYn == "N") {
+                    itemClickListener?.onItemClick(itemModel)
+                } else {
+                    //본사 발주 불가능일 때
+                    val item = SpannableString("(${itemModel.itemCd}) ${itemModel.itemNm}")
+                    item.setSpan(UnderlineSpan(), 0, item.length, 0)
+                    PopupNotice(mContext, "(${itemModel.itemCd}) ${itemModel.itemNm}\n해당 제품은 현재 본사 발주가 불가능합니다.").show()
+                }*/
+
                 itemClickListener?.onItemClick(itemModel)
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
                 intent.putExtra(Define.UNIQUE, itemModel.name)

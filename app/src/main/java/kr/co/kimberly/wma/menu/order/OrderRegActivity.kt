@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
@@ -17,15 +16,12 @@ import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
-import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.databinding.ActOrderRegBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.ObjectResultModel
-import kr.co.kimberly.wma.network.model.SalesInfoModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
@@ -76,7 +72,8 @@ class OrderRegActivity : AppCompatActivity() {
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                finish()
+                // 주문 도중 나갈 경우 나타내는 팝업
+                Utils.backBtnPopup(mContext, mActivity, orderAdapter?.dataList!!)
             }
         })
 
@@ -84,7 +81,7 @@ class OrderRegActivity : AppCompatActivity() {
             override fun onSingleClick(v: View) {
                 val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $accountName\n총금액: ${Utils.decimal(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
                 if (orderAdapter?.dataList!!.isEmpty()) {
-                    Toast.makeText(mContext, "제품이 등록되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "제품이 등록되지 않았습니다.")
                 } else {
                     popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                         override fun onCancelClick() {
@@ -122,19 +119,18 @@ class OrderRegActivity : AppCompatActivity() {
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
         val call = service.order(body)
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<SalesInfoModel>>> {
+        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<Unit>>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<DataModel<SalesInfoModel>>>,
-                response: Response<ObjectResultModel<DataModel<SalesInfoModel>>>
+                call: Call<ObjectResultModel<DataModel<Unit>>>,
+                response: Response<ObjectResultModel<DataModel<Unit>>>
             ) {
                 if (response.isSuccessful) {
                     val item = response.body()
-                    Utils.Log("item ===> ${Gson().toJson(item)}")
                     if (item?.returnCd == Define.RETURN_CD_00) {
                         Utils.Log("order success ====> ${Gson().toJson(item)}")
                         val data = orderAdapter?.dataList
                         val slipNo = item.data?.slipNo
-                        Toast.makeText(mContext, "주문이 전송되었습니다.", Toast.LENGTH_SHORT).show()
+                        Utils.toast(mContext, "주문이 전송되었습니다.")
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
                             putExtra("data", data)
                             putExtra("slipNo", slipNo)
@@ -143,14 +139,14 @@ class OrderRegActivity : AppCompatActivity() {
                         startActivity(intent)
                         finish()
                     } else {
-                        PopupNotice(mContext, item?.returnMsg!!).show()
+                        Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
                     Utils.Log("${response.code()} ====> ${response.message()}")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<DataModel<SalesInfoModel>>>, t: Throwable) {
+            override fun onFailure(call: Call<ObjectResultModel<DataModel<Unit>>>, t: Throwable) {
                 Utils.Log("order failed ====> ${t.message}")
             }
 

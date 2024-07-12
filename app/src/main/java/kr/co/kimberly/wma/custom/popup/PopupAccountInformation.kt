@@ -6,10 +6,14 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
+import kr.co.kimberly.wma.adapter.InformationAdapter
 import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
 import kr.co.kimberly.wma.network.model.CustomerModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
@@ -17,20 +21,22 @@ import kr.co.kimberly.wma.network.model.SearchItemModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
 
 @SuppressLint("NotifyDataSetChanged")
-class PopupAccountInformation(mContext: Context, val accountList: ArrayList<CustomerModel>? = null, val itemList: ArrayList<SearchItemModel>? = null): Dialog(mContext) {
+class PopupAccountInformation(mContext: Context, private val accountList: ArrayList<SlipOrderListModel>? = null, private val itemList: ArrayList<SearchItemModel>? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupSearchResultBinding
     private lateinit var mLoginInfo: LoginResponseModel // 로그인 정보
     private var context = mContext
 
-    var onItemSelect: ((ArrayList<SlipOrderListModel>) -> Unit)? = null
-    var onTitleSelect: ((CustomerModel) -> Unit)? = null
-    var adapter: AccountSearchAdapter? = null
+    var onAccountSelect: ((SlipOrderListModel) -> Unit)? = null
+    var onItemSelect: ((SearchItemModel) -> Unit)? = null
+    var adapter: InformationAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = PopupSearchResultBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
+        Utils.Log("accountList ====> ${Gson().toJson(accountList)}")
+        Utils.Log("itemList ====> ${Gson().toJson(itemList)}")
         initViews()
     }
 
@@ -44,21 +50,38 @@ class PopupAccountInformation(mContext: Context, val accountList: ArrayList<Cust
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
-        if(accountList?.size!! > 6) {
-            Utils.dialogResize(context, window)
+        adapter = InformationAdapter(context)
+        if (accountList == null) {
+            adapter?.itemList = itemList!!
+            if(itemList.size > 6) {
+                Utils.dialogResize(context, window)
+            }
+        } else {
+            adapter?.accountList = accountList
+            if(accountList.size > 6) {
+                Utils.dialogResize(context, window)
+            }
         }
 
-        adapter = AccountSearchAdapter(context)
-        //adapter?.dataList = dataList
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(context)
 
-        adapter?.itemClickListener = object: AccountSearchAdapter.ItemClickListener {
-            override fun onItemClick(item: CustomerModel) {
-                onTitleSelect?.invoke(item)
+        adapter?.itemClickListener = object: InformationAdapter.ItemClickListener {
+            override fun onAccountClick(item: SlipOrderListModel) {
+                onAccountSelect?.invoke(item)
+                hideDialog()
+            }
+
+            override fun onItemClick(item: SearchItemModel) {
+                onItemSelect?.invoke(item)
                 hideDialog()
             }
         }
+        mBinding.btnClose.setOnClickListener(object : OnSingleClickListener(){
+            override fun onSingleClick(v: View) {
+                hideDialog()
+            }
+        })
     }
 
     fun hideDialog() {
