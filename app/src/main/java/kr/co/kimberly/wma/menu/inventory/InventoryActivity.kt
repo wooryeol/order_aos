@@ -16,17 +16,16 @@ import kr.co.kimberly.wma.adapter.InventoryListAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupNotice
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.custom.popup.PopupWarehouseList
 import kr.co.kimberly.wma.databinding.ActInventoryBinding
 import kr.co.kimberly.wma.network.ApiClientService
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.WarehouseListModel
 import kr.co.kimberly.wma.network.model.WarehouseStockModel
 import retrofit2.Call
 import retrofit2.Response
-
 
 class InventoryActivity : AppCompatActivity() {
     private lateinit var mBinding: ActInventoryBinding
@@ -46,7 +45,7 @@ class InventoryActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
-        mLoginInfo = Utils.getLoginData()!!
+        mLoginInfo = Utils.getLoginData()
         agencyCd =  mLoginInfo.agencyCd!!
         userId = mLoginInfo.userId!!
 
@@ -82,7 +81,7 @@ class InventoryActivity : AppCompatActivity() {
 
         })
 
-        mBinding.etProductName.setOnEditorActionListener { v, actionId, event ->
+        mBinding.etProductName.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE){
                 mBinding.search.performClick()
                 true
@@ -155,22 +154,25 @@ class InventoryActivity : AppCompatActivity() {
     }
 
     private fun warehouseList(){
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.warehouseList(agencyCd, userId)
 
         //test
         //val call = service.warehouseList("C000028", "mb2004")
 
-        call.enqueue(object : retrofit2.Callback<ListResultModel<WarehouseListModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<List<WarehouseListModel>>> {
             @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
             override fun onResponse(
-                call: Call<ListResultModel<WarehouseListModel>>,
-                response: Response<ListResultModel<WarehouseListModel>>
+                call: Call<ResultModel<List<WarehouseListModel>>>,
+                response: Response<ResultModel<List<WarehouseListModel>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                        Utils.Log("warehouse search success ====> ${Gson().toJson(item)}")
+                        Utils.log("warehouse search success ====> ${Gson().toJson(item)}")
                         val list = item.data as ArrayList<WarehouseListModel>
                         val popupWarehouseList = PopupWarehouseList(mContext, list)
                         popupWarehouseList.onItemSelect = {
@@ -192,12 +194,15 @@ class InventoryActivity : AppCompatActivity() {
                         popupWarehouseList.show()
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ListResultModel<WarehouseListModel>>, t: Throwable) {
-                Utils.Log("warehouse search failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<List<WarehouseListModel>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("warehouse search failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
         })
@@ -205,41 +210,43 @@ class InventoryActivity : AppCompatActivity() {
 
     // 검색 아이템 리스트 조회
     fun warehouseStock(searchCondition: String) {
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.warehouseStock(agencyCd, userId, warehouseCd!!, searchCondition)
         //test
         //val call = service.warehouseStock("C000028", "mb2004", "I001", "하기스")
 
-        call.enqueue(object : retrofit2.Callback<ListResultModel<WarehouseStockModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<List<WarehouseStockModel>>> {
             override fun onResponse(
-                call: Call<ListResultModel<WarehouseStockModel>>,
-                response: Response<ListResultModel<WarehouseStockModel>>
+                call: Call<ResultModel<List<WarehouseStockModel>>>,
+                response: Response<ResultModel<List<WarehouseStockModel>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                        if (item.data.isNullOrEmpty()) {
-                            Utils.popupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.")
-                        } else {
-                            Utils.Log("stock search success ====> ${Gson().toJson(item.data)}")
-                            itemList = item.data as ArrayList<WarehouseStockModel>
-                            showInventoryList(itemList!!)
+                        Utils.log("stock search success ====> ${Gson().toJson(item.data)}")
+                        itemList = item.data as ArrayList<WarehouseStockModel>
+                        showInventoryList(itemList!!)
 
-                            mBinding.etProductName.visibility = View.GONE
-                            mBinding.tvProductName.text = searchCondition
-                            mBinding.tvProductName.visibility = View.VISIBLE
-                            mBinding.btProductNameEmpty.visibility = View.VISIBLE
-                        }
+                        mBinding.etProductName.visibility = View.GONE
+                        mBinding.tvProductName.text = searchCondition
+                        mBinding.tvProductName.visibility = View.VISIBLE
+                        mBinding.btProductNameEmpty.visibility = View.VISIBLE
                     } else {
                         Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ListResultModel<WarehouseStockModel>>, t: Throwable) {
-                Utils.Log("stock failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<List<WarehouseStockModel>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("stock failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
         })

@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.google.gson.Gson
 import kr.co.kimberly.wma.GlobalApplication
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.network.model.LoginResponseModel
@@ -186,7 +187,7 @@ object Utils {
         }
     }
 
-    fun Log(msg: String) {
+    fun log(msg: String) {
             android.util.Log.d("kimberly_aos", msg)
     }
 
@@ -196,8 +197,17 @@ object Utils {
         return stringWithoutCommas.toInt()
     }
 
+    // 내일 날짜
+    fun getNextDay(): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        return dateFormat.format(calendar.time)
+    }
+
+
     // 로그인 정보 가져오기
-    fun getLoginData(): LoginResponseModel? {
+    fun getLoginData(): LoginResponseModel {
         val json = SharedData.getSharedData(
             GlobalApplication.applicationContext(),
             SharedData.LOGIN_DATA,

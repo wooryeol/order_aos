@@ -148,7 +148,7 @@ class StoreManagementActivity : AppCompatActivity() {
                 } else {
                     popupSingleMessage.itemClickListener = object: PopupSingleMessage.ItemClickListener {
                         override fun onCancelClick() {
-                            Utils.Log("취소 클릭함")
+                            Utils.log("취소 클릭함")
                         }
 
                         @SuppressLint("UseCompatLoadingForDrawables")
@@ -268,7 +268,7 @@ class StoreManagementActivity : AppCompatActivity() {
     private fun addImageView(uri: Uri) {
         val exifInterface = Utils.getOrientationOfImage(mContext, uri)
         val bitmap = Utils.getRotatedBitmap(Utils.uriToBitmap(mActivity, uri), exifInterface.toFloat())
-        Utils.Log("bitmap ====> $bitmap")
+        Utils.log("bitmap ====> $bitmap")
 
         if (bitmap != null) {
             if (isAddImgSw == 0) {

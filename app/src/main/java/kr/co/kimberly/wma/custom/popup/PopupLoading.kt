@@ -2,24 +2,26 @@ package kr.co.kimberly.wma.custom.popup
 
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
+import android.provider.Settings
 import android.view.View
 import android.widget.LinearLayout
-import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.databinding.PopupNoticeV2Binding
+import kr.co.kimberly.wma.databinding.PopupLoadingBinding
+import kr.co.kimberly.wma.databinding.PopupNoticeBinding
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 
-class PopupNoticeV2(mContext: Context, private val msg:String, val mHandler: Handler): Dialog(mContext) {
-    private lateinit var mBinding: PopupNoticeV2Binding
+class PopupLoading(mContext: Context): Dialog(mContext) {
+    private lateinit var mBinding: PopupLoadingBinding
     private val context = mContext
-    var itemClickListener: ItemClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = PopupNoticeV2Binding.inflate(layoutInflater)
+        mBinding = PopupLoadingBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         initViews()
@@ -32,23 +34,6 @@ class PopupNoticeV2(mContext: Context, private val msg:String, val mHandler: Han
         // corner radius 가 보이지 않음
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-
-        mBinding.tvMsg.text = msg
-
-        mBinding.ok.setOnClickListener(object : OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
-                mHandler.sendEmptyMessage(Define.EVENT_OK)
-                hideDialog()
-            }
-        })
-
-        mBinding.cancel.setOnClickListener(object : OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
-                mHandler.sendEmptyMessage(Define.EVENT_CANCEL)
-                hideDialog()
-            }
-        })
-
 
     }
 

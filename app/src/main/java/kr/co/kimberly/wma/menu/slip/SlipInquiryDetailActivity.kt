@@ -16,12 +16,13 @@ import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.databinding.ActSlipInquiryDetailBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -58,7 +59,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
         totalAmount = intent.getIntExtra("totalAmount", 0)
         orderSlipList = intent.getSerializableExtra("list") as ArrayList<SearchItemModel>
 
-        Utils.Log("SlipInquiryDetailActivity\nslipNo ====> $slipNo\ncustomerCd ====> $customerCd\ncustomerNm ====> $customerNm\nenableButtonYn ====> $enableButtonYn\ntotalAmount ====> $totalAmount\norderSlipList ====> ${Gson().toJson(orderSlipList)}")
+        Utils.log("SlipInquiryDetailActivity\nslipNo ====> $slipNo\ncustomerCd ====> $customerCd\ncustomerNm ====> $customerNm\nenableButtonYn ====> $enableButtonYn\ntotalAmount ====> $totalAmount\norderSlipList ====> ${Gson().toJson(orderSlipList)}")
 
         showList()
         setUi()
@@ -85,7 +86,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
         val popupDoubleMessage = PopupDoubleMessage(mContext, "주문전표삭제", "주문번호: ${mBinding.receiptNumber.text}", "선택한 전표가 전표 리스트에서 삭제됩니다.\n삭제하시겠습니까?")
         popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
             override fun onCancelClick() {
-                Utils.Log("취소 클릭")
+                Utils.log("취소 클릭")
             }
 
             override fun onOkClick() {
@@ -101,14 +102,14 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
                 val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : ($customerCd) $customerNm\n총금액: ${Utils.decimal(totalAmount!!)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
                 popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                     override fun onCancelClick() {
-                        Utils.Log("취소 클릭")
+                        Utils.log("취소 클릭")
                     }
 
                     override fun onOkClick() {
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
+                            putExtra("slipNo", slipNo)
                             //test
-                            //putExtra("slipNo", slipNo)
-                            putExtra("slipNo", "20240600015")
+                            //putExtra("slipNo", "20240600015")
                             putExtra("customerCd", customerCd)
                             putExtra("customerNm", customerNm)
                             putExtra("totalAmount", totalAmount)
@@ -124,9 +125,9 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
     }
     private fun moveToEditPage() {
         val intent = Intent(mContext, SlipInquiryModifyActivity::class.java).apply {
+            putExtra("slipNo", slipNo)
             //test
-            //putExtra("slipNo", slipNo)
-            putExtra("slipNo", "20240600015")
+            //putExtra("slipNo", "20240600015")
             putExtra("customerCd", customerCd)
             putExtra("customerNm", customerNm)
             putExtra("enableButtonYn", enableButtonYn)
@@ -162,8 +163,9 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
     }
 
     private fun delete() {
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        val deliveryDate = Utils.getCurrentDateFormatted()
 
         val json = JsonObject().apply {
             addProperty("agencyCd", mLoginInfo.agencyCd)
@@ -175,21 +177,22 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
             addProperty("totalAmount", totalAmount)
         }
 
-        Utils.Log("final delete json ====> ${Gson().toJson(json)}")
+        Utils.log("final delete json ====> ${Gson().toJson(json)}")
 
         val obj = json.toString()
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
         val call = service.delete(body)
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<Unit>>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<Unit>>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<DataModel<Unit>>>,
-                response: Response<ObjectResultModel<DataModel<Unit>>>
+                call: Call<ResultModel<DataModel<Unit>>>,
+                response: Response<ResultModel<DataModel<Unit>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                        Utils.Log("delete success ====> ${Gson().toJson(item)}")
+                        Utils.log("delete success ====> ${Gson().toJson(item)}")
                         Utils.toast(mContext, "전표가 삭제되었습니다.")
                         Intent().putExtra("deletedSlipNo", slipNo).apply {
                             setResult(Activity.RESULT_OK, this)
@@ -199,12 +202,15 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
                         Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<DataModel<Unit>>>, t: Throwable) {
-                Utils.Log("delete failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<DataModel<Unit>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("delete failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
         })
     }

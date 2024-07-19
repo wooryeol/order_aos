@@ -10,36 +10,41 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
+import android.widget.MultiAutoCompleteTextView
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import kotlinx.coroutines.flow.combine
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
+import kr.co.kimberly.wma.db.DBHelper
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
 import kr.co.kimberly.wma.network.model.ProductPriceHistoryModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import retrofit2.Call
 import retrofit2.Response
 import kotlin.math.ceil
 
-class RegAdapter(mContext: Context, mActivity: Activity, private val updateData: ((ArrayList<SearchItemModel>, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchItemModel>, private val updateData: ((ArrayList<SearchItemModel>, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
     var activity = mActivity
-    var dataList: ArrayList<SearchItemModel> = ArrayList()
+    var dataList = list
     var selectedItem: SearchItemModel? = null // 선택된 제품
     var historyList: List<ProductPriceHistoryModel>? = null // 제품 단가 이력 리스트
     var popupSearchResult : PopupSearchResult? = null // 아이템 리스트
@@ -48,9 +53,13 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
     var onItemSelect: ((SearchItemModel) -> Unit)? = null
     var customerCd: String ? = null
 
-    private var accountName : String? = null
-    private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
+    var accountName : String? = null
+    private lateinit var mLoginInfo: LoginResponseModel // 로그인 정보
 
+
+    private val db: DBHelper by lazy { // 검색어 저장
+        DBHelper.getInstance(mContext.applicationContext)
+    }
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -86,12 +95,12 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                         val popupDoubleMessage = PopupDoubleMessage(v.context, "제품 삭제", data.itemNm!!, "선택한 제품이 주문리스트에서 삭제됩니다.\n삭제하시겠습니까?")
                         popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                             override fun onCancelClick() {
-                                Utils.Log("아이템 삭제 취소")
+                                Utils.log("아이템 삭제 취소")
                             }
 
                             override fun onOkClick() {
                                 removeItem(data)
-                                Utils.Log("아이템 삭제")
+                                Utils.log("아이템 삭제")
                             }
                         }
                         popupDoubleMessage.show()
@@ -135,6 +144,10 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
     inner class HeaderViewHolder(val binding: HeaderRegBinding) : RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("SetTextI18n")
         fun bind() {
+            if (accountName?.isNotEmpty() == true) {
+                binding.accountName.text = accountName
+            }
+
             binding.accountArea.setOnClickListener(object : OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
                     val popupAccountSearch = PopupAccountSearch(binding.root.context)
@@ -171,7 +184,11 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                 }
             })
 
-            binding.etProductName.setOnEditorActionListener { v, actionId, event ->
+            // 검색어 저장 어댑터
+            val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, db.searchList)
+            binding.etProductName.setAdapter(adapter)
+
+            binding.etProductName.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     binding.btSearch.performClick()
                     true
@@ -180,7 +197,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                 }
             }
 
-            binding.etPrice.setOnEditorActionListener { v, actionId, event ->
+            binding.etPrice.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     binding.btAddOrder.performClick()
                     true
@@ -200,6 +217,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                         } else {
                             // 아이템 리스트 검색
                             searchItem(binding.etProductName.text.toString(), binding.root.context)
+                            GlobalApplication.hideKeyboard(context, v)
                         }
                     }
                 }
@@ -271,7 +289,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                                         amount = amount
                                     )
 
-                                    Utils.Log("added item =====> ${Gson().toJson(model)}")
+                                    Utils.log("added item =====> ${Gson().toJson(model)}")
                                     addItem(model, accountName!!)
 
                                     binding.etProductName.text = null
@@ -282,10 +300,12 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
                                     binding.etBox.setText(v.context.getString(R.string.zero))
                                     binding.etEach.setText(v.context.getString(R.string.zero))
                                     binding.etPrice.setText(v.context.getString(R.string.zero))
+
+                                    GlobalApplication.hideKeyboard(context, binding.root)
                                 }
                             }
                         } catch (e: Exception) {
-                            Utils.Log("error >>> $e")
+                            Utils.log("error >>> $e")
                             Utils.popupNotice(v.context, "올바른 값을 입력해주세요")
                         }
                     }
@@ -326,31 +346,37 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
 
         // 단가 정보 조회
         fun searchItemPriceHistory(){
+            val loading = PopupLoading(context)
+            loading.show()
             val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-            val call = service.history(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, customerCd!!, selectedItem!!.itemCd!!)
+            val call = service.history(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, customerCd!!, selectedItem!!.itemCd!!)
 
-            call.enqueue(object : retrofit2.Callback<ListResultModel<ProductPriceHistoryModel>> {
+            call.enqueue(object : retrofit2.Callback<ResultModel<List<ProductPriceHistoryModel>>> {
                 override fun onResponse(
-                    call: Call<ListResultModel<ProductPriceHistoryModel>>,
-                    response: Response<ListResultModel<ProductPriceHistoryModel>>
+                    call: Call<ResultModel<List<ProductPriceHistoryModel>>>,
+                    response: Response<ResultModel<List<ProductPriceHistoryModel>>>
                 ) {
-                    if (response.isSuccessful) {
+                    loading.hideDialog()
+                if (response.isSuccessful) {
                         val item = response.body()
                         if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                            Utils.Log("price history search success ====> ${Gson().toJson(item)}")
-                            historyList = item.data
+                            Utils.log("price history search success ====> ${Gson().toJson(item)}")
+                            historyList = item.data as ArrayList<ProductPriceHistoryModel>
                             popupProductPriceHistory = PopupProductPriceHistory(context, historyList!!, selectedItem!!.itemNm!!)
                             popupProductPriceHistory?.show()
                         } else {
                             popupResultNothing?.show()
                         }
                     } else {
-                        Utils.Log("${response.code()} ====> ${response.message()}")
+                        Utils.log("${response.code()} ====> ${response.message()}")
+                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                     }
                 }
 
-                override fun onFailure(call: Call<ListResultModel<ProductPriceHistoryModel>>, t: Throwable) {
-                    Utils.Log("item search failed ====> ${t.message}")
+                override fun onFailure(call: Call<ResultModel<List<ProductPriceHistoryModel>>>, t: Throwable) {
+                    loading.hideDialog()
+                    Utils.log("item search failed ====> ${t.message}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
 
             })
@@ -358,59 +384,94 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
 
         // 검색 아이템 리스트 조회
         fun searchItem(searchCondition: String, context: Context) {
+            val loading = PopupLoading(context)
+            loading.show()
             val service = ApiClientService.retrofit.create(ApiClientService::class.java)
             val searchType = Define.SEARCH
             val orderYn = Define.PURCHASE_NO
 
-            val call = service.item(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, customerCd!!, searchType, orderYn, searchCondition)
+            val call = service.item(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, customerCd!!, searchType, orderYn, searchCondition)
+            Utils.log("searchCondition ====> $searchCondition")
 
-            call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<SearchItemModel>>> {
+            call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<SearchItemModel>>> {
+                @SuppressLint("SetTextI18n")
                 override fun onResponse(
-                    call: Call<ObjectResultModel<DataModel<SearchItemModel>>>,
-                    response: Response<ObjectResultModel<DataModel<SearchItemModel>>>
+                    call: Call<ResultModel<DataModel<SearchItemModel>>>,
+                    response: Response<ResultModel<DataModel<SearchItemModel>>>
                 ) {
-                    if (response.isSuccessful) {
+                    loading.hideDialog()
+                if (response.isSuccessful) {
                         val item = response.body()
                         if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                            //Utils.Log("item search success ====> ${Gson().toJson(item.data?.firstOrNull()?.itemList)}")
-                            Utils.Log("item search success ====> ${Gson().toJson(item.data)}")
-                            if (item.data?.itemList.isNullOrEmpty()) {
+                            //Utils.log("item search success ====> ${Gson().toJson(item.data)}")
+                            if (item.data.itemList.isNullOrEmpty()) {
                                 popupResultNothing?.show()
                             } else {
-                                val itemList = item.data?.itemList!!
+                                val itemList = item.data.itemList
                                 popupSearchResult = PopupSearchResult(context, itemList)
                                 popupSearchResult?.show()
 
                                 // 팝업 선택 시
                                 popupSearchResult?.onItemSelect = {
-                                    binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                    binding.etProductName.visibility = View.GONE
-                                    binding.tvProductName.visibility = View.VISIBLE
-                                    binding.tvProductName.isSelected = true
-                                    binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                    selectedItem = SearchItemModel(
-                                        it.itemCd,
-                                        it.itemNm,
-                                        it.whStock,
-                                        it.getBox,
-                                        it.vatYn,
-                                        it.netPrice
-                                    )
-                                    Utils.Log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
+                                    // 검색어 DB 저장
+                                    if (!db.searchList.contains(it.itemNm)) {
+                                        db.insertSearchData(it.itemNm ?: "")
+                                    }
+
+                                    if (dataList.isEmpty()) {
+                                        binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                                        binding.etProductName.visibility = View.GONE
+                                        binding.tvProductName.visibility = View.VISIBLE
+                                        binding.tvProductName.isSelected = true
+                                        binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                                        selectedItem = SearchItemModel(
+                                            it.itemCd,
+                                            it.itemNm,
+                                            it.whStock,
+                                            it.getBox,
+                                            it.vatYn,
+                                            it.netPrice
+                                        )
+                                        Utils.log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
+                                    } else {
+                                        dataList.forEach {item ->
+                                            if (item.itemCd == it.itemCd) {
+                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.")
+                                            } else {
+                                                binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                                                binding.etProductName.visibility = View.GONE
+                                                binding.tvProductName.visibility = View.VISIBLE
+                                                binding.tvProductName.isSelected = true
+                                                binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                                                selectedItem = SearchItemModel(
+                                                    it.itemCd,
+                                                    it.itemNm,
+                                                    it.whStock,
+                                                    it.getBox,
+                                                    it.vatYn,
+                                                    it.netPrice
+                                                )
+                                                Utils.log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         } else {
                             PopupNotice(context, item?.returnMsg!!).show()
 
-                            Utils.Log("returnMsg ====> ${item.returnMsg}")
+                            Utils.log("returnMsg ====> ${item.returnMsg}")
                         }
                     } else {
-                        Utils.Log("${response.code()} ====> ${response.message()}")
+                        Utils.log("${response.code()} ====> ${response.message()}")
+                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                     }
                 }
 
-                override fun onFailure(call: Call<ObjectResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
-                    Utils.Log("item search failed ====> ${t.message}")
+                override fun onFailure(call: Call<ResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
+                    loading.hideDialog()
+                    Utils.log("item search failed ====> ${t.message}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
             })
         }
@@ -420,7 +481,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, private val updateData:
     fun addItem(item: SearchItemModel, accountName: String) {
         dataList.removeAll{ it.itemCd == item.itemCd}
         dataList.add(item)
-        Utils.Log("updateData dataList ====> ${Gson().toJson(dataList)}")
+        Utils.log("updateData dataList ====> ${Gson().toJson(dataList)}")
         notifyDataSetChanged()
         updateData(dataList, accountName)
     }

@@ -10,15 +10,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Toast
+import android.widget.ArrayAdapter
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.custom.popup.PopupOk
 import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
@@ -26,26 +28,26 @@ import kr.co.kimberly.wma.custom.popup.PopupSAP
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderPurchaseRequesetBinding
+import kr.co.kimberly.wma.db.DBHelper
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
 import kr.co.kimberly.wma.network.model.ProductPriceHistoryModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SapModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import retrofit2.Call
 import retrofit2.Response
 import kotlin.math.ceil
 
-class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val updateData: ((ArrayList<SearchItemModel>, SapModel) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchItemModel>, data: SapModel, private val updateData: ((ArrayList<SearchItemModel>, SapModel) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
     var activity = mActivity
 
     var popupSAP: PopupSAP? = null //SAP Code 팝업
-    var selectedSAP: SapModel? = null // 선택된 SAP 모델
+    var selectedSAP = data // 선택된 SAP 모델
 
-    var itemList: ArrayList<SearchItemModel> = ArrayList() // 제품 리스트
+    var itemList= list// 제품 리스트
     var selectedItem: SearchItemModel? = null // 선택된 제품
     var popupSearchResult : PopupSearchResult? = null // 제품 검색 팝업
 
@@ -55,6 +57,10 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
     var onItemSelect: ((SearchItemModel) -> Unit)? = null // 선택된 제품
 
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
+
+    private val db: DBHelper by lazy { // 검색어 저장
+        DBHelper.getInstance(mContext.applicationContext)
+    }
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -70,7 +76,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        mLoginInfo = Utils.getLoginData()!!
+        mLoginInfo = Utils.getLoginData()
         return when (viewType) {
             TYPE_HEADER -> HeaderViewHolder(HeaderPurchaseRequesetBinding.inflate(inflater, parent, false))
             else -> ViewHolder(CellOrderRegBinding.inflate(inflater, parent, false))
@@ -88,12 +94,12 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                         val popupDoubleMessage = PopupDoubleMessage(v.context, "제품 삭제", data.itemNm!!, "선택한 제품이 주문리스트에서 삭제됩니다.\n삭제하시겠습니까?")
                         popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                             override fun onCancelClick() {
-                                Utils.Log("취소 클릭함")
+                                Utils.log("취소 클릭함")
                             }
 
                             @SuppressLint("NotifyDataSetChanged")
                             override fun onOkClick() {
-                                removeItem(data, selectedSAP!!)
+                                removeItem(data, selectedSAP)
                             }
                         }
                         popupDoubleMessage.show()
@@ -126,7 +132,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                 onItemSelect?.invoke(item)
             }
 
-            Utils.Log("item ====> ${Gson().toJson(item)}")
+            Utils.log("item ====> ${Gson().toJson(item)}")
 
             binding.orderName.text = item.itemNm
             binding.tvBoxEach.text = "BOX(${item.getBox}EA): "
@@ -139,13 +145,39 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
 
     inner class HeaderViewHolder(private val binding: HeaderPurchaseRequesetBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind() {
+            Utils.log("selectedSAP ====> ${Gson().toJson(selectedSAP)}")
+            setSAPInfo(selectedSAP)
 
             binding.sapCode.isSelected = true
             binding.shipping.isSelected = true
 
             binding.accountArea.setOnClickListener(object: OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    getSAPCode()
+                    if(itemList.isNotEmpty()) {
+                        val popupNoticeV2 = PopupNoticeV2(v.context, "기존 주문이 완료되지 않았습니다.\n새로운 거래처를 검색하시겠습니까?",
+                            object : Handler(Looper.getMainLooper()) {
+                                @SuppressLint("NotifyDataSetChanged")
+                                override fun handleMessage(msg: Message) {
+                                    when(msg.what) {
+                                        Define.OK -> {
+                                            binding.shipping.text = context.getString(R.string.purchaseAddressHint)
+                                            binding.etProductName.text = null
+                                            binding.searchResult.text = v.context.getString(R.string.searchResult)
+                                            binding.tvProductName.text = null
+                                            binding.tvProductName.visibility = View.GONE
+                                            binding.etProductName.visibility = View.VISIBLE
+                                            binding.etProductName.hint = v.context.getString(R.string.productNameHint)
+                                            clear()
+                                            notifyDataSetChanged()
+                                            getShipping(selectedSAP.sapCustomerCd!!)
+                                        }
+                                    }
+                                }
+                            })
+                        popupNoticeV2.show()
+                    } else {
+                        getSAPCode()
+                    }
                 }
             })
 
@@ -153,16 +185,41 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                 override fun onSingleClick(v: View) {
                     if (binding.sapCode.text == context.getString(R.string.purchaseAccountHint)) {
                         Utils.popupNotice(context, "SAP Code를 선택해주세요")
+                    } else if(itemList.isNotEmpty()) {
+                        val popupNoticeV2 = PopupNoticeV2(v.context, "기존 주문이 완료되지 않았습니다.\n새로운 거래처를 검색하시겠습니까?",
+                            object : Handler(Looper.getMainLooper()) {
+                                @SuppressLint("NotifyDataSetChanged")
+                                override fun handleMessage(msg: Message) {
+                                    when(msg.what) {
+                                        Define.OK -> {
+                                            binding.shipping.text = context.getString(R.string.purchaseAddressHint)
+                                            binding.etProductName.text = null
+                                            binding.searchResult.text = v.context.getString(R.string.searchResult)
+                                            binding.tvProductName.text = null
+                                            binding.tvProductName.visibility = View.GONE
+                                            binding.etProductName.visibility = View.VISIBLE
+                                            binding.etProductName.hint = v.context.getString(R.string.productNameHint)
+                                            clear()
+                                            notifyDataSetChanged()
+                                            getShipping(selectedSAP.sapCustomerCd!!)
+                                        }
+                                    }
+                                }
+                            })
+                        popupNoticeV2.show()
                     } else {
-                        //getShipping(sapCustomerCd!!)
-                        getShipping(selectedSAP?.sapCustomerCd!!)
+                        getShipping(selectedSAP.sapCustomerCd!!)
                     }
                 }
             })
 
+            // 검색어 저장 어댑터
+            val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, db.searchList)
+            binding.etProductName.setAdapter(adapter)
+
             binding.etProductName.setOnClickListener(object : OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    if (selectedSAP?.sapCustomerCd.isNullOrEmpty()) {
+                    if (selectedSAP.sapCustomerCd.isNullOrEmpty()) {
                         Utils.popupNotice(context, "SAP Code를 선택해주세요")
                     }
                 }
@@ -179,9 +236,9 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
 
             binding.btSearch.setOnClickListener(object : OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    if (selectedSAP?.sapCustomerCd.isNullOrEmpty()){
+                    if (selectedSAP.sapCustomerCd.isNullOrEmpty()){
                         Utils.popupNotice(context, "SAP Code를 선택해주세요")
-                    } else if(selectedSAP?.arriveCd.isNullOrEmpty()){
+                    } else if(selectedSAP.arriveCd.isNullOrEmpty()){
                         Utils.popupNotice(context, "배송처를 선택해주세요")
                     } else if (binding.etProductName.text.isNullOrEmpty()) {
                         Utils.popupNotice(context, "제품명을 입력해주세요")
@@ -235,13 +292,13 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                                 amount
                             }
                             val vat = amount - supplyPrice
-                            Utils.Log("itemName ====> $itemName")
-                            Utils.Log("itemCd ====> ${selectedItem?.itemCd}")
-                            Utils.Log("boxQty ====> $boxQty")
-                            Utils.Log("saleQty ====> $saleQty")
-                            Utils.Log("amount ====> $amount")
-                            Utils.Log("supplyPrice ====> $supplyPrice")
-                            Utils.Log("vat ====> $vat")
+                            Utils.log("itemName ====> $itemName")
+                            Utils.log("itemCd ====> ${selectedItem?.itemCd}")
+                            Utils.log("boxQty ====> $boxQty")
+                            Utils.log("saleQty ====> $saleQty")
+                            Utils.log("amount ====> $amount")
+                            Utils.log("supplyPrice ====> $supplyPrice")
+                            Utils.log("vat ====> $vat")
 
 
                             if (boxQty == 0) {
@@ -268,9 +325,11 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                                 binding.searchResult.text = v.context.getString(R.string.searchResult)
                                 binding.etBox.setText(v.context.getString(R.string.zero))
                                 binding.tvPrice.text = null
+
+                                GlobalApplication.hideKeyboard(context, binding.root)
                             }
                         } catch (e: Exception) {
-                            Utils.Log("e ====> $e")
+                            Utils.log("e ====> $e")
                             Utils.popupNotice(v.context, "올바른 값을 입력해주세요")
                         }
                     }
@@ -299,7 +358,9 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
 
         // SAP Code 조회
         private fun getSAPCode() {
-            val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+            val loading = PopupLoading(context)
+        loading.show()
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
             //val call = service.sapCode(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!)
 
             //RETURN_CD_00 배송처 없음
@@ -312,77 +373,81 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
             val call = service.sapCode("C000032", "mb2004")
             //val call = service.sapCode("C000541", "mb2004")
 
-            call.enqueue(object : retrofit2.Callback<ListResultModel<SapModel>> {
+            call.enqueue(object : retrofit2.Callback<ResultModel<List<SapModel>>> {
                 @SuppressLint("SetTextI18n", "UseCompatLoadingForDrawables")
                 override fun onResponse(
-                    call: Call<ListResultModel<SapModel>>,
-                    response: Response<ListResultModel<SapModel>>
+                    call: Call<ResultModel<List<SapModel>>>,
+                    response: Response<ResultModel<List<SapModel>>>
                 ) {
-                    if (response.isSuccessful) {
+                    loading.hideDialog()
+                if (response.isSuccessful) {
                         val item = response.body()
-                        if (!item?.data.isNullOrEmpty()){
-                            val mSapList = item?.data as ArrayList<SapModel>
-                            popupSAP = PopupSAP(context, mSapList, item.returnCd)
-                            when(item.returnCd) {
-                                // SAP코드 1개 & 배송처 코드 1개
-                                Define.RETURN_CD_00 -> {
-                                    Utils.Log("return code : ${item.returnCd}")
-                                    Utils.Log("returnMsg : ${item.returnMsg}")
-                                    setSAPInfo(item.data.firstOrNull()!!)
-                                    PopupOk(context, "조회가 완료되었습니다.").show()
-                                }
+                        val mSapList = item?.data as ArrayList<SapModel>
+                        popupSAP = PopupSAP(context, mSapList, item.returnCd)
+                        when(item.returnCd) {
+                            // SAP코드 1개 & 배송처 코드 1개
+                            Define.RETURN_CD_00 -> {
+                                Utils.log("return code : ${item.returnCd}")
+                                Utils.log("returnMsg : ${item.returnMsg}")
+                                setSAPInfo(item.data.firstOrNull()!!)
+                                PopupOk(context, "조회가 완료되었습니다.").show()
+                            }
 
-                                // SAP 코드 N개
-                                Define.RETURN_CD_90 -> {
-                                    Utils.Log("return code : ${item.returnCd}")
-                                    Utils.Log("returnMsg : ${item.returnMsg}")
-                                    Utils.Log("sap list ====> ${item.data}")
-                                    popupSAP?.show()
+                            // SAP 코드 N개
+                            Define.RETURN_CD_90 -> {
+                                Utils.log("return code : ${item.returnCd}")
+                                Utils.log("returnMsg : ${item.returnMsg}")
+                                Utils.log("sap list ====> ${item.data}")
+                                popupSAP?.show()
 
-                                    popupSAP?.onItemSelect = {
-                                        //아이템 리스트가 있을 경우 기존 주문 취소 팝업
-                                        if (itemList.isNotEmpty()){
-                                            cancelOrderPopup(it)
-                                        } else {
-                                            setSAPInfo(it)
-                                            getShipping(selectedSAP?.sapCustomerCd!!)
-                                        }
-                                    }
-                                }
-
-                                // SAP 코드 1개 & 배송처 코드 N개
-                                Define.RETURN_CD_91 -> {
-                                    Utils.Log("return code : ${item.returnCd}")
-                                    Utils.Log("returnMsg : ${item.returnMsg}")
-                                    popupSAP?.show()
-
-                                    // 팝업 선택 시
-                                    popupSAP?.onItemSelect = {
-                                        Utils.Log("CODE_91 ====> $it")
+                                popupSAP?.onItemSelect = {
+                                    //아이템 리스트가 있을 경우 기존 주문 취소 팝업
+                                    if (itemList.isNotEmpty()){
+                                        cancelOrderPopup(it)
+                                    } else {
                                         setSAPInfo(it)
+                                        getShipping(selectedSAP.sapCustomerCd!!)
                                     }
-                                }
-
-                                else -> {
-                                    Utils.popupNotice(context, item.returnMsg)
-                                    Utils.Log("$item ====> ${item.returnMsg}")
                                 }
                             }
-                        } else {
-                            Utils.popupNotice(context, item?.returnMsg!!)
+
+                            // SAP 코드 1개 & 배송처 코드 N개
+                            Define.RETURN_CD_91 -> {
+                                Utils.log("return code : ${item.returnCd}")
+                                Utils.log("returnMsg : ${item.returnMsg}")
+                                popupSAP?.show()
+
+                                // 팝업 선택 시
+                                popupSAP?.onItemSelect = {
+                                    Utils.log("CODE_91 ====> $it")
+                                    setSAPInfo(it)
+                                }
+                            }
+
+                            else -> {
+                                Utils.popupNotice(context, item.returnMsg)
+                                Utils.log("$item ====> ${item.returnMsg}")
+                            }
                         }
+                    } else {
+                        Utils.log("${response.code()} ====> ${response.message()}")
+                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                     }
                 }
 
-                override fun onFailure(call: Call<ListResultModel<SapModel>>, t: Throwable) {
-                    Utils.Log("sap search failed ====> ${t.message}")
+                override fun onFailure(call: Call<ResultModel<List<SapModel>>>, t: Throwable) {
+                    loading.hideDialog()
+                    Utils.log("sap search failed ====> ${t.message}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
 
             })
         }
 
         fun getShipping(sapCustomerCd : String) {
-            val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+            val loading = PopupLoading(context)
+        loading.show()
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
             //val call = service.shipping(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, sapCustomerCd)
 
             val call = service.shipping("C000032", "mb2004", sapCustomerCd)
@@ -396,39 +461,40 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
             //RETURN_CD_91 배송처 코드 N개
             //val call = service.shipping("C000537", "mb2004", sapCustomerCd)
 
-            call.enqueue(object: retrofit2.Callback<ListResultModel<SapModel>> {
+            call.enqueue(object: retrofit2.Callback<ResultModel<List<SapModel>>> {
                 @SuppressLint("SetTextI18n")
                 override fun onResponse(
-                    call: Call<ListResultModel<SapModel>>,
-                    response: Response<ListResultModel<SapModel>>
+                    call: Call<ResultModel<List<SapModel>>>,
+                    response: Response<ResultModel<List<SapModel>>>
                 ) {
-                    if (response.isSuccessful) {
+                    loading.hideDialog()
+                if (response.isSuccessful) {
                         val item = response.body()
                         when(item?.returnCd) {
                             //배송처 1개
                             Define.RETURN_CD_00 -> {
-                                Utils.Log("return code : ${item.returnCd}")
-                                Utils.Log("returnMsg : ${item.returnMsg}")
-                                setSAPInfo(item.data?.firstOrNull()!!)
+                                Utils.log("return code : ${item.returnCd}")
+                                Utils.log("returnMsg : ${item.returnMsg}")
+                                setSAPInfo(item.data.firstOrNull()!!)
                             }
 
                             //배송처 없음
                             Define.RETURN_CD_90 -> {
-                                Utils.Log("return code : ${item.returnCd}")
-                                Utils.Log("returnMsg : ${item.returnMsg}")
-                                setSAPInfo(item.data?.firstOrNull()!!)
+                                Utils.log("return code : ${item.returnCd}")
+                                Utils.log("returnMsg : ${item.returnMsg}")
+                                setSAPInfo(item.data.firstOrNull()!!)
                             }
 
                             //배송처 N개
                             Define.RETURN_CD_91 -> {
-                                Utils.Log("return code : ${item.returnCd}")
-                                Utils.Log("returnMsg : ${item.returnMsg}")
+                                Utils.log("return code : ${item.returnCd}")
+                                Utils.log("returnMsg : ${item.returnMsg}")
                                 val mSapList = item.data as ArrayList<SapModel>
                                 popupSAP = PopupSAP(context, mSapList, item.returnCd)
                                 popupSAP?.show()
                                 // 팝업 선택 시
                                 popupSAP?.onItemSelect = {
-                                    Utils.Log("shipping CODE_91 ====> $it")
+                                    Utils.log("shipping CODE_91 ====> $it")
                                     //아이템 리스트가 있을 경우 기존 주문 취소 팝업
                                     if (itemList.isNotEmpty()){
                                         cancelOrderPopup(it)
@@ -440,14 +506,19 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                             else -> {
                                 Utils.popupNotice(context, item?.returnMsg!!)
                                 binding.shipping.text = context.getString(R.string.purchaseAddressHint)
-                                Utils.Log("$item ====> ${item.returnMsg}")
+                                Utils.log("$item ====> ${item.returnMsg}")
                             }
                         }
+                    } else {
+                        Utils.log("${response.code()} ====> ${response.message()}")
+                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                     }
                 }
 
-                override fun onFailure(call: Call<ListResultModel<SapModel>>, t: Throwable) {
-                    Utils.Log("shipping search failed ====> ${t.message}")
+                override fun onFailure(call: Call<ResultModel<List<SapModel>>>, t: Throwable) {
+                    loading.hideDialog()
+                    Utils.log("shipping search failed ====> ${t.message}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
 
             })
@@ -455,31 +526,37 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
 
         // 단가 정보 조회
         fun searchItemPriceHistory(){
-            val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-            val call = service.history(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, selectedSAP?.sapCustomerCd!!, selectedItem!!.itemCd!!)
+            val loading = PopupLoading(context)
+        loading.show()
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+            val call = service.history(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, selectedSAP.sapCustomerCd!!, selectedItem!!.itemCd!!)
 
-            call.enqueue(object : retrofit2.Callback<ListResultModel<ProductPriceHistoryModel>> {
+            call.enqueue(object : retrofit2.Callback<ResultModel<List<ProductPriceHistoryModel>>> {
                 override fun onResponse(
-                    call: Call<ListResultModel<ProductPriceHistoryModel>>,
-                    response: Response<ListResultModel<ProductPriceHistoryModel>>
+                    call: Call<ResultModel<List<ProductPriceHistoryModel>>>,
+                    response: Response<ResultModel<List<ProductPriceHistoryModel>>>
                 ) {
-                    if (response.isSuccessful) {
+                    loading.hideDialog()
+                if (response.isSuccessful) {
                         val item = response.body()
                         if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                            Utils.Log("price history search success ====> ${Gson().toJson(item)}")
-                            historyList = item.data
+                            Utils.log("price history search success ====> ${Gson().toJson(item)}")
+                            historyList = item.data as ArrayList<ProductPriceHistoryModel>
                             popupProductPriceHistory = PopupProductPriceHistory(context, historyList!!, selectedItem!!.itemNm!!)
                             popupProductPriceHistory?.show()
                         } else {
                             Utils.popupNotice(context, item?.returnMsg!!)
                         }
                     } else {
-                        Utils.Log("${response.code()} ====> ${response.message()}")
+                        Utils.log("${response.code()} ====> ${response.message()}")
+                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                     }
                 }
 
-                override fun onFailure(call: Call<ListResultModel<ProductPriceHistoryModel>>, t: Throwable) {
-                    Utils.Log("item search failed ====> ${t.message}")
+                override fun onFailure(call: Call<ResultModel<List<ProductPriceHistoryModel>>>, t: Throwable) {
+                    loading.hideDialog()
+                    Utils.log("item search failed ====> ${t.message}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
 
             })
@@ -487,52 +564,88 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
 
         // 검색 아이템 리스트 조회
         fun searchItem(searchCondition: String, context: Context) {
+            val loading = PopupLoading(context)
+            loading.show()
             val service = ApiClientService.retrofit.create(ApiClientService::class.java)
             val searchType = Define.SEARCH
             val orderYn = Define.PURCHASE_YES
 
-            val call = service.item(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, selectedSAP?.sapCustomerCd!!, searchType, orderYn, searchCondition)
+            val call = service.item(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, selectedSAP.sapCustomerCd!!, searchType, orderYn, searchCondition)
 
-            call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<SearchItemModel>>> {
+            call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<SearchItemModel>>> {
                 @SuppressLint("SetTextI18n")
                 override fun onResponse(
-                    call: Call<ObjectResultModel<DataModel<SearchItemModel>>>,
-                    response: Response<ObjectResultModel<DataModel<SearchItemModel>>>
+                    call: Call<ResultModel<DataModel<SearchItemModel>>>,
+                    response: Response<ResultModel<DataModel<SearchItemModel>>>
                 ) {
-                    if (response.isSuccessful) {
+                    loading.hideDialog()
+                if (response.isSuccessful) {
                         val item = response.body()
                         if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                            Utils.Log("item search success ====> ${Gson().toJson(item.data)}")
+                            //Utils.log("item search success ====> ${Gson().toJson(item.data)}")
 
-                            if (item.data?.itemList.isNullOrEmpty()) {
+                            if (item.data.itemList.isNullOrEmpty()) {
                                 Utils.popupNotice(context, context.getString(R.string.error))
                             } else {
-                                val itemList = item.data?.itemList!!
-                                popupSearchResult = PopupSearchResult(context, itemList)
+                                popupSearchResult = PopupSearchResult(context, item.data.itemList)
                                 popupSearchResult?.show()
 
                                 // 팝업 선택 시
                                 popupSearchResult?.onItemSelect = {
-                                    //본사 발주 가능 시
-                                    if (it.enableOrderYn == "Y") {
-                                        binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                        binding.etProductName.visibility = View.GONE
-                                        binding.tvProductName.visibility = View.VISIBLE
-                                        binding.tvProductName.isSelected = true
-                                        binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                        binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
-                                        selectedItem = SearchItemModel(
-                                            itemCd = it.itemCd,
-                                            itemNm = it.itemNm,
-                                            whStock = it.whStock,
-                                            getBox = it.getBox,
-                                            vatYn = it.vatYn,
-                                            netPrice = it.netPrice,
-                                            enableOrderYn = it.enableOrderYn,
-                                            orderPrice = it.orderPrice
-                                        )
+                                    // 검색어 DB 저장
+                                    if (!db.searchList.contains(it.itemNm)) {
+                                        db.insertSearchData(it.itemNm ?: "")
+                                    }
+                                    if (itemList.isEmpty()) {
+                                        //본사 발주 가능 시
+                                        if (it.enableOrderYn == "Y") {
+                                            binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                                            binding.etProductName.visibility = View.GONE
+                                            binding.tvProductName.visibility = View.VISIBLE
+                                            binding.tvProductName.isSelected = true
+                                            binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                                            binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
+                                            selectedItem = SearchItemModel(
+                                                itemCd = it.itemCd,
+                                                itemNm = it.itemNm,
+                                                whStock = it.whStock,
+                                                getBox = it.getBox,
+                                                vatYn = it.vatYn,
+                                                netPrice = it.netPrice,
+                                                enableOrderYn = it.enableOrderYn,
+                                                orderPrice = it.orderPrice
+                                            )
+                                        } else {
+                                            Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.")
+                                        }
                                     } else {
-                                        Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.")
+                                        itemList.forEach { item ->
+                                            if (item.itemCd == it.itemCd) {
+                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.")
+                                            } else {
+                                                //본사 발주 가능 시
+                                                if (it.enableOrderYn == "Y") {
+                                                    binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                                                    binding.etProductName.visibility = View.GONE
+                                                    binding.tvProductName.visibility = View.VISIBLE
+                                                    binding.tvProductName.isSelected = true
+                                                    binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                                                    binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
+                                                    selectedItem = SearchItemModel(
+                                                        itemCd = it.itemCd,
+                                                        itemNm = it.itemNm,
+                                                        whStock = it.whStock,
+                                                        getBox = it.getBox,
+                                                        vatYn = it.vatYn,
+                                                        netPrice = it.netPrice,
+                                                        enableOrderYn = it.enableOrderYn,
+                                                        orderPrice = it.orderPrice
+                                                    )
+                                                } else {
+                                                    Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.")
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -540,12 +653,15 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                             Utils.popupNotice(context, item?.returnMsg!!)
                         }
                     } else {
-                        Utils.Log("${response.code()} ====> ${response.message()}")
+                        Utils.log("${response.code()} ====> ${response.message()}")
+                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                     }
                 }
 
-                override fun onFailure(call: Call<ObjectResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
-                    Utils.Log("item search failed ====> ${t.message}")
+                override fun onFailure(call: Call<ResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
+                    loading.hideDialog()
+                    Utils.log("item search failed ====> ${t.message}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
 
             })
@@ -582,7 +698,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
         //SAP Code 정보 업데이트
         @SuppressLint("SetTextI18n")
         fun setSAPInfo(data: SapModel){
-            Utils.Log("selected SAP Code Model ====> ${Gson().toJson(data)}")
+            Utils.log("selected SAP Code Model ====> ${Gson().toJson(data)}")
             if (!data.sapCustomerCd.isNullOrEmpty() && !data.sapCustomerNm.isNullOrEmpty()){
                 selectedSAP = data.copy(
                     sapCustomerCd = data.sapCustomerCd,
@@ -591,7 +707,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
             }
 
             if (!data.arriveCd.isNullOrEmpty() && !data.arriveNm.isNullOrEmpty()) {
-                selectedSAP = selectedSAP?.copy(
+                selectedSAP = selectedSAP.copy(
                     arriveCd = data.arriveCd,
                     arriveNm = data.arriveNm
                 )
@@ -601,12 +717,14 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
                 binding.sapCode.text = "(${data.sapCustomerCd}) ${data.sapCustomerNm}"
             }
 
-            if (selectedSAP?.arriveCd == "-" && selectedSAP?.arriveNm == "-") {
+            if (selectedSAP.arriveCd == null && selectedSAP.arriveNm == null) {
+                binding.shipping.text = context.getString(R.string.purchaseAccountHint)
+            } else if (selectedSAP.arriveCd == "-" && selectedSAP.arriveNm == "-") {
                 binding.shipping.text = context.getString(R.string.NoAddress)
             } else {
-                binding.shipping.text = "(${selectedSAP?.arriveCd}) ${selectedSAP?.arriveNm}"
+                binding.shipping.text = "(${selectedSAP.arriveCd}) ${selectedSAP.arriveNm}"
             }
-            Utils.Log("SAP 거래처 코드 : ${selectedSAP?.sapCustomerCd}\n거래처 명 : ${selectedSAP?.sapCustomerNm}\nSAP 배송처 코드 : ${selectedSAP?.arriveCd}\n배송처 명 : ${selectedSAP?.arriveNm}")
+            Utils.log("SAP 거래처 코드 : ${selectedSAP.sapCustomerCd}\n거래처 명 : ${selectedSAP.sapCustomerNm}\nSAP 배송처 코드 : ${selectedSAP.arriveCd}\n배송처 명 : ${selectedSAP.arriveNm}")
         }
     }
 
@@ -614,7 +732,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
     fun addItem(item: SearchItemModel, sapModel: SapModel) {
         itemList.removeAll{ it.itemCd == item.itemCd}
         itemList.add(item)
-        Utils.Log("updateData dataList ====> ${Gson().toJson(itemList)}")
+        Utils.log("updateData dataList ====> ${Gson().toJson(itemList)}")
         notifyDataSetChanged()
         updateData(itemList, sapModel)
     }
@@ -623,12 +741,12 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, private val
     fun removeItem(item: SearchItemModel, sapModel: SapModel) {
         itemList.remove(item)
         notifyDataSetChanged()
-        Utils.Log("updateData dataList ====> ${Gson().toJson(itemList)}")
+        Utils.log("updateData dataList ====> ${Gson().toJson(itemList)}")
         updateData(itemList, sapModel)
     }
 
     fun clear(item: SearchItemModel? = null) {
         itemList.clear()
-        updateData(itemList, selectedSAP!!)
+        updateData(itemList, selectedSAP)
     }
 }

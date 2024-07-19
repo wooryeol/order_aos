@@ -12,6 +12,10 @@ object Define {
     const val MENU08 = "menu08"
     const val MENU09 = "menu09"
 
+    const val EVENT_OK = 10000
+    const val EVENT_CANCEL = 10001
+    const val REQUEST_CODE = 1
+
     // 테스트
     const val IS_TEST = true
 
@@ -27,20 +31,12 @@ object Define {
     const val DAY = "day"
     const val TODAY = "today"
 
-    const val EVENT_OK = 10000
-    const val EVENT_CANCEL = 10001
-
-    //통신
-    const val SUCCESS = "SUCCESS"
-
-    const val REQUEST_CODE = 1
-
     // 로컬 주소
-    //const val DEV_URL = "http://192.168.0.50"
+    const val DEV_URL = "http://192.168.0.50"
     const val DEV_PORT = "80"
 
     // 개발 주소
-    const val DEV_URL = "http://58.229.132.250"
+    //const val DEV_URL = "http://58.229.132.250"
 
     const val URL = DEV_URL
     const val URL_PORT = DEV_PORT
@@ -62,8 +58,13 @@ object Define {
     const val TYPE_CUSTOMER = "C"
     const val TYPE_ITEM = "I"
 
-    //return Code
+    // 통신 return Code
     const val RETURN_CD_00 = "00"
     const val RETURN_CD_90 = "90"
     const val RETURN_CD_91 = "91"
+
+    // 수금코드
+    const val CASH = "CC"
+    const val NOTE = "BB"
+    const val BOTH = "CB"
 }

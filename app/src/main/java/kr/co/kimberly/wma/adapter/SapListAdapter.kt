@@ -28,7 +28,7 @@ class SapListAdapter(context: Context, val returnCd: String): RecyclerView.Adapt
                     binding.accountSearchName.text = "(${itemModel.sapCustomerCd}) ${itemModel.sapCustomerNm}"
 
                     itemView.setOnClickListener {
-                        //Utils.Log("selected sapCustomerNm ====> (${itemModel.sapCustomerCd}) ${itemModel.sapCustomerNm}")
+                        //Utils.log("selected sapCustomerNm ====> (${itemModel.sapCustomerCd}) ${itemModel.sapCustomerNm}")
                         itemClickListener?.onItemClick(itemModel)
                     }
                 }
@@ -37,7 +37,7 @@ class SapListAdapter(context: Context, val returnCd: String): RecyclerView.Adapt
                     binding.accountSearchName.text = "(${itemModel.arriveCd}) ${itemModel.arriveNm}"
 
                     itemView.setOnClickListener {
-                        //Utils.Log("selected arriveNm ====> (${itemModel.arriveCd}) ${itemModel.arriveNm}")
+                        //Utils.log("selected arriveNm ====> (${itemModel.arriveCd}) ${itemModel.arriveNm}")
                         itemClickListener?.onItemClick(itemModel)
                     }
                 }

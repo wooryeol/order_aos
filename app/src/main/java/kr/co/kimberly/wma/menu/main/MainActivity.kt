@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         mActivity = this
 
         mLoginInfo = Utils.getLoginData()
-        Utils.Log("mainActivity mLoginInfo =====> $mLoginInfo")
+        Utils.log("mainActivity mLoginInfo =====> $mLoginInfo")
 
         // 앱 버전 체크
         if (isVersionCheck) {
@@ -89,11 +89,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // 실행종료
-        val popupSingleMessage = PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null)
         mBinding.finish.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                popupSingleMessage.show()
+                // 실행종료
+                PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null).show()
             }
         })
     }
@@ -119,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                 popupNotice.show()
             }
         } catch (error: Error) {
-            Utils.Log("error ====> $error")
+            Utils.log("error ====> $error")
         }
     }
 
@@ -128,13 +127,13 @@ class MainActivity : AppCompatActivity() {
         //val deviceVersion = BuildConfig.VERSION_NAME
         val deviceVersion = "1.0.2"
 
-        Utils.Log("storeVersion ====> $storeVersion")
-        Utils.Log("deviceVersion ====> $deviceVersion")
+        Utils.log("storeVersion ====> $storeVersion")
+        Utils.log("deviceVersion ====> $deviceVersion")
 
         return try {
             storeVersion!! > deviceVersion
         } catch (error: Error) {
-            Utils.Log("error ====> $error")
+            Utils.log("error ====> $error")
             false
         }
     }

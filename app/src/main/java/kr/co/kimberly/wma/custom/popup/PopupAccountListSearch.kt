@@ -16,12 +16,10 @@ import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
-import kr.co.kimberly.wma.menu.slip.SlipInquiryActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.CustomerModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
-import kr.co.kimberly.wma.network.model.SlipOrderListModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import retrofit2.Call
 import retrofit2.Response
 
@@ -82,18 +80,22 @@ class PopupAccountListSearch(mContext: Context, private val searchCondition: Str
     }
 
     private fun searchCustomer(searchCondition: String) {
+        val loading = PopupLoading(context)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.client(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, searchCondition)
 
-        call.enqueue(object : retrofit2.Callback<ListResultModel<CustomerModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<List<CustomerModel>>> {
             override fun onResponse(
-                call: Call<ListResultModel<CustomerModel>>,
-                response: Response<ListResultModel<CustomerModel>>
+                call: Call<ResultModel<List<CustomerModel>>>,
+                response: Response<ResultModel<List<CustomerModel>>>
             ) {
+                loading.hideDialog()
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                        Utils.Log("account search success ====> ${Gson().toJson(item)}")
+                        //Utils.log("account search success ====> ${Gson().toJson(item)}")
 
                         dataList = item.data as ArrayList<CustomerModel>
 
@@ -106,15 +108,18 @@ class PopupAccountListSearch(mContext: Context, private val searchCondition: Str
 
                     } else {
                         Utils.popupNotice(context, item?.returnMsg!!)
+                        hideDialog()
                     }
                 } else {
-
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ListResultModel<CustomerModel>>, t: Throwable) {
-                Utils.Log("search failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<List<CustomerModel>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("search failed ====> ${t.message}")
+                Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
             }
 
         })

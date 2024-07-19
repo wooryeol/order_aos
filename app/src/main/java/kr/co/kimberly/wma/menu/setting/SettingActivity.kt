@@ -124,11 +124,11 @@ class SettingActivity : AppCompatActivity() {
                 when (isRadioChecked) {
                     1 -> {
                         dlg.show()
-                        Utils.Log("scanner is selected")
+                        Utils.log("scanner is selected")
                     }
                     2 -> {
                         dlg.show()
-                        Utils.Log("printer is selected")
+                        Utils.log("printer is selected")
                     }
                 }
             }
@@ -151,7 +151,7 @@ class SettingActivity : AppCompatActivity() {
                         mBinding.radioPrintBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
                         isRadioChecked = 1
                         mBinding.radioPrint.isChecked = false
-                        Utils.Log("scanner is checked")
+                        Utils.log("scanner is checked")
                     }
                 R.id.radioPrint ->
                     if (checked) {
@@ -160,7 +160,7 @@ class SettingActivity : AppCompatActivity() {
                         mBinding.radioScannerBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
                         isRadioChecked = 2
                         mBinding.radioScanner.isChecked = false
-                        Utils.Log("printer is checked")
+                        Utils.log("printer is checked")
                 }
             }
         }

@@ -15,13 +15,15 @@ import kr.co.kimberly.wma.adapter.SlipInquiryModifyAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupDeliveryDatePicker
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.databinding.ActOrderRegBinding
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -53,7 +55,7 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
         mContext = this
         mActivity = this
 
-        mLoginInfo = Utils.getLoginData()!!
+        mLoginInfo = Utils.getLoginData()
 
         slipNo = intent.getStringExtra("slipNo")
         customerCd = intent.getStringExtra("customerCd")
@@ -64,10 +66,9 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
         originSlipList.addAll(orderSlipList!!)
         getItemCode(orderSlipList!!)
 
-        Utils.Log("SlipInquiryModifyActivity\nslipNo ====> $slipNo\ncustomerCd ====> $customerCd\ncustomerNm ====> $customerNm\ntotalAmount ====> $totalAmount\norderSlipList ====> ${Gson().toJson(orderSlipList)}")
+        Utils.log("SlipInquiryModifyActivity\nslipNo ====> $slipNo\ncustomerCd ====> $customerCd\ncustomerNm ====> $customerNm\ntotalAmount ====> $totalAmount\norderSlipList ====> ${Gson().toJson(orderSlipList)}")
 
         setUi()
-        onClickApprovalOrder()
 
         modifyAdapter = SlipInquiryModifyAdapter(mContext, customerCd!!, customerNm!!) {items ->
             totalAmount = 0
@@ -77,7 +78,7 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
                 totalAmount += stringWithoutComma.toInt()
             }
 
-            mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount!!)}원"
+            mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
         }
 
         modifyAdapter?.slipList = orderSlipList
@@ -86,37 +87,25 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
 
         mBinding.header.backBtn.setOnClickListener(object : OnSingleClickListener(){
             override fun onSingleClick(v: View) {
-                Utils.backBtnPopup(mContext, mActivity, orderSlipList!!)
-            }
-        })
-    }
-    @SuppressLint("SetTextI18n")
-    private fun setUi() {
-        mBinding.header.headerTitle.text = getString(R.string.slipModify)
-        mBinding.bottom.bottomButton.text = getString(R.string.titleOrder)
-        mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount!!)}원"
-
-        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
+                //Utils.backBtnPopup(mContext, mActivity, orderSlipList!!)
                 finish()
             }
         })
-    }
 
-    private fun onClickApprovalOrder() {
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $customerNm\n총금액: ${Utils.decimal(totalAmount!!)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "납기일자 선택", "납기 일자를 선택하시겠습니까?\n선택하지 않으시면 납기일자가 다음 날로 저장됩니다.")
                 if (!checkItem(orderSlipList, originSlipList)) {
                     Utils.popupNotice(mContext, "수정된 제품이 없습니다.")
                 } else {
                     popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
                         override fun onCancelClick() {
-                            Utils.Log("취소 클릭함")
+                            Utils.log("취소 클릭 ====> 납기일자 다음 날로 설정")
+                            checkOrderPopup(Utils.getNextDay())
                         }
 
                         override fun onOkClick() {
-                            updateOrder()
+                            setDeliveryDate()
                         }
                     }
                     popupDoubleMessage.show()
@@ -125,14 +114,52 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
         })
     }
 
-    private fun updateOrder(){
+    // 수정 주문 확인 팝업
+    private fun checkOrderPopup(deliveryDate: String) {
+        val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $customerNm\n총금액: ${Utils.decimal(totalAmount)}원\n납기일자: $deliveryDate", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+        popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
+            override fun onCancelClick() {
+                Utils.log("취소 클릭함")
+            }
+
+            override fun onOkClick() {
+                updateOrder(deliveryDate)
+            }
+        }
+        popupDoubleMessage.show()
+    }
+
+    // 납기 일자 선택 팝업
+    private fun setDeliveryDate() {
+        val popupDeliveryDatePicker = PopupDeliveryDatePicker(mContext)
+        popupDeliveryDatePicker.onSelectedDate = {
+            checkOrderPopup(it)
+        }
+        popupDeliveryDatePicker.show()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun setUi() {
+        mBinding.header.headerTitle.text = getString(R.string.slipModify)
+        mBinding.bottom.bottomButton.text = getString(R.string.titleOrder)
+        mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
+
+        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                finish()
+            }
+        })
+    }
+
+    private fun updateOrder(deliveryDate: String){
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val jsonArray = Gson().toJsonTree(orderSlipList).asJsonArray
-        val deliveryDate = Utils.getCurrentDateFormatted()
 
         val json = JsonObject().apply {
-            addProperty("agencyCd", mLoginInfo?.agencyCd)
-            addProperty("userId", mLoginInfo?.userId)
+            addProperty("agencyCd", mLoginInfo.agencyCd)
+            addProperty("userId", mLoginInfo.userId)
             addProperty("slipNo", slipNo)
             addProperty("slipType", Define.ORDER)
             addProperty("customerCd", customerCd)
@@ -141,28 +168,29 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
             addProperty("totalAmount", totalAmount)
         }
         json.add("salesInfo", jsonArray)
-        Utils.Log("final updated order json ====> ${Gson().toJson(json)}")
+        Utils.log("final updated order json ====> ${Gson().toJson(json)}")
 
         val obj = json.toString()
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
         val call = service.update(body)
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<Unit>>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<Unit>>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<DataModel<Unit>>>,
-                response: Response<ObjectResultModel<DataModel<Unit>>>
+                call: Call<ResultModel<DataModel<Unit>>>,
+                response: Response<ResultModel<DataModel<Unit>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
-                    Utils.Log("item ===> ${Gson().toJson(item)}")
+                    Utils.log("item ===> ${Gson().toJson(item)}")
                     if (item?.returnCd == Define.RETURN_CD_00) {
-                        Utils.Log("order success ====> ${Gson().toJson(item)}")
+                        Utils.log("order success ====> ${Gson().toJson(item)}")
                         val data = orderSlipList
-                        val slipNo = item.data?.slipNo
+                        val slipNo = item.data.slipNo
                         Utils.toast(mContext, "주문이 전송되었습니다.")
-                        Utils.Log("returnMsg ====> ${item.returnMsg}")
+                        Utils.log("returnMsg ====> ${item.returnMsg}")
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
-                            putExtra("data", data)
+                            //putExtra("data", data)
                             putExtra("slipNo", slipNo)
                             putExtra("title", mContext.getString(R.string.titleOrder))
                         }
@@ -171,12 +199,15 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
                         Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<DataModel<Unit>>>, t: Throwable) {
-                Utils.Log("order failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<DataModel<Unit>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("order failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
         })
@@ -187,13 +218,13 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
 
         for (searchItemModel in orderSlipList) {
             val matcher = searchItemModel.itemNm?.let { pattern.matcher(it) }
-            Utils.Log("searchItemModel.vatYn ====> ${searchItemModel.vatYn}")
+            Utils.log("searchItemModel.vatYn ====> ${searchItemModel.vatYn}")
             val supplyPrice = if (searchItemModel.vatYn == "01") {
                 ceil(searchItemModel.amount!! / 1.1).toInt()
             } else {
                 searchItemModel.amount!!
             }
-            val vat = searchItemModel.amount - supplyPrice
+            val vat = searchItemModel.amount!! - supplyPrice
             searchItemModel.supplyPrice = supplyPrice
             searchItemModel.vat = vat
             if (matcher!!.find()) {

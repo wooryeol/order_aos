@@ -18,11 +18,12 @@ import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountSlipSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker02
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.databinding.ActSlipInquiryBinding
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.CustomerModel
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
 import retrofit2.Response
@@ -71,12 +72,40 @@ class SlipInquiryActivity : AppCompatActivity() {
             popupDatePicker.show()
         }
 
-        mBinding.etAccountName.setOnEditorActionListener { v, actionId, event ->
+        mBinding.etAccountName.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE){
                 mBinding.btSearch.performClick()
                 true
             } else {
                 false
+            }
+        }
+
+        mBinding.radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            when(checkedId) {
+                R.id.radioOrder -> {
+                    mBinding.etAccountName.text = null
+                    mBinding.tvAccountName.text = null
+                    mBinding.etAccountName.hint = getString(R.string.accountHint)
+                    mBinding.etAccountName.visibility = View.VISIBLE
+                    mBinding.tvAccountName.visibility = View.GONE
+                    mBinding.btAccountNameEmpty.visibility = View.GONE
+                    mBinding.noSearch.visibility = View.VISIBLE
+                    orderSlipList.clear()
+                    slipAdapter?.notifyDataSetChanged()
+                }
+
+                R.id.radioReturn -> {
+                    mBinding.etAccountName.text = null
+                    mBinding.tvAccountName.text = null
+                    mBinding.etAccountName.hint = getString(R.string.accountHint)
+                    mBinding.etAccountName.visibility = View.VISIBLE
+                    mBinding.tvAccountName.visibility = View.GONE
+                    mBinding.btAccountNameEmpty.visibility = View.GONE
+                    mBinding.noSearch.visibility = View.VISIBLE
+                    orderSlipList.clear()
+                    slipAdapter?.notifyDataSetChanged()
+                }
             }
         }
     }
@@ -92,7 +121,7 @@ class SlipInquiryActivity : AppCompatActivity() {
                 mBinding.tvAccountName.text = null
                 mBinding.tvAccountName.visibility = View.GONE
                 mBinding.etAccountName.visibility = View.VISIBLE
-                mBinding.etAccountName.hint = v.context.getString(R.string.productNameHint)
+                mBinding.etAccountName.hint = getString(R.string.accountHint)
                 mBinding.noSearch.visibility = View.VISIBLE
                 mBinding.recyclerview.visibility = View.GONE
                 orderSlipList.clear()
@@ -103,6 +132,7 @@ class SlipInquiryActivity : AppCompatActivity() {
     private fun setUi(){
         mBinding.header.headerTitle.text = getString(R.string.menu04)
         mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
+        mBinding.radioOrder.isChecked = true
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
@@ -115,6 +145,7 @@ class SlipInquiryActivity : AppCompatActivity() {
         slipAdapter = SlipListAdapter(mContext, mActivity, orderSlipList)
         mBinding.recyclerview.adapter = slipAdapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
+
         if (orderSlipList.isNotEmpty()){
             mBinding.noSearch.visibility = View.GONE
             mBinding.recyclerview.visibility = View.VISIBLE
@@ -154,71 +185,75 @@ class SlipInquiryActivity : AppCompatActivity() {
     }
 
     private fun searchCustomer() {
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val searchCondition = mBinding.etAccountName.text.toString()
         val call = service.client(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, searchCondition)
 
-        call.enqueue(object : retrofit2.Callback<ListResultModel<CustomerModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<List<CustomerModel>>> {
             override fun onResponse(
-                call: Call<ListResultModel<CustomerModel>>,
-                response: Response<ListResultModel<CustomerModel>>
+                call: Call<ResultModel<List<CustomerModel>>>,
+                response: Response<ResultModel<List<CustomerModel>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                        Utils.Log("account search success ====> ${Gson().toJson(item)}")
-                        if (item.data.isNullOrEmpty()) {
-                            Utils.popupNotice(mContext, "조회 결과가 없습니다.\n다시 검색해주세요.")
-                        } else {
-                            val list = item.data as ArrayList<CustomerModel>
-                            val searchFromDate = mBinding.startDate.text.toString()
-                            val searchToDate = mBinding.endDate.text.toString()
-                            popupSearchResult = PopupAccountSlipSearch(mBinding.root.context, list, searchFromDate, searchToDate, mBinding.radioOrder.isChecked)
-                            popupSearchResult?.onTitleSelect = {
-                                mBinding.tvAccountName.isSelected = true
-                                mBinding.tvAccountName.text = it.custNm
-                                mBinding.etAccountName.visibility = View.GONE
-                                mBinding.tvAccountName.visibility = View.VISIBLE
+                        //Utils.log("account search success ====> ${Gson().toJson(item)}")
+                        val list = item.data as ArrayList<CustomerModel>
+                        val searchFromDate = mBinding.startDate.text.toString()
+                        val searchToDate = mBinding.endDate.text.toString()
+                        popupSearchResult = PopupAccountSlipSearch(mBinding.root.context, list, searchFromDate, searchToDate, mBinding.radioOrder.isChecked)
+                        popupSearchResult?.onTitleSelect = {
+                            mBinding.tvAccountName.isSelected = true
+                            mBinding.tvAccountName.text = it.custNm
+                            mBinding.etAccountName.visibility = View.GONE
+                            mBinding.tvAccountName.visibility = View.VISIBLE
 
-
-                                if (!mBinding.tvAccountName.text.isNullOrEmpty()) {
-                                    showCollectList()
-                                }
-                            }
-
-                            popupSearchResult?.onItemSelect = {
-                                for(i in it) {
-                                    orderSlipList.add(i)
-                                }
-                                slipAdapter?.notifyDataSetChanged()
-
-                                if (orderSlipList.isNotEmpty()){
-                                    mBinding.noSearch.visibility = View.GONE
-                                    mBinding.recyclerview.visibility = View.VISIBLE
-                                } else {
-                                    mBinding.noSearch.visibility = View.VISIBLE
-                                    mBinding.recyclerview.visibility = View.GONE
-                                }
-                            }
-                            popupSearchResult?.show()
-
-                            if (list.isNullOrEmpty()) {
-                                mBinding.recyclerview.visibility = View.GONE
-                                mBinding.noSearch.visibility = View.VISIBLE
-                            } else {
-                                mBinding.recyclerview.visibility = View.VISIBLE
-                                mBinding.noSearch.visibility = View.GONE
+                            if (!mBinding.tvAccountName.text.isNullOrEmpty()) {
+                                showCollectList()
                             }
                         }
+
+                        popupSearchResult?.onItemSelect = {
+                            orderSlipList.clear()
+                            for(i in it) {
+                                orderSlipList.add(i)
+                            }
+                            slipAdapter?.notifyDataSetChanged()
+
+                            if (orderSlipList.isNotEmpty()){
+                                mBinding.noSearch.visibility = View.GONE
+                                mBinding.recyclerview.visibility = View.VISIBLE
+                            } else {
+                                mBinding.noSearch.visibility = View.VISIBLE
+                                mBinding.recyclerview.visibility = View.GONE
+                            }
+                        }
+                        popupSearchResult?.show()
+
+                        if (list.isEmpty()) {
+                            mBinding.recyclerview.visibility = View.GONE
+                            mBinding.noSearch.visibility = View.VISIBLE
+                        } else {
+                            mBinding.recyclerview.visibility = View.VISIBLE
+                            mBinding.noSearch.visibility = View.GONE
+                        }
+
+                    } else {
+                        Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
-
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ListResultModel<CustomerModel>>, t: Throwable) {
-                Utils.Log("search failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<List<CustomerModel>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("search failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
         })

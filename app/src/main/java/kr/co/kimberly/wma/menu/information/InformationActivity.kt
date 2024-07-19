@@ -23,13 +23,13 @@ import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountInformation
-import kr.co.kimberly.wma.custom.popup.PopupNotice
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.databinding.ActInformationBinding
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.DetailInfoModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
@@ -167,26 +167,29 @@ class InformationActivity : AppCompatActivity() {
     }
 
     private fun getInfo(searchCondition: String) {
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.masterInfo(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, mSearchType!!, searchCondition)
         //test
         //val call = service.masterInfo("C000000", "mb2004", mSearchType!!, searchCondition)
 
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<Any>>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<Any>>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<DataModel<Any>>>,
-                response: Response<ObjectResultModel<DataModel<Any>>>
+                call: Call<ResultModel<DataModel<Any>>>,
+                response: Response<ResultModel<DataModel<Any>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item != null) {
-                        Utils.Log("item ====> $item")
+                        Utils.log("item ====> $item")
                         if (item.returnCd == Define.RETURN_CD_90 || item.returnCd == Define.RETURN_CD_91 || item.returnCd == Define.RETURN_CD_00) {
                             val gson = Gson()
                             when(mSearchType) {
                                 Define.TYPE_CUSTOMER -> {
-                                    Utils.Log("customer info search success ====> ${Gson().toJson(item.data?.customerList)}")
+                                    Utils.log("customer info search success ====> ${Gson().toJson(item.data?.customerList)}")
 
                                     // customerList를 JSON 문자열로 변환 후 다시 List<Customer>로 변환
                                     val jsonElement = gson.toJsonTree(item.data?.customerList)
@@ -203,7 +206,7 @@ class InformationActivity : AppCompatActivity() {
                                 }
 
                                 Define.TYPE_ITEM -> {
-                                    Utils.Log("item info search success ====> ${Gson().toJson(item.data?.itemList)}")
+                                    Utils.log("item info search success ====> ${Gson().toJson(item.data?.itemList)}")
                                     // itemList를 JSON 문자열로 변환 후 다시 List<Customer>로 변환
                                     val jsonElement = gson.toJsonTree(item.data?.itemList)
                                     val jsonString = gson.toJson(jsonElement)
@@ -227,12 +230,15 @@ class InformationActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<DataModel<Any>>>, t: Throwable) {
-                Utils.Log("getInfo failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<DataModel<Any>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("getInfo failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
         })
@@ -241,6 +247,8 @@ class InformationActivity : AppCompatActivity() {
 
     // 상세 정보 조회
     private fun getDetailInfo(searchCd: String) {
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.masterInfoDetail(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, mSearchType!!, searchCd)
         //test
@@ -248,20 +256,21 @@ class InformationActivity : AppCompatActivity() {
 
         //val call = service.masterInfoDetail("C000028", "mb2004", "C", "000012")
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DetailInfoModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<DetailInfoModel>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<DetailInfoModel>>,
-                response: Response<ObjectResultModel<DetailInfoModel>>
+                call: Call<ResultModel<DetailInfoModel>>,
+                response: Response<ResultModel<DetailInfoModel>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item != null) {
-                        Utils.Log("item ====> $item")
+                        Utils.log("item ====> $item")
                         if (item.returnCd == Define.RETURN_CD_90 || item.returnCd == Define.RETURN_CD_91 || item.returnCd == Define.RETURN_CD_00) {
                             val data = item.data
                             when(mSearchType) {
                                 Define.TYPE_CUSTOMER -> {
-                                    Utils.Log("customer detail info search success ====> ${Gson().toJson(item.data)}")
+                                    Utils.log("customer detail info search success ====> ${Gson().toJson(item.data)}")
 
                                     detailInfoModel = item.data?.copy(
                                         searchType = data?.searchType!!,
@@ -283,7 +292,7 @@ class InformationActivity : AppCompatActivity() {
                                 }
 
                                 Define.TYPE_ITEM -> {
-                                    Utils.Log("item detail info search success ====> ${Gson().toJson(item.data)}")
+                                    Utils.log("item detail info search success ====> ${Gson().toJson(item.data)}")
 
                                     detailInfoModel = item.data?.copy(
                                         representNm =  data?.resultType!!,
@@ -311,12 +320,15 @@ class InformationActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<DetailInfoModel>>, t: Throwable) {
-                Utils.Log("getInfo failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<DetailInfoModel>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("getInfo failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
         })
@@ -357,16 +369,21 @@ class InformationActivity : AppCompatActivity() {
                 mBinding.Dimension.text = detailInfoModel.dimension
                 mBinding.Dimension.isSelected = true
                 mBinding.tax.text = detailInfoModel.vatType
-                if (!detailInfoModel.imgUrl.isNullOrEmpty()){
-                    val defaultImage = mContext.getDrawable(R.drawable.imagesmode)
+                if (detailInfoModel.registerImgYn == "Y") {
+                    mBinding.noImage.visibility = View.GONE
+                    mBinding.image.visibility = View.VISIBLE
                     Glide.with(this)
                         .load(detailInfoModel.imgUrl) // 불러올 이미지 url
-                        .placeholder(defaultImage) // 이미지 로딩 시작하기 전 표시할 이미지
-                        .error(defaultImage) // 로딩 에러 발생 시 표시할 이미지
-                        .fallback(defaultImage) // 로드할 url 이 비어있을(null 등) 경우 표시할 이미지
+                        //.placeholder(defaultImage) // 이미지 로딩 시작하기 전 표시할 이미지
+                        //.error(defaultImage) // 로딩 에러 발생 시 표시할 이미지
+                        //.fallback(defaultImage) // 로드할 url 이 비어있을(null 등) 경우 표시할 이미지
                         //.circleCrop() // 동그랗게 자르기
-                        .into(mBinding.imageView) // 이미지를 넣을 뷰
+                        .into(mBinding.image) // 이미지를 넣을 뷰
+                } else {
+                    mBinding.noImage.visibility = View.VISIBLE
+                    mBinding.image.visibility = View.GONE
                 }
+
             }
         }
     }

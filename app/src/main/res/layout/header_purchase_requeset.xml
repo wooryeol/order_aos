@@ -111,20 +111,21 @@
             android:layout_marginEnd="8dp"
             android:background="@drawable/et_round_c9cbd0"
             android:layout_gravity="center_vertical">
-            <EditText
+
+            <AutoCompleteTextView
                 android:id="@+id/etProductName"
                 android:layout_width="0dp"
-                android:layout_weight="1"
                 android:layout_height="40dp"
-                android:textSize="16dp"
+                android:layout_weight="1"
                 android:background="@color/trans"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
-                android:imeOptions="actionDone"
-                android:singleLine="true"
-                android:inputType="text"
                 android:hint="@string/productNameHint"
-                tools:ignore="Autofill,SpUsage,TextFields" />
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="10dp"
+                android:singleLine="true"
+                android:textSize="16dp"
+                tools:ignore="Autofill,NestedWeights,SpUsage,TextFields" />
 
             <TextView
                 android:visibility="gone"

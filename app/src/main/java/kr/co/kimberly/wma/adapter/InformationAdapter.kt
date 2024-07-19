@@ -24,7 +24,7 @@ class InformationAdapter(context: Context): RecyclerView.Adapter<InformationAdap
             binding.accountSearchName.text = "(${itemModel.customerCd}) ${itemModel.customerNm}"
 
             itemView.setOnClickListener {
-                Utils.Log("selected account ====> (${itemModel.customerCd}) ${itemModel.customerNm}")
+                Utils.log("selected account ====> (${itemModel.customerCd}) ${itemModel.customerNm}")
                 itemClickListener?.onAccountClick(itemModel)
             }
         }
@@ -33,7 +33,7 @@ class InformationAdapter(context: Context): RecyclerView.Adapter<InformationAdap
             binding.accountSearchName.text = "(${itemModel.itemCd}) ${itemModel.itemNm}"
 
             itemView.setOnClickListener {
-                Utils.Log("selected item ====> (${itemModel.itemCd}) ${itemModel.itemNm}")
+                Utils.log("selected item ====> (${itemModel.itemCd}) ${itemModel.itemNm}")
                 itemClickListener?.onItemClick(itemModel)
             }
         }

@@ -38,6 +38,10 @@ class PopupDoubleMessage(mContext: Context, private var title: String, private v
         mBinding.tvMsg01.text = msg01
         mBinding.tvMsg02.text = msg02
 
+        if (msg02.isNullOrEmpty()) {
+            mBinding.tvMsg02.visibility = View.GONE
+        }
+
         if (purchase != null) {
             if (purchase) {
                 mBinding.tvMsg04.visibility = View.VISIBLE

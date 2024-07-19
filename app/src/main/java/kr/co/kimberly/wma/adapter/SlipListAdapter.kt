@@ -12,13 +12,13 @@ import com.google.gson.Gson
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.databinding.CellCollectBinding
 import kr.co.kimberly.wma.menu.slip.SlipInquiryDetailActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
@@ -62,20 +62,23 @@ class SlipListAdapter(context: Context, activity: Activity, val dataList: ArrayL
     private fun searchOrderSlipDetail(slipNo: String){
         val agencyCd = mLoginInfo?.agencyCd!!
         val userId = mLoginInfo?.userId!!
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.orderSlipDetail(agencyCd, userId, slipNo)
 
         //test
         //val call = service.orderSlipDetail("C000028", "mb2004", "20240600015")
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<DataModel<SearchItemModel>>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<SearchItemModel>>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<DataModel<SearchItemModel>>>,
-                response: Response<ObjectResultModel<DataModel<SearchItemModel>>>
+                call: Call<ResultModel<DataModel<SearchItemModel>>>,
+                response: Response<ResultModel<DataModel<SearchItemModel>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                        Utils.Log("OrderSlipDetail search success ====> ${Gson().toJson(item)}")
+                        Utils.log("OrderSlipDetail search success ====> ${Gson().toJson(item)}")
                         val data = item.data
                         if (data != null) {
                             val list: ArrayList<SearchItemModel> = data.itemList as ArrayList<SearchItemModel>
@@ -96,12 +99,14 @@ class SlipListAdapter(context: Context, activity: Activity, val dataList: ArrayL
                         }
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
-                Utils.Log("OrderSlipDetail search failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("OrderSlipDetail search failed ====> ${t.message}")
             }
 
         })

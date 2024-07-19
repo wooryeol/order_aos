@@ -1,8 +1,8 @@
 package kr.co.kimberly.wma.network.model
 
 class LedgerModel (
-    val date: String,
-    val saleAmount: Int,
-    val collectAmount: Int,
+    val transDate: String? = null, // 거래일자
+    val salePrice: Int? = null, // 매출액
+    val collectionPrice: Int? = null, // 수금액
 
 )

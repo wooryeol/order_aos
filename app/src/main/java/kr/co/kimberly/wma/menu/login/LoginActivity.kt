@@ -18,12 +18,13 @@ import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.databinding.ActLoginBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
@@ -150,6 +151,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun login() {
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val userId = mBinding.etId.text.toString()
         val userPw = mBinding.etPw.text.toString()
@@ -163,18 +166,19 @@ class LoginActivity : AppCompatActivity() {
 
         val obj = json.toString()
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
-        Utils.Log("body ====> ${Gson().toJson(json)}")
+        Utils.log("body ====> ${Gson().toJson(json)}")
         val call = service.postLogin(body)
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<LoginResponseModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<LoginResponseModel>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<LoginResponseModel>>,
-                response: Response<ObjectResultModel<LoginResponseModel>>
+                call: Call<ResultModel<LoginResponseModel>>,
+                response: Response<ResultModel<LoginResponseModel>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00) {
-                        Utils.Log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
+                        Utils.log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
                         SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, Gson().toJson(item.data))
                         val intent = Intent(mContext,  MainActivity::class.java)
                         startActivity(intent)
@@ -183,13 +187,14 @@ class LoginActivity : AppCompatActivity() {
                         Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
                     Utils.popupNotice(mContext, "로그인 정보를 확인해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<LoginResponseModel>>, t: Throwable) {
-                Utils.Log("login failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<LoginResponseModel>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("login failed ====> ${t.message}")
                 Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
@@ -201,4 +206,6 @@ class LoginActivity : AppCompatActivity() {
         mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
     }
+
+
 }

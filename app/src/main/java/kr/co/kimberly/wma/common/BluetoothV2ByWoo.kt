@@ -58,7 +58,7 @@ class BluetoothV2ByWoo(context: Context, activity: Activity, private val list: A
             }
             when(intent.action) {
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
-                    Utils.Log("bluetooth 가능 기기를 탐색합니다.")
+                    Utils.log("bluetooth 가능 기기를 탐색합니다.")
                 }
                 BluetoothDevice.ACTION_FOUND -> {
                     if (!isPaired) {
@@ -82,7 +82,7 @@ class BluetoothV2ByWoo(context: Context, activity: Activity, private val list: A
                     }
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    Utils.Log("bluetooth 가능 기기 탐색을 종료합니다.")
+                    Utils.log("bluetooth 가능 기기 탐색을 종료합니다.")
                     //Toast.makeText(mContext, "bluetooth 가능 기기 탐색을 종료합니다.", Toast.LENGTH_SHORT).show()
                     bluetoothListener?.hideLoadingImage()
                     if (mBluetoothAdapter.isDiscovering) {

@@ -40,9 +40,9 @@ class PurchaseApprovalActivity: AppCompatActivity() {
         sapModel = intent.getSerializableExtra("sapModel") as SapModel
         purchaseList = intent.getSerializableExtra("purchaseList") as ArrayList<SearchItemModel>
 
-        Utils.Log("slipNo ====> ${Gson().toJson(slipNo)}")
-        Utils.Log("sapModel ====> ${Gson().toJson(sapModel)}")
-        Utils.Log("purchaseList ====> ${Gson().toJson(purchaseList)}")
+        Utils.log("slipNo ====> ${Gson().toJson(slipNo)}")
+        Utils.log("sapModel ====> ${Gson().toJson(sapModel)}")
+        Utils.log("purchaseList ====> ${Gson().toJson(purchaseList)}")
 
         mContext = this
         mActivity = this

@@ -35,8 +35,8 @@ class PopupAccountInformation(mContext: Context, private val accountList: ArrayL
         mBinding = PopupSearchResultBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        Utils.Log("accountList ====> ${Gson().toJson(accountList)}")
-        Utils.Log("itemList ====> ${Gson().toJson(itemList)}")
+        Utils.log("accountList ====> ${Gson().toJson(accountList)}")
+        Utils.log("itemList ====> ${Gson().toJson(itemList)}")
         initViews()
     }
 
