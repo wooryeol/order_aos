@@ -7,9 +7,11 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.common.Define
@@ -24,7 +26,7 @@ import retrofit2.Call
 import retrofit2.Response
 
 @SuppressLint("NotifyDataSetChanged")
-class PopupAccountListSearch(mContext: Context, private val searchCondition: String): Dialog(mContext) {
+class PopupAccountListSearch(mContext: Context, private val searchCondition: String, private val editText: EditText): Dialog(mContext) {
     private lateinit var mBinding: PopupSearchResultBinding
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
     private var context = mContext
@@ -107,7 +109,7 @@ class PopupAccountListSearch(mContext: Context, private val searchCondition: Str
                         adapter?.notifyDataSetChanged()
 
                     } else {
-                        Utils.popupNotice(context, item?.returnMsg!!)
+                        Utils.popupNotice(context, item?.returnMsg!!, editText)
                         hideDialog()
                     }
                 } else {

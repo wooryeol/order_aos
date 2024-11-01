@@ -124,76 +124,155 @@ class PopupDeliveryDatePicker(val mContext: Context): Dialog(mContext) {
 
 
     private fun onButtonClick() {
-            // 년도 조절 버튼
-            mBinding.btnAddYear.setOnClickListener {
-                year += 1
-                updateDate()
-            }
+        // 년도 조절 버튼
+        mBinding.btnAddYear.setOnClickListener {
+            year += 1
+            updateDate()
+        }
 
-            mBinding.btnMinusYear.setOnClickListener {
-                year -= 1
-                updateDate()
-            }
+        mBinding.btnMinusYear.setOnClickListener {
+            year -= 1
+            updateDate()
+        }
 
-            // 월 조절 버튼
-            mBinding.btnAddMonth.setOnClickListener {
-                month += 1
-                updateDate()
-            }
+        /*// 월 조절 버튼
+        mBinding.btnAddMonth.setOnClickListener {
+            month += 1
+            updateDate()
+        }
 
-            mBinding.btnMinusMonth.setOnClickListener {
-                month -= 1
-                updateDate()
-            }
+        mBinding.btnMinusMonth.setOnClickListener {
+            month -= 1
+            updateDate()
+        }
 
-            // 일 조절 버튼
-            mBinding.btnAddDate.setOnClickListener {
-                date += 1
-                updateDate()
-            }
+        // 일 조절 버튼
+        mBinding.btnAddDate.setOnClickListener {
+            date += 1
+            updateDate()
+        }
 
-            mBinding.btnMinusDate.setOnClickListener {
-                date -= 1
-                updateDate()
+        mBinding.btnMinusDate.setOnClickListener {
+            date -= 1
+            updateDate()
+        }*/
+
+        // 월 조절 버튼
+        mBinding.btnAddMonth.setOnClickListener {
+            month += 1
+            updateDate(true) // 월이 변경되었음을 알림
+        }
+
+        mBinding.btnMinusMonth.setOnClickListener {
+            month -= 1
+            updateDate(true) // 월이 변경되었음을 알림
+        }
+
+        // 일 조절 버튼
+        mBinding.btnAddDate.setOnClickListener {
+            date += 1
+            updateDate()
+        }
+
+        mBinding.btnMinusDate.setOnClickListener {
+            date -= 1
+            updateDate()
+        }
+
+    }
+    private fun updateDate(isMonthChange: Boolean = false) {
+        today.set(year, month - 1, date)
+
+        val currentDate = Calendar.getInstance()
+        currentDate.add(Calendar.DAY_OF_YEAR, 1)
+        if (today.before(currentDate)) {
+            today.time = currentDate.time
+            year = today.get(Calendar.YEAR)
+            month = today.get(Calendar.MONTH) + 1
+            date = today.get(Calendar.DATE)
+        }
+
+        // 월을 변경했을 때 `date`가 새로운 월의 최대 날짜를 넘지 않도록 설정
+        if (isMonthChange) {
+            val maxDateForNextMonth = getEndDate(month)
+            if (date > maxDateForNextMonth) {
+                date = 1 // 다음 달의 첫날로 설정
             }
         }
 
-        private fun updateDate() {
-            today.set(year, month - 1, date)
+        // 날짜가 현재 월의 최대 날짜를 초과할 경우 다음 월로 이동
+        val maxDateForCurrentMonth = getEndDate(month)
+        if (date > maxDateForCurrentMonth) {
+            date = 1
+            month += 1
+        }
 
-            val currentDate = Calendar.getInstance()
-            currentDate.add(Calendar.DAY_OF_YEAR, 1)
-            if (today.before(currentDate)) {
-                today.time = currentDate.time
-                year = today.get(Calendar.YEAR)
-                month = today.get(Calendar.MONTH) + 1
-                date = today.get(Calendar.DATE)
-            }
+        // 월이 12월을 초과하면 년도를 증가시키고 1월로 설정
+        if (month > 12) {
+            year += 1
+            month = 1
+        }
 
-            if (month > 12) {
-                year += 1
-                month = 1
-            }
+        // 월이 1월보다 작아지면 년도를 감소시키고 12월로 설정
+        if (month < 1) {
+            year -= 1
+            month = 12
+        }
 
+        // 날짜가 1일보다 작아지면 이전 달의 마지막 날짜로 설정
+        if (date < 1) {
+            month -= 1
             if (month < 1) {
                 year -= 1
                 month = 12
             }
-
-            if (date > getEndDate(month)) {
-                month += 1
-                date = 1
-            }
-
-            if (date < 1) {
-                date = getEndDate(month)
-                month -= 1
-            }
-
-            mBinding.year.setText(year.toString())
-            mBinding.month.setText(month.toString().padStart(2, '0'))
-            mBinding.date.setText(date.toString().padStart(2, '0'))
+            date = getEndDate(month)
         }
+
+        mBinding.year.setText(year.toString())
+        mBinding.month.setText(month.toString().padStart(2, '0'))
+        mBinding.date.setText(date.toString().padStart(2, '0'))
+    }
+
+
+
+    /*private fun updateDate() {
+        today.set(year, month - 1, date)
+
+        val currentDate = Calendar.getInstance()
+        currentDate.add(Calendar.DAY_OF_YEAR, 1)
+        if (today.before(currentDate)) {
+            today.time = currentDate.time
+            year = today.get(Calendar.YEAR)
+            month = today.get(Calendar.MONTH) + 1
+            date = today.get(Calendar.DATE)
+        }
+
+        if (date > getEndDate(month)) {
+            date = 1
+            month += 1
+        }
+
+        if (month > 12) {
+            year += 1
+            month = 1
+        }
+
+        if (month < 1) {
+            year -= 1
+            month = 12
+        }
+
+        if (date < 1) {
+            month -= 1
+            date = getEndDate(month)
+
+        }
+
+        mBinding.year.setText(year.toString())
+        mBinding.month.setText(month.toString().padStart(2, '0'))
+        mBinding.date.setText(date.toString().padStart(2, '0'))
+    }*/
 
         @SuppressLint("SimpleDateFormat", "SetTextI18n")
         private fun initView() {

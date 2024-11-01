@@ -18,6 +18,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
@@ -45,6 +46,8 @@ class InformationActivity : AppCompatActivity() {
     private var mSearchType: String? = null // 조회 유형
     private var popupInformation : PopupAccountInformation? = null // 정보조회
     private var detailInfoModel: DetailInfoModel? = null // 상세정보
+    private var accountName = ""
+    private var itemName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +56,7 @@ class InformationActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
-        mLoginInfo = Utils.getLoginData()!!
+        mLoginInfo = Utils.getLoginData()
         mSearchType = Define.TYPE_CUSTOMER
 
 
@@ -98,7 +101,7 @@ class InformationActivity : AppCompatActivity() {
             }
         })
 
-        mBinding.etSearch.setOnEditorActionListener { v, actionId, event ->
+        mBinding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE){
                 mBinding.search.performClick()
                 true
@@ -109,42 +112,42 @@ class InformationActivity : AppCompatActivity() {
     }
 
     private fun setSetting() {
-        radioGroupCheckedListener = OnCheckedChangeListener { group, checkedId ->
+        radioGroupCheckedListener = OnCheckedChangeListener { _, checkedId ->
             hideKeyboard()
-
             when(checkedId) {
                 R.id.accountInfo -> {
-                    mBinding.etSearch.hint = getString(R.string.accountHint)
+                    if (accountName.isNotEmpty()){
+                        mBinding.tvProductName.text = accountName
+                        mBinding.tvProductName.visibility = View.VISIBLE
+                        mBinding.btProductNameEmpty.visibility = View.VISIBLE
+                        mBinding.etSearch.visibility = View.GONE
+                    } else {
+                        mBinding.etSearch.hint = getString(R.string.accountHint)
+                        mBinding.etSearch.visibility = View.VISIBLE
+                        mBinding.tvProductName.visibility = View.GONE
+                        mBinding.btProductNameEmpty.visibility = View.GONE
+                    }
+
                     mBinding.accountInfoLayout.visibility = View.VISIBLE
                     mBinding.productInfoLayout.visibility = View.GONE
                     mSearchType = Define.TYPE_CUSTOMER
-
-                    // 데이터 초기화
-                    mBinding.accountCode.text = ""
-                    mBinding.account.text = ""
-                    mBinding.represent.text = ""
-                    mBinding.businessNum.text = ""
-                    mBinding.phone.text = ""
-                    mBinding.fax.text = ""
-                    mBinding.address.text = ""
-                    mBinding.customer.text = ""
-                    mBinding.scale.text = ""
-                    mBinding.inCharge.text = ""
-                    mBinding.inChargeNum.text = ""
                 }
                 R.id.productInfo -> {
+                    if (itemName.isNotEmpty()){
+                        mBinding.tvProductName.text = itemName
+                        mBinding.tvProductName.visibility = View.VISIBLE
+                        mBinding.btProductNameEmpty.visibility = View.VISIBLE
+                        mBinding.etSearch.visibility = View.GONE
+                    } else {
+                        mBinding.etSearch.hint = getString(R.string.accountHint)
+                        mBinding.etSearch.visibility = View.VISIBLE
+                        mBinding.tvProductName.visibility = View.GONE
+                        mBinding.btProductNameEmpty.visibility = View.GONE
+                    }
                     mBinding.etSearch.hint = getString(R.string.productHint)
                     mBinding.productInfoLayout.visibility = View.VISIBLE
                     mBinding.accountInfoLayout.visibility = View.GONE
                     mSearchType = Define.TYPE_ITEM
-
-                    mBinding.manufacturer.text = ""
-                    mBinding.productCode.text = ""
-                    mBinding.productName.text = ""
-                    mBinding.barcode.text = ""
-                    mBinding.incomeQty.text = ""
-                    mBinding.Dimension.text = ""
-                    mBinding.tax.text = ""
                 }
             }
         }
@@ -152,9 +155,16 @@ class InformationActivity : AppCompatActivity() {
 
     fun clearButton() {
         mBinding.etSearch.text = null
+        if (mBinding.tvProductName.text == accountName) {
+            accountName = ""
+        }
+        if (mBinding.tvProductName.text == itemName) {
+            itemName = ""
+        }
         when(mSearchType){
             Define.TYPE_CUSTOMER -> {
                 mBinding.etSearch.hint = mContext.getString(R.string.accountHint)
+
             }
             Define.TYPE_ITEM -> {
                 mBinding.etSearch.hint = mContext.getString(R.string.productNameHint)
@@ -164,6 +174,7 @@ class InformationActivity : AppCompatActivity() {
         mBinding.tvProductName.text = null
         mBinding.tvProductName.visibility = View.GONE
         mBinding.btProductNameEmpty.visibility = View.GONE
+        GlobalApplication.showKeyboard(mContext, mBinding.etSearch)
     }
 
     private fun getInfo(searchCondition: String) {
@@ -176,6 +187,7 @@ class InformationActivity : AppCompatActivity() {
 
 
         call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<Any>>> {
+            @SuppressLint("SetTextI18n")
             override fun onResponse(
                 call: Call<ResultModel<DataModel<Any>>>,
                 response: Response<ResultModel<DataModel<Any>>>
@@ -189,10 +201,10 @@ class InformationActivity : AppCompatActivity() {
                             val gson = Gson()
                             when(mSearchType) {
                                 Define.TYPE_CUSTOMER -> {
-                                    Utils.log("customer info search success ====> ${Gson().toJson(item.data?.customerList)}")
+                                    Utils.log("customer info search success ====> ${Gson().toJson(item.data.customerList)}")
 
                                     // customerList를 JSON 문자열로 변환 후 다시 List<Customer>로 변환
-                                    val jsonElement = gson.toJsonTree(item.data?.customerList)
+                                    val jsonElement = gson.toJsonTree(item.data.customerList)
                                     val jsonString = gson.toJson(jsonElement)
                                     val customerListType = object : TypeToken<ArrayList<SlipOrderListModel>>() {}.type
                                     val customerList: ArrayList<SlipOrderListModel> = gson.fromJson(jsonString, customerListType)
@@ -200,15 +212,16 @@ class InformationActivity : AppCompatActivity() {
                                     popupInformation = PopupAccountInformation(mContext, customerList, null  )
                                     popupInformation?.onAccountSelect = {
                                         mBinding.tvProductName.text = it.customerNm
+                                        accountName = it.customerNm.toString()
                                         getDetailInfo(it.customerCd.toString())
                                     }
                                     popupInformation?.show()
                                 }
 
                                 Define.TYPE_ITEM -> {
-                                    Utils.log("item info search success ====> ${Gson().toJson(item.data?.itemList)}")
+                                    Utils.log("item info search success ====> ${Gson().toJson(item.data.itemList)}")
                                     // itemList를 JSON 문자열로 변환 후 다시 List<Customer>로 변환
-                                    val jsonElement = gson.toJsonTree(item.data?.itemList)
+                                    val jsonElement = gson.toJsonTree(item.data.itemList)
                                     val jsonString = gson.toJson(jsonElement)
                                     val itemListType = object : TypeToken<ArrayList<SearchItemModel>>() {}.type
                                     val itemList: ArrayList<SearchItemModel> = gson.fromJson(jsonString, itemListType)
@@ -216,17 +229,18 @@ class InformationActivity : AppCompatActivity() {
                                     val popupAccountInformation = PopupAccountInformation(mContext, null, itemList)
                                     popupAccountInformation.onItemSelect = {
                                         mBinding.tvProductName.text = it.itemNm
+                                        itemName = it.itemNm.toString()
                                         getDetailInfo(it.itemCd.toString())
                                     }
                                     popupAccountInformation.show()
                                 }
 
                                 else -> {
-                                    Utils.popupNotice(mContext, item.returnMsg)
+                                    Utils.popupNotice(mContext, item.returnMsg, mBinding.etSearch)
                                 }
                             }
                         } else {
-                            Utils.popupNotice(mContext, item.returnMsg)
+                            Utils.popupNotice(mContext, item.returnMsg, mBinding.etSearch)
                         }
                     }
                 } else {
@@ -272,8 +286,8 @@ class InformationActivity : AppCompatActivity() {
                                 Define.TYPE_CUSTOMER -> {
                                     Utils.log("customer detail info search success ====> ${Gson().toJson(item.data)}")
 
-                                    detailInfoModel = item.data?.copy(
-                                        searchType = data?.searchType!!,
+                                    detailInfoModel = item.data.copy(
+                                        searchType = data.searchType!!,
                                         customerCd = data.customerCd!!,
                                         customerNm = data.customerNm!!,
                                         representNm = data.representNm!!,
@@ -294,8 +308,8 @@ class InformationActivity : AppCompatActivity() {
                                 Define.TYPE_ITEM -> {
                                     Utils.log("item detail info search success ====> ${Gson().toJson(item.data)}")
 
-                                    detailInfoModel = item.data?.copy(
-                                        representNm =  data?.resultType!!,
+                                    detailInfoModel = item.data.copy(
+                                        representNm =  data.resultType!!,
                                         makerNm = data.makerNm!!,
                                         itemCd = data.itemCd!!,
                                         itemNm = data.itemNm!!,
@@ -312,11 +326,11 @@ class InformationActivity : AppCompatActivity() {
                                 }
 
                                 else -> {
-                                    Utils.popupNotice(mContext, item.returnMsg)
+                                    Utils.popupNotice(mContext, item.returnMsg, mBinding.etSearch)
                                 }
                             }
                         } else {
-                            Utils.popupNotice(mContext, item.returnMsg)
+                            Utils.popupNotice(mContext, item.returnMsg, mBinding.etSearch)
                         }
                     }
                 } else {
@@ -336,12 +350,21 @@ class InformationActivity : AppCompatActivity() {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private fun setInfo(detailInfoModel: DetailInfoModel){
-        mBinding.etSearch.visibility = View.GONE
+        /*mBinding.etSearch.visibility = View.GONE
         mBinding.tvProductName.visibility = View.VISIBLE
-        mBinding.btProductNameEmpty.visibility = View.VISIBLE
-
+        mBinding.btProductNameEmpty.visibility = View.VISIBLE*/
         when(mSearchType) {
             Define.TYPE_CUSTOMER -> {
+                if (accountName.isNotEmpty()) {
+                    mBinding.tvProductName.text = accountName
+                    mBinding.etSearch.visibility = View.GONE
+                    mBinding.tvProductName.visibility = View.VISIBLE
+                    mBinding.btProductNameEmpty.visibility = View.VISIBLE
+                } else {
+                    mBinding.etSearch.visibility = View.VISIBLE
+                    mBinding.tvProductName.visibility = View.GONE
+                    mBinding.btProductNameEmpty.visibility = View.GONE
+                }
                 mBinding.accountCode.text = detailInfoModel.customerCd
                 mBinding.account.text = detailInfoModel.customerNm
                 mBinding.represent.text = detailInfoModel.representNm
@@ -361,6 +384,16 @@ class InformationActivity : AppCompatActivity() {
                 }
             }
             Define.TYPE_ITEM -> {
+                if (itemName.isNotEmpty()) {
+                    mBinding.tvProductName.text = itemName
+                    mBinding.etSearch.visibility = View.GONE
+                    mBinding.tvProductName.visibility = View.VISIBLE
+                    mBinding.btProductNameEmpty.visibility = View.VISIBLE
+                } else {
+                    mBinding.etSearch.visibility = View.VISIBLE
+                    mBinding.tvProductName.visibility = View.GONE
+                    mBinding.btProductNameEmpty.visibility = View.GONE
+                }
                 mBinding.manufacturer.text = detailInfoModel.makerNm
                 mBinding.productCode.text = detailInfoModel.itemCd
                 mBinding.productName.text = detailInfoModel.itemNm

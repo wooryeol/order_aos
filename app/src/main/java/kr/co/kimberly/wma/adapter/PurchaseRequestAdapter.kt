@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -55,12 +54,15 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
     var popupProductPriceHistory : PopupProductPriceHistory? = null // 제품 단가 이력 팝업
 
     var onItemSelect: ((SearchItemModel) -> Unit)? = null // 선택된 제품
+    var onItemDelete: ((SearchItemModel) -> Unit)? = null // 선택된 제품 삭제
 
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
 
     private val db: DBHelper by lazy { // 검색어 저장
         DBHelper.getInstance(mContext.applicationContext)
     }
+
+    private lateinit var searchListAdapter: CustomAutoCompleteAdapter
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -100,6 +102,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                             @SuppressLint("NotifyDataSetChanged")
                             override fun onOkClick() {
                                 removeItem(data, selectedSAP)
+                                onItemDelete?.invoke(data)
                             }
                         }
                         popupDoubleMessage.show()
@@ -138,8 +141,8 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             binding.tvBoxEach.text = "BOX(${item.getBox}EA): "
             binding.tvBox.text = Utils.decimal(item.boxQty!!)
             binding.tvPrice.text = "${Utils.decimal(item.orderPrice!!)}원"
-            binding.tvTotal.text = Utils.decimal(item.saleQty!!)
-            binding.tvTotalAmount.text = "${Utils.decimal(item.amount!!)}원"
+            binding.tvTotal.text = Utils.decimalLong(item.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimalLong(item.amount!!)}원"
         }
     }
 
@@ -159,8 +162,8 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                 @SuppressLint("NotifyDataSetChanged")
                                 override fun handleMessage(msg: Message) {
                                     when(msg.what) {
-                                        Define.OK -> {
-                                            binding.shipping.text = context.getString(R.string.purchaseAddressHint)
+                                        Define.EVENT_OK -> {
+                                            binding.shipping.hint = context.getString(R.string.purchaseAddressHint)
                                             binding.etProductName.text = null
                                             binding.searchResult.text = v.context.getString(R.string.searchResult)
                                             binding.tvProductName.text = null
@@ -183,16 +186,16 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
 
             binding.addressArea.setOnClickListener(object: OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
-                    if (binding.sapCode.text == context.getString(R.string.purchaseAccountHint)) {
-                        Utils.popupNotice(context, "SAP Code를 선택해주세요")
+                    if (binding.sapCode.text.isNullOrEmpty()) {
+                        Utils.popupNotice(context, "거래처를 선택해주세요")
                     } else if(itemList.isNotEmpty()) {
                         val popupNoticeV2 = PopupNoticeV2(v.context, "기존 주문이 완료되지 않았습니다.\n새로운 거래처를 검색하시겠습니까?",
                             object : Handler(Looper.getMainLooper()) {
                                 @SuppressLint("NotifyDataSetChanged")
                                 override fun handleMessage(msg: Message) {
                                     when(msg.what) {
-                                        Define.OK -> {
-                                            binding.shipping.text = context.getString(R.string.purchaseAddressHint)
+                                        Define.EVENT_OK -> {
+                                            binding.shipping.hint = context.getString(R.string.purchaseAddressHint)
                                             binding.etProductName.text = null
                                             binding.searchResult.text = v.context.getString(R.string.searchResult)
                                             binding.tvProductName.text = null
@@ -208,14 +211,17 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                             })
                         popupNoticeV2.show()
                     } else {
-                        getShipping(selectedSAP.sapCustomerCd!!)
+                        if (selectedSAP.sapCustomerCd != null) {
+                            getShipping(selectedSAP.sapCustomerCd!!)
+                        }
                     }
                 }
             })
 
             // 검색어 저장 어댑터
-            val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, db.searchList)
-            binding.etProductName.setAdapter(adapter)
+            searchListAdapter = CustomAutoCompleteAdapter(context, db.searchList)
+            binding.etProductName.setAdapter(searchListAdapter)
+            searchListAdapter.setAutoCompleteDropDownHeight(binding.etProductName, 5)
 
             binding.etProductName.setOnClickListener(object : OnSingleClickListener() {
                 override fun onSingleClick(v: View) {
@@ -225,7 +231,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                 }
             })
 
-            binding.etProductName.setOnEditorActionListener { v, actionId, event ->
+            binding.etProductName.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     binding.btSearch.performClick()
                     true
@@ -260,13 +266,28 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
 
             //제품 수정
             onItemSelect ={
-                binding.btAddOrder.text = context.getString(R.string.editOrder)
-                binding.searchResult.text = it.itemNm
-                binding.etBox.setText(it.boxQty.toString())
-                binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
+                if (binding.searchResult.text == it.itemNm) {
+                    binding.btAddOrder.text = context.getString(R.string.addOrder)
+                    binding.searchResult.text = context.getString(R.string.searchResult)
+                    binding.etBox.setText(R.string.zero)
+                    binding.tvPrice.text = context.getString(R.string.zero)
+                } else {
+                    binding.btAddOrder.text = context.getString(R.string.editOrder)
+                    binding.searchResult.text = it.itemNm
+                    binding.etBox.setText(it.boxQty.toString())
+                    binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
+                }
             }
 
-            binding.etBox.setOnEditorActionListener { v, actionId, event ->
+            // 제품 삭제되면
+            onItemDelete = {
+                binding.btAddOrder.text = context.getString(R.string.addOrder)
+                binding.searchResult.text = context.getString(R.string.searchResult)
+                binding.etBox.setText(R.string.zero)
+                binding.tvPrice.text = context.getString(R.string.zero)
+            }
+
+            binding.etBox.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     binding.btAddOrder.performClick()
                     true
@@ -278,16 +299,20 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             binding.btAddOrder.setOnClickListener(object : OnSingleClickListener() {
                 @SuppressLint("NotifyDataSetChanged")
                 override fun onSingleClick(v: View) {
-                    if (binding.etBox.text.isNullOrEmpty() || binding.searchResult.text == "검색된 제품명") {
+                    if (binding.sapCode.text.isNullOrEmpty()) {
+                        Utils.popupNotice(v.context, "SAP Code를 검색해주세요.")
+                    } else if (binding.searchResult.text.isNullOrEmpty()){
+                        Utils.popupNotice(v.context, "제품을 검색해주세요.")
+                    } else if(binding.etBox.text.isNullOrEmpty() || binding.searchResult.text == "검색된 제품명") {
                         Utils.popupNotice(v.context, "모든 항목을 채워주세요")
                     } else {
                         try {
                             val itemName = binding.searchResult.text.toString()
                             val boxQty = Utils.getIntValue(binding.etBox.text.toString())
-                            val saleQty = (boxQty * selectedItem?.getBox!!)
-                            val amount = saleQty * selectedItem?.orderPrice!!
+                            val saleQty = (boxQty * selectedItem?.getBox!!).toLong()
+                            val amount = saleQty * selectedItem?.orderPrice!!.toLong()
                             val supplyPrice = if (selectedItem?.vatYn == "01") {
-                                ceil(amount/1.1).toInt()
+                                ceil(amount/1.1).toLong()
                             } else {
                                 amount
                             }
@@ -316,7 +341,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                     amount = amount
                                 )
 
-                                addItem(addedItem, sapModel = selectedSAP!!)
+                                addItem(addedItem, sapModel = selectedSAP)
 
                                 binding.etProductName.text = null
                                 binding.etProductName.visibility = View.VISIBLE
@@ -505,7 +530,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                             }
                             else -> {
                                 Utils.popupNotice(context, item?.returnMsg!!)
-                                binding.shipping.text = context.getString(R.string.purchaseAddressHint)
+                                binding.shipping.hint = context.getString(R.string.purchaseAddressHint)
                                 Utils.log("$item ====> ${item.returnMsg}")
                             }
                         }
@@ -595,7 +620,9 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                     // 검색어 DB 저장
                                     if (!db.searchList.contains(it.itemNm)) {
                                         db.insertSearchData(it.itemNm ?: "")
+                                        searchListAdapter.notifyDataSetChanged()
                                     }
+
                                     if (itemList.isEmpty()) {
                                         //본사 발주 가능 시
                                         if (it.enableOrderYn == "Y") {
@@ -616,12 +643,15 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                                 orderPrice = it.orderPrice
                                             )
                                         } else {
-                                            Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.")
+                                            Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.", binding.etProductName)
                                         }
                                     } else {
                                         itemList.forEach { item ->
                                             if (item.itemCd == it.itemCd) {
-                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.")
+                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.", binding.etProductName)
+                                                binding.etProductName.setText("")
+                                                binding.btProductNameEmpty.visibility = View.GONE
+                                                binding.etProductName.hint = context.getString(R.string.productNameHint)
                                             } else {
                                                 //본사 발주 가능 시
                                                 if (it.enableOrderYn == "Y") {
@@ -641,8 +671,11 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                                         enableOrderYn = it.enableOrderYn,
                                                         orderPrice = it.orderPrice
                                                     )
+                                                    if (!binding.etBox.text.isNullOrEmpty()){
+                                                        binding.etBox.setText("0")
+                                                    }
                                                 } else {
-                                                    Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.")
+                                                    Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.", binding.etProductName)
                                                 }
                                             }
                                         }
@@ -650,18 +683,18 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                 }
                             }
                         } else {
-                            Utils.popupNotice(context, item?.returnMsg!!)
+                            Utils.popupNotice(context, item?.returnMsg ?:"잠시 후 다시 시도해주세요.", binding.etProductName)
                         }
                     } else {
                         Utils.log("${response.code()} ====> ${response.message()}")
-                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
+                        Utils.popupNotice(context, "잠시 후 다시 시도해주세요.")
                     }
                 }
 
                 override fun onFailure(call: Call<ResultModel<DataModel<SearchItemModel>>>, t: Throwable) {
                     loading.hideDialog()
                     Utils.log("item search failed ====> ${t.message}")
-                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요.")
                 }
 
             })
@@ -718,9 +751,9 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             }
 
             if (selectedSAP.arriveCd == null && selectedSAP.arriveNm == null) {
-                binding.shipping.text = context.getString(R.string.purchaseAccountHint)
+                binding.shipping.hint = context.getString(R.string.purchaseAccountHint)
             } else if (selectedSAP.arriveCd == "-" && selectedSAP.arriveNm == "-") {
-                binding.shipping.text = context.getString(R.string.NoAddress)
+                binding.shipping.hint = context.getString(R.string.NoAddress)
             } else {
                 binding.shipping.text = "(${selectedSAP.arriveCd}) ${selectedSAP.arriveNm}"
             }
@@ -745,7 +778,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
         updateData(itemList, sapModel)
     }
 
-    fun clear(item: SearchItemModel? = null) {
+    fun clear() {
         itemList.clear()
         updateData(itemList, selectedSAP)
     }

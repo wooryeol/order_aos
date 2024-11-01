@@ -25,11 +25,12 @@ import retrofit2.Call
 import retrofit2.Response
 
 @SuppressLint("NotifyDataSetChanged")
-class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<CustomerModel>, private val searchFromDate: String? = null, private val searchToDate: String? = null, val order: Boolean? = null ): Dialog(mContext) {
+class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<CustomerModel>): Dialog(mContext) {
     private lateinit var mBinding: PopupSearchResultBinding
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
     private var context = mContext
-    var onItemSelect: ((ArrayList<SlipOrderListModel>) -> Unit)? = null
+    var onOrderItemSelect: ((ArrayList<SlipOrderListModel>) -> Unit)? = null
+    var onReturnItemSelect: ((ArrayList<SlipOrderListModel>) -> Unit)? = null
     var onTitleSelect: ((CustomerModel) -> Unit)? = null
     var adapter: AccountSearchAdapter? = null
 
@@ -63,7 +64,6 @@ class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<Customer
         adapter?.itemClickListener = object: AccountSearchAdapter.ItemClickListener {
             override fun onItemClick(item: CustomerModel) {
                 onTitleSelect?.invoke(item)
-                searchOrderSlipList(item.custCd)
                 hideDialog()
             }
         }
@@ -79,49 +79,5 @@ class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<Customer
         if (isShowing) {
             dismiss()
         }
-    }
-
-    private fun searchOrderSlipList(customerCd: String){
-        val agencyCd = mLoginInfo?.agencyCd!!
-        val userId = mLoginInfo?.userId!!
-        val slipType = if (order!!) Define.ORDER else Define.RETURN
-
-        val loading = PopupLoading(context)
-        loading.show()
-        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        val call = service.orderSlipList(agencyCd, userId, searchFromDate?.replace("/","-"), searchToDate?.replace("/","-"), customerCd, slipType)
-        Utils.log("slipType ====> $slipType")
-        //test
-        //val call = service.orderSlipList("C000028", "mb2004", "2024-06-01", "2024-06-27", "000001", slipType)
-        call.enqueue(object : retrofit2.Callback<ResultModel<List<SlipOrderListModel>>> {
-            override fun onResponse(
-                call: Call<ResultModel<List<SlipOrderListModel>>>,
-                response: Response<ResultModel<List<SlipOrderListModel>>>
-            ) {
-                loading.hideDialog()
-                if (response.isSuccessful) {
-                    val data = response.body()
-                    if (data?.returnCd == Define.RETURN_CD_00 || data?.returnCd == Define.RETURN_CD_90 || data?.returnCd == Define.RETURN_CD_91) {
-                        Utils.log("OrderSlipList search success ====> ${Gson().toJson(data)}")
-
-                        onItemSelect?.invoke(data.data as ArrayList<SlipOrderListModel>)
-                        SlipInquiryActivity().slipAdapter?.notifyDataSetChanged()
-
-                    } else {
-                        Utils.popupNotice(context, data?.returnMsg!!)
-                    }
-                } else {
-                    Utils.log("${response.code()} ====> ${response.message()}")
-                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
-                }
-            }
-
-            override fun onFailure(call: Call<ResultModel<List<SlipOrderListModel>>>, t: Throwable) {
-                loading.hideDialog()
-                Utils.log("search failed ====> ${t.message}")
-                Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
-            }
-
-        })
     }
 }

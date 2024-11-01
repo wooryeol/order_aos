@@ -32,7 +32,7 @@ interface ApiClientService {
     @POST("wma/login")
     fun postLogin(
         @Body requestBody: RequestBody
-    ): Call<ResultModel<LoginResponseModel>>
+    ): Call<ResultModel<List<LoginResponseModel>>>
 
     // 주문&반품 전표 등록
     @POST("wma/orderSlip/add")
@@ -217,7 +217,7 @@ interface ApiClientService {
             .build()
 
         val retrofit: Retrofit = Retrofit.Builder()
-            .baseUrl("${Define.URL}:${Define.URL_PORT}/")
+            .baseUrl(Define.URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

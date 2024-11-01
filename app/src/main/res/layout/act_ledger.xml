@@ -45,7 +45,7 @@
                     android:layout_marginStart="12dp"
                     android:clickable="false"
                     android:hint="@string/monthHint"
-                    android:textSize="16dp"
+                    android:textSize="14dp"
                     android:textColor="@color/color_1A1A1A"
                     tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -100,8 +100,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="16dp"
+                    android:textSize="14dp"
                     android:background="@color/trans"
+                    android:textColor="@color/black"
                     android:paddingVertical="10dp"
                     android:paddingHorizontal="12dp"
                     android:ellipsize="marquee"
@@ -196,7 +197,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/searchNothing"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
         </LinearLayout>

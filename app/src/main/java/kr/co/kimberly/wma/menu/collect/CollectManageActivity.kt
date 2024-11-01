@@ -12,6 +12,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.common.Define
@@ -53,6 +54,7 @@ class CollectManageActivity : AppCompatActivity() {
         // 헤더 설정 변경
         mBinding.header.headerTitle.text = getString(R.string.menu02)
         mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
+        mBinding.header.scanBtn.visibility = View.GONE
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 finish()
@@ -97,13 +99,16 @@ class CollectManageActivity : AppCompatActivity() {
         }
 
         // 날짜 선택
-        /*val datePickerDialog = PopupDatePicker(mContext)
-        mBinding.startDate.setOnClickListener {
-            datePickerDialog.showDatePickerDialog(mBinding.startDate)
-        }
-        mBinding.endDate.setOnClickListener {
-            datePickerDialog.showDatePickerDialog(mBinding.endDate)
-        }*/
+        mBinding.startDate.setOnClickListener (object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                Utils.popupNotice(mContext, "직전 한달의 수금 정보만 조회하실 수 있습니다.")
+            }
+        })
+        mBinding.endDate.setOnClickListener (object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                Utils.popupNotice(mContext, "직전 한달의 수금 정보만 조회하실 수 있습니다.")
+            }
+        })
 
         // 거래처 검색
         mBinding.accountArea.setOnClickListener(object: OnSingleClickListener() {

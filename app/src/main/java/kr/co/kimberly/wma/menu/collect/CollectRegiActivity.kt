@@ -15,12 +15,14 @@ import android.widget.RadioGroup.OnCheckedChangeListener
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountListSearch
+import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.custom.popup.PopupNoteType
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
@@ -55,6 +57,11 @@ class CollectRegiActivity : AppCompatActivity() {
     private var collectionCd: String? = null
     private var billType: String? = null
 
+    private var totalAmount = 0
+    private var cashAmount = 0
+    private var billAmount = 0
+    private var collectionAmount = 0
+
     @SuppressLint("HandlerLeak")
     private val handler = object : Handler() {
        override fun handleMessage(msg: Message) {
@@ -73,6 +80,7 @@ class CollectRegiActivity : AppCompatActivity() {
         mContext = this
         mActivity = this
         mLoginInfo = Utils.getLoginData()
+        collectionCd = Define.CASH
 
         // UI 셋팅
         setUI()
@@ -119,22 +127,24 @@ class CollectRegiActivity : AppCompatActivity() {
         mBinding.radioGroup.setOnCheckedChangeListener(radioGroupCheckedListener)
 
         mBinding.typeText.setOnClickListener {
-            val dlg = PopupNoteType(this,  handler)
-            dlg.show()
+            val popupNoteType = PopupNoteType(this,  handler)
+            popupNoteType.show()
         }
 
         mBinding.bottom.bottomButton.setOnClickListener {
             if (emptyCheck()) {
-                val dlg = PopupOrderSend(this, object : Handler(Looper.getMainLooper()) {
-                    override fun handleMessage(msg: Message) {
-                        when(msg.what) {
-                            Define.EVENT_OK -> {
-                                postSlip()
-                            }
-                        }
+                val payment = if (cash) getString(R.string.cash) else if(note) getString(R.string.note) else getString(R.string.both)
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "수금 등록", "거래처 : ${mBinding.tvAccountName.text}\n결제방법 : $payment\n결제금액 : ${Utils.decimal(totalAmount)}원", "위와 같이 수금 등록을 하시겠습니까??")
+                popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
+                    override fun onCancelClick() {
+                        Utils.log("취소 클릭")
                     }
-                })
-                dlg.show()
+
+                    override fun onOkClick() {
+                        postSlip()
+                    }
+                }
+                popupDoubleMessage.show()
             }
         }
 
@@ -148,12 +158,15 @@ class CollectRegiActivity : AppCompatActivity() {
                 mBinding.uncollected.text = null
                 mBinding.uncollected.hint = mContext.getString(R.string.accountHint)
                 mBinding.uncollected.gravity = Gravity.CENTER_VERTICAL
-                mBinding.collectedDate.text = mContext.getString(R.string.accountHint)
-                mBinding.totalAmount.text = mContext.getString(R.string.accountHint)
+                mBinding.collectedDate.text = null
+                mBinding.collectedDate.hint = mContext.getString(R.string.accountHint)
+                mBinding.totalAmount.text = null
+                mBinding.totalAmount.hint = mContext.getString(R.string.accountHint)
                 mBinding.totalAmount.gravity = Gravity.CENTER_VERTICAL
                 customerCd = ""
                 customerNm = ""
                 balanceData = null
+                GlobalApplication.showKeyboard(mContext, mBinding.etAccount)
             }
         })
 
@@ -161,18 +174,22 @@ class CollectRegiActivity : AppCompatActivity() {
         mBinding.search.setOnClickListener(object: OnSingleClickListener() {
             @SuppressLint("SetTextI18n")
             override fun onSingleClick(v: View) {
-                val popupAccountSearch = PopupAccountListSearch(mContext, mBinding.etAccount.text.toString())
-                popupAccountSearch.onItemSelect = {
-                    mBinding.etAccount.visibility = View.GONE
-                    mBinding.tvAccountName.visibility = View.VISIBLE
-                    mBinding.btEmpty.visibility = View.VISIBLE
-                    mBinding.tvAccountName.isSelected = true
-                    mBinding.tvAccountName.text = "(${it.custCd}) ${it.custNm}"
-                    customerCd = it.custCd
-                    customerNm = "(${it.custCd}) ${it.custNm}"
-                    getCustomerBond(it.custCd)
+                if (mBinding.etAccount.text.isNullOrEmpty()) {
+                    Utils.popupNotice(mContext, "거래처를 검색해주세요")
+                } else {
+                    val popupAccountSearch = PopupAccountListSearch(mContext, mBinding.etAccount.text.toString(), mBinding.etAccount)
+                    popupAccountSearch.onItemSelect = {
+                        mBinding.etAccount.visibility = View.GONE
+                        mBinding.tvAccountName.visibility = View.VISIBLE
+                        mBinding.btEmpty.visibility = View.VISIBLE
+                        mBinding.tvAccountName.isSelected = true
+                        mBinding.tvAccountName.text = "(${it.custCd}) ${it.custNm}"
+                        customerCd = it.custCd
+                        customerNm = "(${it.custCd}) ${it.custNm}"
+                        getCustomerBond(it.custCd)
+                    }
+                    popupAccountSearch.show()
                 }
-                popupAccountSearch.show()
             }
         })
 
@@ -188,10 +205,10 @@ class CollectRegiActivity : AppCompatActivity() {
 
     private fun setUI() {
         //헤더 및 바텀 설정
+        mBinding.bottom.bottomButton.text = getString(R.string.collectRegi)
         mBinding.header.headerTitle.text = getString(R.string.collectRegi)
         mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
-
-        mBinding.bottom.bottomButton.text = getString(R.string.collectRegi)
+        mBinding.header.scanBtn.visibility = View.GONE
 
         mBinding.etAccount.isSelected = true
 
@@ -251,37 +268,85 @@ class CollectRegiActivity : AppCompatActivity() {
     }
 
     private fun emptyCheck(): Boolean {
-        if (mBinding.etAccount.text.isEmpty()
-            || mBinding.uncollected.text.isEmpty()
-            || mBinding.collectedDate.text.isEmpty()
-            || mBinding.totalAmount.text.isEmpty()){
-            Utils.popupNotice(mContext, "필수 입력란이 비었습니다.")
+        if (mBinding.tvAccountName.text.isNullOrEmpty()){
+            Utils.popupNotice(mContext, "거래처를 검색해주세요")
+            return false
         } else {
-            if (cash && mBinding.cashAmountText.text!!.isEmpty()) {
-                Utils.popupNotice(mContext, "필수 입력란이 비었습니다.")
-                return false
-            } else if(note && (mBinding.typeText.text.isEmpty()
-                        || mBinding.noteAmountText.text?.isEmpty()!!
-                        || mBinding.noteNumberText.text.isEmpty()
-                        || mBinding.publishByText.text.isEmpty()
-                        || mBinding.publishDateText.text?.isEmpty()!!
-                        || mBinding.expireDateText.text.isEmpty())) {
-                Utils.popupNotice(mContext, "필수 입력란이 비었습니다.")
-                return false
-            } else if (both && (mBinding.cashAmountText.text!!.isEmpty()
-                        || mBinding.typeText.text.isEmpty()
-                        || mBinding.noteAmountText.text?.isEmpty()!!
-                        || mBinding.noteNumberText.text.isEmpty()
-                        || mBinding.publishByText.text.isEmpty()
-                        || mBinding.publishDateText.text?.isEmpty()!!
-                        || mBinding.expireDateText.text.isEmpty())){
-                Utils.popupNotice(mContext, "필수 입력란이 비었습니다.")
-                return false
-            } else if (!cash && !note && !both) {
-                Utils.popupNotice(mContext, "수금 수단을 선택해주세요.")
+            when {
+                cash -> {
+                    if (mBinding.cashAmountText.text.isNullOrEmpty()) {
+                        Utils.log("222")
+                        Utils.popupNotice(mContext, "비고를 제외한 나머지 입력란은 필수입니다.")
+                        return false
+                    }
+
+                    cashAmount = mBinding.cashAmountText.text.toString().replace(",", "").toInt()
+                    Utils.log("cashAmount ====> $cashAmount")
+                    totalAmount = cashAmount
+
+                    if ((balanceData?.bondBalance?:0) < totalAmount) {
+                        Utils.popupNotice(mContext, "결제 금액을 확인해주세요")
+                        return false
+                    }
+                }
+
+                note -> {
+                    if (mBinding.typeText.text.isNullOrEmpty()) {
+                        Utils.popupNotice(mContext, "결제방법을 선택해주세요.")
+                        return false
+                    } else if (mBinding.noteAmountText.text.isNullOrEmpty()
+                        || mBinding.noteNumberText.text.isNullOrEmpty()
+                        || mBinding.publishByText.text.isNullOrEmpty()
+                        || mBinding.publishDateText.text.isNullOrEmpty()
+                        || mBinding.expireDateText.text.isNullOrEmpty()) {
+                        Utils.log("333")
+                        Utils.popupNotice(mContext, "비고를 제외한 나머지 입력란은 필수입니다.")
+                        return false
+                    }
+
+                    billAmount = mBinding.noteAmountText.text.toString().replace(",", "").toInt()
+                    Utils.log("billAmount ====> $billAmount")
+                    totalAmount = billAmount
+                    if ((balanceData?.bondBalance?:0) < totalAmount) {
+                        Utils.popupNotice(mContext, "결제 금액을 확인해주세요")
+                        return false
+                    }
+                }
+
+                both -> {
+                    if (mBinding.typeText.text.isNullOrEmpty()) {
+                        Utils.popupNotice(mContext, "결제방법을 선택해주세요.")
+                        return false
+                    } else if (mBinding.cashAmountText.text.isNullOrEmpty()
+                        || mBinding.noteAmountText.text.isNullOrEmpty()
+                        || mBinding.noteNumberText.text.isNullOrEmpty()
+                        || mBinding.publishByText.text.isNullOrEmpty()
+                        || mBinding.publishDateText.text.isNullOrEmpty()
+                        || mBinding.expireDateText.text.isNullOrEmpty()) {
+                        Utils.log("444")
+                        Utils.popupNotice(mContext, "비고를 제외한 나머지 입력란은 필수입니다.")
+                        return false
+                    }
+
+                    cashAmount = mBinding.cashAmountText.text.toString().replace(",", "").toInt()
+                    billAmount = mBinding.noteAmountText.text.toString().replace(",", "").toInt()
+                    collectionAmount = cashAmount + billAmount
+                    Utils.log("cashAmount ====> $cashAmount")
+                    Utils.log("billAmount ====> $billAmount")
+                    totalAmount = collectionAmount
+                    if ((balanceData?.bondBalance?:0) < totalAmount) {
+                        Utils.popupNotice(mContext, "결제 금액을 확인해주세요")
+                        return false
+                    }
+                }
+
+                else -> {
+                    Utils.popupNotice(mContext, "수금 수단을 선택해주세요.")
+                    return false
+                }
             }
+            return true
         }
-        return true
     }
 
     private fun getCustomerBond(customerCd: String){
@@ -305,7 +370,7 @@ class CollectRegiActivity : AppCompatActivity() {
                         if (item.returnCd == Define.RETURN_CD_90 || item.returnCd == Define.RETURN_CD_91 || item.returnCd == Define.RETURN_CD_00) {
                             balanceData = item.data.copy(
                                 bondBalance = item.data.bondBalance,
-                                lastCollectionDate = item.data.lastCollectionDate,
+                                lastCollectionDate = item.data.lastCollectionDate ?: "-",
                                 lastCollectionAmount = item.data.lastCollectionAmount
                             )
                             Utils.log("bond balance search success ====> $balanceData")
@@ -315,7 +380,7 @@ class CollectRegiActivity : AppCompatActivity() {
                             mBinding.totalAmount.text = "${Utils.decimal(balanceData?.lastCollectionAmount!!)}원"
                             mBinding.totalAmount.gravity = Gravity.END or Gravity.CENTER_VERTICAL
                         } else {
-                            Utils.popupNotice(mContext, item.returnMsg)
+                            Utils.popupNotice(mContext, item.returnMsg, mBinding.etAccount)
                             Utils.log("returnCd ====> ${item.returnCd}")
                         }
                     }
@@ -344,8 +409,8 @@ class CollectRegiActivity : AppCompatActivity() {
         val remark = if(mBinding.remarkText.text.isNotEmpty()) mBinding.remarkText.text.toString() else { null }
 
         val json = if (cash) {
-            val cashAmount = mBinding.cashAmountText.text.toString().replace(",", "").toInt()
             val remark = mBinding.remarkText.text.toString()
+
             JsonObject().apply {
                 addProperty("agencyCd", agencyCd)
                 addProperty("userId", userId)
@@ -357,11 +422,11 @@ class CollectRegiActivity : AppCompatActivity() {
                 addProperty("remark", remark)
             }
         } else if (note) {
-            val billAmount = mBinding.noteAmountText.text.toString().replace(",", "").toInt()
             val billNo = mBinding.noteNumberText.text.toString()
             val billIssuer = mBinding.publishByText.text.toString()
             val billIssueDate = mBinding.publishDateText.text.toString()
             val billExpireDate = mBinding.expireDateText.text.toString()
+
             JsonObject().apply {
                 addProperty("agencyCd", agencyCd)
                 addProperty("userId", userId)
@@ -378,14 +443,12 @@ class CollectRegiActivity : AppCompatActivity() {
                 addProperty("remark", remark)
             }
         } else {
-            val cashAmount = mBinding.cashAmountText.text.toString().replace(",", "").toInt()
-            val billAmount = mBinding.noteAmountText.text.toString().replace(",", "").toInt()
-            val collectionAmount = cashAmount + billAmount
             val billNo = mBinding.noteNumberText.text.toString()
             val billIssuer = mBinding.publishByText.text.toString()
             val billIssueDate = mBinding.publishDateText.text.toString()
             val billExpireDate = mBinding.expireDateText.text.toString()
             val remark = mBinding.remarkText.text.toString()
+
             JsonObject().apply {
                 addProperty("agencyCd", agencyCd)
                 addProperty("userId", userId)
@@ -434,7 +497,8 @@ class CollectRegiActivity : AppCompatActivity() {
                         finish()
                     } else {
                         Utils.log("return message ====> ${item?.returnMsg}")
-                        Utils.popupNotice(mContext, item?.returnMsg!!)
+                        Utils.log("return returnCd ====> ${item?.returnCd}")
+                        //Utils.popupNotice(mContext, item?.returnMsg)
                     }
                 } else {
                     Utils.log("${response.code()} ====> ${response.message()}")

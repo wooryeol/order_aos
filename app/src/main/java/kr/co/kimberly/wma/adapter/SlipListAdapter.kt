@@ -24,7 +24,8 @@ import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
 import retrofit2.Response
 
-class SlipListAdapter(context: Context, activity: Activity, val dataList: ArrayList<SlipOrderListModel>): RecyclerView.Adapter<SlipListAdapter.ViewHolder>() {
+class SlipListAdapter(context: Context, activity: Activity): RecyclerView.Adapter<SlipListAdapter.ViewHolder>() {
+    lateinit var dataList: ArrayList<SlipOrderListModel>
     var mContext = context
     var mActivity = activity
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
@@ -80,23 +81,21 @@ class SlipListAdapter(context: Context, activity: Activity, val dataList: ArrayL
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                         Utils.log("OrderSlipDetail search success ====> ${Gson().toJson(item)}")
                         val data = item.data
-                        if (data != null) {
-                            val list: ArrayList<SearchItemModel> = data.itemList as ArrayList<SearchItemModel>
-                            val customerCd = data.customerCd
-                            val customerNm = data.customerNm
-                            val enableButtonYn = data.enableButtonYn
-                            val totalAmount = data.totalAmount
-                            val intent = Intent(mContext, SlipInquiryDetailActivity::class.java).apply {
-                                //putExtra("slipNo", slipNo)
-                                putExtra("slipNo", "20240600015")
-                                putExtra("customerCd", customerCd)
-                                putExtra("customerNm", customerNm)
-                                putExtra("enableButtonYn", enableButtonYn)
-                                putExtra("totalAmount", totalAmount)
-                                putExtra("list", ArrayList(list))
-                            }
-                            mActivity.startActivityForResult(intent, Define.REQUEST_CODE)
+                        val list: ArrayList<SearchItemModel> = data.itemList as ArrayList<SearchItemModel>
+                        val customerCd = data.customerCd
+                        val customerNm = data.customerNm
+                        val enableButtonYn = data.enableButtonYn
+                        val totalAmount = data.totalAmount
+                        val intent = Intent(mContext, SlipInquiryDetailActivity::class.java).apply {
+                            putExtra("slipNo", slipNo)
+                            //putExtra("slipNo", "20240600015")
+                            putExtra("customerCd", customerCd)
+                            putExtra("customerNm", customerNm)
+                            putExtra("enableButtonYn", enableButtonYn)
+                            putExtra("totalAmount", totalAmount)
+                            putExtra("list", ArrayList(list))
                         }
+                        mActivity.startActivityForResult(intent, Define.REQUEST_CODE)
                     }
                 } else {
                     Utils.log("${response.code()} ====> ${response.message()}")

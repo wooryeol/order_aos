@@ -30,16 +30,11 @@ object Define {
     const val MONTH = "month"
     const val DAY = "day"
     const val TODAY = "today"
+    // 주소
+    private const val DEV_URL = "https://192.168.110.42" /*개발*/
+    private const val PRO_URL = "https://m2.ykwma.co.kr" /*운영*/
 
-    // 로컬 주소
-    const val DEV_URL = "http://192.168.0.50"
-    const val DEV_PORT = "80"
-
-    // 개발 주소
-    //const val DEV_URL = "http://58.229.132.250"
-
-    const val URL = DEV_URL
-    const val URL_PORT = DEV_PORT
+    const val URL = PRO_URL
 
     // 블루투스 유형
     const val SEARCH = "T"

@@ -10,12 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
-import android.widget.MultiAutoCompleteTextView
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import kotlinx.coroutines.flow.combine
 import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
@@ -50,16 +47,18 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
     var popupSearchResult : PopupSearchResult? = null // 아이템 리스트
     var popupProductPriceHistory : PopupProductPriceHistory? = null // 단가 이력 팝업
     var popupResultNothing : PopupNotice? = null // 조회 내역 없을 때
-    var onItemSelect: ((SearchItemModel) -> Unit)? = null
+    var onItemSelect: ((SearchItemModel) -> Unit)? = null // 제품 수정 시
+    var onItemDelete: ((SearchItemModel) -> Unit)? = null // 제품 삭제 시
     var customerCd: String ? = null
 
     var accountName : String? = null
     private lateinit var mLoginInfo: LoginResponseModel // 로그인 정보
 
-
     private val db: DBHelper by lazy { // 검색어 저장
         DBHelper.getInstance(mContext.applicationContext)
     }
+
+    private lateinit var searchListAdapter: CustomAutoCompleteAdapter
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -100,6 +99,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
 
                             override fun onOkClick() {
                                 removeItem(data)
+                                onItemDelete?.invoke(data)
                                 Utils.log("아이템 삭제")
                             }
                         }
@@ -136,8 +136,8 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
             binding.tvBox.text = Utils.decimal(item.boxQty!!)
             binding.tvEach.text = Utils.decimal(item.unitQty!!)
             binding.tvPrice.text = "${Utils.decimal(item.netPrice!!)}원"
-            binding.tvTotal.text = Utils.decimal(item.saleQty!!)
-            binding.tvTotalAmount.text = "${Utils.decimal(item.amount!!)}원"
+            binding.tvTotal.text = Utils.decimalLong(item.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimalLong(item.amount!!)}원"
         }
     }
 
@@ -162,7 +162,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                                 @SuppressLint("NotifyDataSetChanged")
                                 override fun handleMessage(msg: Message) {
                                     when(msg.what) {
-                                        Define.OK -> {
+                                        Define.EVENT_OK -> {
                                             binding.accountName.text = null
                                             binding.etProductName.text = null
                                             binding.searchResult.text = v.context.getString(R.string.searchResult)
@@ -185,8 +185,9 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
             })
 
             // 검색어 저장 어댑터
-            val adapter = ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, db.searchList)
-            binding.etProductName.setAdapter(adapter)
+            searchListAdapter = CustomAutoCompleteAdapter(context, db.searchList)
+            binding.etProductName.setAdapter(searchListAdapter)
+            searchListAdapter.setAutoCompleteDropDownHeight(binding.etProductName, 5)
 
             binding.etProductName.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -234,19 +235,56 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
 
             //제품 수정
             onItemSelect ={
-                binding.btAddOrder.text = context.getString(R.string.editOrder)
-                binding.searchResult.text = it.itemNm
-                binding.etBox.setText(it.boxQty.toString())
-                binding.etEach.setText(it.unitQty.toString())
-                binding.etPrice.setText(it.netPrice.toString())
+                if (binding.searchResult.text == it.itemNm) {
+                    binding.btAddOrder.text = context.getString(R.string.addOrder)
+                    binding.searchResult.text = context.getString(R.string.searchResult)
+                    binding.etBox.setText(R.string.zero)
+                    binding.etEach.setText(R.string.zero)
+                    binding.etPrice.setText(R.string.zero)
+                    selectedItem = null
+                } else {
+                    binding.btAddOrder.text = context.getString(R.string.editOrder)
+                    binding.searchResult.text = it.itemNm
+                    binding.etBox.setText(it.boxQty.toString())
+                    binding.etEach.setText(it.unitQty.toString())
+                    binding.etPrice.setText(it.netPrice.toString())
+                    selectedItem = SearchItemModel(
+                        amount = it.amount,
+                        boxQty = it.boxQty,
+                        getBox = it.getBox,
+                        itemCd = it.itemCd,
+                        itemNm = it.itemNm,
+                        netPrice = it.netPrice,
+                        saleQty = it.saleQty,
+                        supplyPrice = it.supplyPrice,
+                        unitQty = it.unitQty,
+                        vat = it.vat,
+                        vatYn = it.vatYn
+                    )
+                }
+            }
+
+            // 제품 삭제되면
+            onItemDelete = {
+                binding.btAddOrder.text = context.getString(R.string.addOrder)
+                binding.searchResult.text = context.getString(R.string.searchResult)
+                binding.etBox.setText(R.string.zero)
+                binding.etEach.setText(R.string.zero)
+                binding.etPrice.setText(R.string.zero)
             }
 
             binding.btAddOrder.setOnClickListener(object : OnSingleClickListener() {
                 @SuppressLint("NotifyDataSetChanged")
                 override fun onSingleClick(v: View) {
-                    if (binding.etPrice.text.isNullOrEmpty() || binding.searchResult.text == context.getString(R.string.searchResult)) {
+                    if (binding.accountName.text.isNullOrEmpty()) {
+                        Utils.popupNotice(v.context, "거래처를 검색해주세요.")
+                    //} else if (binding.tvProductName.text.isNullOrEmpty()) {
+                    } else if (binding.searchResult.text.isNullOrEmpty()) {
+                        Utils.popupNotice(v.context, "제품을 검색해주세요.")
+                    } else if (binding.etPrice.text.isNullOrEmpty() || binding.searchResult.text == context.getString(R.string.searchResult)) {
                         Utils.popupNotice(v.context, "모든 항목을 채워주세요")
                     } else {
+                        Utils.log("selectedItem ====> $selectedItem")
                         try {
                             if (binding.etBox.text.isNullOrEmpty()) {
                                 binding.etBox.setText("0")
@@ -261,10 +299,10 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                             val boxQty = Utils.getIntValue(binding.etBox.text.toString())
                             val unitQty = Utils.getIntValue(binding.etEach.text.toString())
                             val netPrice = Utils.getIntValue(binding.etPrice.text.toString())
-                            val saleQty = selectedItem?.getBox!! * boxQty + unitQty
-                            val amount = saleQty * netPrice
+                            val saleQty = (selectedItem?.getBox!! * boxQty).toLong() + unitQty.toLong()
+                            val amount = saleQty * netPrice.toLong()
                             val supplyPrice = if (selectedItem?.vatYn == "01") {
-                                ceil(amount/1.1).toInt()
+                                ceil(amount/1.1).toLong()
                             } else {
                                 amount
                             }
@@ -286,6 +324,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                                         saleQty = saleQty,
                                         supplyPrice = supplyPrice,
                                         vat = vat,
+                                        vatYn = selectedItem?.vatYn,
                                         amount = amount
                                     )
 
@@ -340,6 +379,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                     binding.etBox.setText(context.getText(R.string.zero))
                     binding.etEach.setText(context.getText(R.string.zero))
                     binding.etPrice.setText(context.getText(R.string.zero))
+                    GlobalApplication.showKeyboard(context, binding.etProductName)
                 }
             })
         }
@@ -391,7 +431,6 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
             val orderYn = Define.PURCHASE_NO
 
             val call = service.item(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, customerCd!!, searchType, orderYn, searchCondition)
-            Utils.log("searchCondition ====> $searchCondition")
 
             call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<SearchItemModel>>> {
                 @SuppressLint("SetTextI18n")
@@ -416,6 +455,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                                     // 검색어 DB 저장
                                     if (!db.searchList.contains(it.itemNm)) {
                                         db.insertSearchData(it.itemNm ?: "")
+                                        searchListAdapter.notifyDataSetChanged()
                                     }
 
                                     if (dataList.isEmpty()) {
@@ -423,6 +463,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                                         binding.etProductName.visibility = View.GONE
                                         binding.tvProductName.visibility = View.VISIBLE
                                         binding.tvProductName.isSelected = true
+                                        binding.etProductName.setText(it.itemNm)
                                         binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
                                         selectedItem = SearchItemModel(
                                             it.itemCd,
@@ -432,11 +473,13 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                                             it.vatYn,
                                             it.netPrice
                                         )
-                                        Utils.log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
                                     } else {
                                         dataList.forEach {item ->
                                             if (item.itemCd == it.itemCd) {
-                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.")
+                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.", binding.etProductName)
+                                                binding.etProductName.setText("")
+                                                binding.btProductNameEmpty.visibility = View.GONE
+                                                binding.etProductName.hint = context.getString(R.string.productNameHint)
                                             } else {
                                                 binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
                                                 binding.etProductName.visibility = View.GONE
@@ -451,16 +494,29 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                                                     it.vatYn,
                                                     it.netPrice
                                                 )
-                                                Utils.log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
+                                                if (!binding.etBox.text.isNullOrEmpty()){
+                                                    binding.etBox.setText("0")
+                                                }
+                                                if (!binding.etEach.text.isNullOrEmpty()){
+                                                    binding.etEach.setText("0")
+                                                }
+                                                if (!binding.etPrice.text.isNullOrEmpty()){
+                                                    binding.etPrice.setText("0")
+                                                }
+                                                Utils.log("RegAdapter selected item 222 ====> ${Gson().toJson(selectedItem)}")
                                             }
                                         }
                                     }
                                 }
                             }
                         } else {
-                            PopupNotice(context, item?.returnMsg!!).show()
-
-                            Utils.log("returnMsg ====> ${item.returnMsg}")
+                            Utils.popupNotice(context, item?.returnMsg ?: "다시 검색해주세요", binding.etProductName )
+                            Utils.log("returnMsg ====> ${item?.returnMsg}")
+                            binding.etProductName.visibility = View.VISIBLE
+                            binding.etProductName.setText("")
+                            binding.etProductName.hint = context.getString(R.string.productNameHint)
+                            binding.tvProductName.visibility = View.GONE
+                            binding.btProductNameEmpty.visibility = View.GONE
                         }
                     } else {
                         Utils.log("${response.code()} ====> ${response.message()}")

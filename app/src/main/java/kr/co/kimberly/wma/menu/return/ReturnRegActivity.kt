@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
@@ -43,7 +44,7 @@ class ReturnRegActivity : AppCompatActivity() {
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
 
     private var accountName = ""
-    private var totalAmount = 0
+    private var totalAmount: Long = 0
     private var returnAdapter: RegAdapter? = null
 
     private val db : DBHelper by lazy {
@@ -66,37 +67,18 @@ class ReturnRegActivity : AppCompatActivity() {
 
         setAdapter()
 
+        // 소프트키 뒤로가기
+        this.onBackPressedDispatcher.addCallback(this, callback)
+
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                // 주문 도중 나갈 경우
-                if (!returnAdapter?.dataList.isNullOrEmpty()) {
-                    PopupNoticeV2(mContext, "기존 주문이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
-                        object : Handler(Looper.getMainLooper()) {
-                            @SuppressLint("NotifyDataSetChanged")
-                            override fun handleMessage(msg: Message) {
-                                when (msg.what) {
-                                    Define.EVENT_OK -> {
-                                        saveData()
-                                        finish()
-                                    }
-                                    Define.EVENT_CANCEL -> {
-                                        isSave = false
-                                        db.deleteReturnData()
-                                        finish()
-                                    }
-                                }
-                            }
-                        }
-                    ).show()
-                } else {
-                    finish()
-                }
+                goBack()
             }
         })
 
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $accountName\n총금액: ${Utils.decimal(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $accountName\n총금액: ${Utils.decimalLong(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
                 if (returnAdapter?.dataList!!.isEmpty()) {
                     Utils.popupNotice(mContext, "제품이 등록되지 않았습니다.")
                 } else {
@@ -125,11 +107,11 @@ class ReturnRegActivity : AppCompatActivity() {
         }
 
         returnAdapter = RegAdapter(mContext, mActivity, list) { items, name ->
-            var totalMoney = 0
+            var totalMoney: Long = 0
 
             items.map {
                 val stringWithoutComma = it.amount.toString().replace(",", "")
-                totalMoney += stringWithoutComma.toInt()
+                totalMoney += stringWithoutComma.toLong()
             }
 
             accountName = name.ifEmpty {
@@ -137,7 +119,7 @@ class ReturnRegActivity : AppCompatActivity() {
             }
             totalAmount = totalMoney
 
-            val formatTotalMoney = Utils.decimal(totalMoney)
+            val formatTotalMoney = Utils.decimalLong(totalMoney)
             mBinding.tvTotalAmount.text = "${formatTotalMoney}원"
         }
 
@@ -148,7 +130,7 @@ class ReturnRegActivity : AppCompatActivity() {
             list.forEach {
                 totalAmount += it.amount!!
             }
-            mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
+            mBinding.tvTotalAmount.text = "${Utils.decimalLong(totalAmount)}원"
         }
 
         returnAdapter?.accountName = intent.getStringExtra("returnAccountName") ?: ""
@@ -193,11 +175,10 @@ class ReturnRegActivity : AppCompatActivity() {
                         val slipNo = item.data.slipNo
                         Utils.log("return success ====> ${Gson().toJson(item)}")
                         Utils.toast(mContext, "반품주문이 전송되었습니다.")
+
                         // 주문이 전송되면 데이터 초기화
-                        SharedData.setSharedData(mContext, "returnCustomerCd", "")
-                        SharedData.setSharedData(mContext, "returnAccountName", "")
-                        isSave = false
-                        db.deleteReturnData()
+                        deleteData()
+
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
                             //putExtra("data", data)
                             putExtra("slipNo", slipNo)
@@ -230,10 +211,50 @@ class ReturnRegActivity : AppCompatActivity() {
         }
     }
 
+    private fun deleteData() {
+        SharedData.setSharedData(mContext, "returnAccountName", "")
+        SharedData.setSharedData(mContext, "returnCustomerCd", "")
+        db.deleteReturnData()
+        isSave = false
+    }
+
     override fun onStop() {
         super.onStop()
         if (!returnAdapter?.dataList.isNullOrEmpty() && isSave){
             saveData()
+        }
+    }
+
+    // 뒤로가기 버튼
+    val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            goBack()
+        }
+    }
+
+    private fun goBack() {
+        // 주문 도중 나갈 경우
+        if (!returnAdapter?.dataList.isNullOrEmpty()) {
+            PopupNoticeV2(mContext, "기존 주문이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
+                object : Handler(Looper.getMainLooper()) {
+                    @SuppressLint("NotifyDataSetChanged")
+                    override fun handleMessage(msg: Message) {
+                        when (msg.what) {
+                            Define.EVENT_OK -> {
+                                saveData()
+                                finish()
+                            }
+                            Define.EVENT_CANCEL -> {
+                                deleteData()
+                                finish()
+                            }
+                        }
+                    }
+                }
+            ).show()
+        } else {
+            deleteData()
+            finish()
         }
     }
 }

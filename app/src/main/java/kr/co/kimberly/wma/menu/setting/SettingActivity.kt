@@ -1,41 +1,28 @@
 package kr.co.kimberly.wma.menu.setting
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.view.KeyEvent
 import android.view.View
-import android.widget.RadioButton
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.multidex.BuildConfig
 import androidx.recyclerview.widget.LinearLayoutManager
-import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.adapter.PairedDevicesAdapterV2ByWoo
-import kr.co.kimberly.wma.common.BluetoothV2ByWoo
+import com.google.gson.Gson
+import com.gun0912.tedpermission.PermissionListener
+import com.gun0912.tedpermission.normal.TedPermission
+import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
+import kr.co.kimberly.wma.common.Bluetooth
 import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
-import kr.co.kimberly.wma.databinding.ActSettingV3ByWooBinding
-import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.databinding.ActSettingBinding
+import kr.co.kimberly.wma.network.model.DevicesModel
 
 class SettingActivity : AppCompatActivity() {
-    companion object {
-        // 스캐너 라디오 버튼을 선택하면 1, 프린터는 2
-        // 팝업으로 넘겨주어 UI 변경
-        var isRadioChecked = 0
-
-        // 연결된 기기 목록을 담는 리스트
-        val pairedList : ArrayList<BluetoothDevice> = ArrayList()
-        val searchedList: ArrayList<BluetoothDevice> = ArrayList()
-
-        var checkScanner = false
-        var checkPrinter = false
-    }
 
     val callback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
@@ -45,24 +32,39 @@ class SettingActivity : AppCompatActivity() {
         }
     }
 
-    //private lateinit var mBinding: ActSettingBinding
-    private lateinit var mBinding: ActSettingV3ByWooBinding
+    private lateinit var mBinding: ActSettingBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
-
-    //private var adapter : PairedDevicesAdapter? = null
-    private var adapter : PairedDevicesAdapterV2ByWoo? = null
 
     private var mAgencyCode: String? = null // 대리점 코드
     private var mPhoneNumber : String? = null // 연락처
 
+    private val ALL_BLE_PERMISSIONS = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        arrayOf(
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_SCAN
+        )
+    }
+    else {
+        arrayOf(
+            android.Manifest.permission.BLUETOOTH_ADMIN,
+            android.Manifest.permission.BLUETOOTH,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mBinding = ActSettingV3ByWooBinding.inflate(layoutInflater)
+        mBinding = ActSettingBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         mContext = this
         mActivity = this
+
+        if (!BuildConfig.DEBUG) {
+            mBinding.mobileNumber.text = "01029812904"
+            mBinding.accountCode.setText("C000000")
+        }
 
         this.onBackPressedDispatcher.addCallback(this, callback)
 
@@ -79,127 +81,18 @@ class SettingActivity : AppCompatActivity() {
 
         mBinding.bottom.bottomButton.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                searchDevices()
-            }
-
-        })
-
-        getInfo()
-        showPairedDevices()
-        //useDevice()
-
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun showPairedDevices() {
-        val mBluetooth = BluetoothV2ByWoo(mContext, mActivity, pairedList, true)
-        mBluetooth.checkBluetoothAvailable()
-        mBluetooth.bluetoothListener = object : BluetoothV2ByWoo.BluetoothListener{
-            override fun hideLoadingImage() {
-            }
-
-            override fun showLoadingImage() {
-            }
-
-            @SuppressLint("NotifyDataSetChanged")
-            override fun onChangeAdapterData() {
-                adapter?.notifyDataSetChanged()
-            }
-        }
-        adapter = PairedDevicesAdapterV2ByWoo(mContext, mActivity)
-        adapter?.dataList = pairedList
-        mBinding.recyclerview.adapter = adapter
-        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun searchDevices(){
-        mBinding.bottom.bottomButton.setOnClickListener {
-            val dlg = PopupSearchDevices(mContext, mActivity)
-            if (mBinding.accountCode.text.isEmpty()) {
-                Utils.popupNotice(mContext, "대리점 코드를 입력해주세요")
-            } else if(isRadioChecked == 0) {
-                Utils.popupNotice(mContext, "스캐너 또는 프린트를 선택해주세요")
-            } else {
-                when (isRadioChecked) {
-                    1 -> {
-                        dlg.show()
-                        Utils.log("scanner is selected")
-                    }
-                    2 -> {
-                        dlg.show()
-                        Utils.log("printer is selected")
-                    }
-                }
-            }
-            val mBluetooth = BluetoothV2ByWoo(mContext, mActivity, searchedList, false)
-            mBluetooth.checkBluetoothAvailable()
-        }
-    }
-
-    fun onSettingActRadioButtonClicked(view: View): Int {
-        if (view is RadioButton) {
-            val checked = view.isChecked
-
-            when(view.id) {
-                R.id.radioScanner ->
-                    if (checked) {
-                        // 뷰의 맨 앞으로 보내서 사용자가 클릭하기 쉽도록
-                        view.bringToFront()
-                        // 각 항목을 선택하면 테두리 색 변경
-                        mBinding.radioScannerBox.setBackgroundResource(R.drawable.et_round_1d6de5)
-                        mBinding.radioPrintBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
-                        isRadioChecked = 1
-                        mBinding.radioPrint.isChecked = false
-                        Utils.log("scanner is checked")
-                    }
-                R.id.radioPrint ->
-                    if (checked) {
-                        view.bringToFront()
-                        mBinding.radioPrintBox.setBackgroundResource(R.drawable.et_round_1d6de5)
-                        mBinding.radioScannerBox.setBackgroundResource(R.drawable.et_round_c9cbd0)
-                        isRadioChecked = 2
-                        mBinding.radioScanner.isChecked = false
-                        Utils.log("printer is checked")
-                }
-            }
-        }
-        return isRadioChecked
-    }
-
-    private fun useDevice() {
-        val print = mBinding.checkBoxPrint
-        val scanner = mBinding.checkBoxScanner
-
-        scanner.setOnClickListener(object : OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
-                scanner.isEnabled = false
-                val name = SharedData.getSharedData(mContext, SharedData.SCANNER_NAME, "")
-                val address = SharedData.getSharedData(mContext, SharedData.SCANNER_ADDR, "")
-                if (address == "" && name == "") {
-                    Utils.popupNotice(mContext, "스캐너를 연결해주세요")
-                } else {
-                    scanner.isEnabled = true
-                    checkScanner = scanner.isChecked
-                }
+                requestPermission()
             }
         })
 
-        print.setOnClickListener(object : OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
-                print.isEnabled = false
-                val name = SharedData.getSharedData(mContext, SharedData.PRINTER_NAME, "")
-                val address = SharedData.getSharedData(mContext, SharedData.PRINTER_ADDR, "")
-                if (address == "" && name == "") {
-                    Utils.popupNotice(mContext, "프린터를 연결해주세요")
-                } else {
-                    print.isEnabled = true
-                    checkPrinter = print.isChecked
-                }
-            }
-        })
+        //대리점 코드 및 전화번호 세팅
+        getInfoSetting()
+        //연결된 블루투스 목록
+        showPairedList()
+
     }
-    private fun getInfo() {
+
+    private fun getInfoSetting() {
         mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
 
@@ -208,7 +101,38 @@ class SettingActivity : AppCompatActivity() {
         }
 
         if (mPhoneNumber != "") {
-            mBinding.mobileNumber.setText(mPhoneNumber.toString())
+            mBinding.mobileNumber.text = mPhoneNumber.toString()
+        }
+    }
+
+    private fun showPairedList(){
+        val adapter = PairedDevicesAdapter(mContext, mActivity)
+        mBinding.recyclerview.adapter = adapter
+        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
+    }
+
+    private fun requestPermission() {
+        TedPermission.create()
+            .setPermissionListener(object : PermissionListener {
+                override fun onPermissionGranted() {
+                    showDeviceList()
+                }
+
+                override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
+                    Toast.makeText(mContext, "권한을 허용해주세요.", Toast.LENGTH_LONG).show()
+                }
+            })
+            .setDeniedMessage("권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+            .setPermissions(*ALL_BLE_PERMISSIONS)
+            .check()
+    }
+
+    private fun showDeviceList(){
+        val popup = PopupSearchDevices(mContext)
+        if (mBinding.accountCode.text.isEmpty()) {
+            Utils.popupNotice(mContext, "대리점 코드를 입력해주세요")
+        }  else {
+            popup.show()
         }
     }
 }

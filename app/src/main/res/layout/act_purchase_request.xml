@@ -30,7 +30,7 @@
             android:layout_gravity="center"
             android:layout_marginStart="16dp"
             android:text="총금액 :"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:textStyle="normal"
             android:textColor="@color/color_1A1A1A" />
 
@@ -41,7 +41,7 @@
             android:layout_gravity="center"
             android:layout_marginEnd="16dp"
             android:text="0원"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:textStyle="normal"
             android:textColor="@color/color_1D6DE5"/>
     </LinearLayout>

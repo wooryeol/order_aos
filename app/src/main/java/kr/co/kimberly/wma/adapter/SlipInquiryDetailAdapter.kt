@@ -26,8 +26,8 @@ class SlipInquiryDetailAdapter(context: Context, private val updateData: ((Array
             } else {
                 binding.tvPrice.text = "${Utils.decimal(itemModel.netPrice!!)}원"
             }
-            binding.tvTotal.text = Utils.decimal(itemModel.saleQty!!)
-            binding.tvTotalAmount.text = "${Utils.decimal(itemModel.amount!!)}원"
+            binding.tvTotal.text = Utils.decimalLong(itemModel.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimalLong(itemModel.amount!!)}원"
             binding.deleteButton.visibility = View.GONE
 
             itemView.setOnClickListener {

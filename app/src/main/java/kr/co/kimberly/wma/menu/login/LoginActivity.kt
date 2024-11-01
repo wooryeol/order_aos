@@ -1,24 +1,32 @@
 package kr.co.kimberly.wma.menu.login
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.telephony.TelephonyManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.github.chrisbanes.photoview.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.gun0912.tedpermission.PermissionListener
+import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActLoginBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.menu.setting.SettingActivity
@@ -38,6 +46,13 @@ class LoginActivity : AppCompatActivity() {
     private var mAgencyCode: String? = null // 대리점 코드
     private var mPhoneNumber : String? = null // 연락처
 
+    private val mPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        Manifest.permission.READ_PHONE_NUMBERS
+    } else {
+        Manifest.permission.READ_PRECISE_PHONE_STATE
+    }
+
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +65,11 @@ class LoginActivity : AppCompatActivity() {
         // 대리점 코드와 휴대폰 번호
         mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
+
+        // 저장되어 있는 전화번호가 없으면 가져올 수 있게 세팅
+        if (mPhoneNumber == "") {
+            requestPhoneNumPermission()
+        }
 
         mBinding.btLogin.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
@@ -167,24 +187,31 @@ class LoginActivity : AppCompatActivity() {
         val obj = json.toString()
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
         Utils.log("body ====> ${Gson().toJson(json)}")
+        Utils.log("body 222 ====> $json")
         val call = service.postLogin(body)
-
-        call.enqueue(object : retrofit2.Callback<ResultModel<LoginResponseModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<List<LoginResponseModel>>> {
             override fun onResponse(
-                call: Call<ResultModel<LoginResponseModel>>,
-                response: Response<ResultModel<LoginResponseModel>>
+                call: Call<ResultModel<List<LoginResponseModel>>>,
+                response: Response<ResultModel<List<LoginResponseModel>>>
             ) {
                 loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnCd == Define.RETURN_CD_00) {
-                        Utils.log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
-                        SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, Gson().toJson(item.data))
-                        val intent = Intent(mContext,  MainActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    } else {
-                        Utils.popupNotice(mContext, item?.returnMsg!!)
+                    when (item?.returnCd) {
+                        Define.RETURN_CD_00 -> {
+                            Utils.log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
+                            SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, Gson().toJson(item.data))
+                            val intent = Intent(mContext,  MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                        "01" -> {
+                            Utils.popupNotice(mContext, "아이디, 비밀번호, 대리점코드 또는 전화번호를 다시 확인해주세요")
+
+                        }
+                        else -> {
+                            Utils.popupNotice(mContext, item?.returnMsg!!)
+                        }
                     }
                 } else {
                     Utils.log("${response.code()} ====> ${response.message()}")
@@ -192,7 +219,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<ResultModel<LoginResponseModel>>, t: Throwable) {
+            override fun onFailure(call: Call<ResultModel<List<LoginResponseModel>>>, t: Throwable) {
                 loading.hideDialog()
                 Utils.log("login failed ====> ${t.message}")
                 Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
@@ -207,5 +234,55 @@ class LoginActivity : AppCompatActivity() {
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
     }
 
+    private fun checkPhoneNumPermission() {
+        TedPermission.create()
+            .setPermissionListener(object : PermissionListener {
+                @SuppressLint("HardwareIds", "MissingPermission")
+                override fun onPermissionGranted() {
+                    val tm = getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+                    if (tm != null) {
+                        val phoneNum = tm.line1Number
+                        if (phoneNum != null) {
+                            mPhoneNumber = tm.line1Number
+                            SharedData.setSharedData(mContext, "phoneNumber", tm.line1Number)
+                        } else {
+                            //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")
+                            Utils.popupNotice(mContext, "권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+                        }
+                    } else {
+                        //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")
+                        Utils.popupNotice(mContext, "권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+                    }
+                }
 
+                override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
+                    //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")
+                    Utils.popupNotice(mContext, "권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+                }
+            })
+            .setDeniedMessage("권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+            .setPermissions(mPermission)
+            .check()
+    }
+
+    private fun requestPhoneNumPermission(){
+        if (ActivityCompat.checkSelfPermission(mContext, mPermission) != PackageManager.PERMISSION_GRANTED) {
+            checkPhoneNumPermission()
+        }
+    }
+
+    private var clickTime: Long = 0
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        val current = System.currentTimeMillis()
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            if(current - clickTime >= 2000) {
+                PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null).show()
+            } else {
+                finish()
+            }
+        } else {
+            super.onBackPressed()
+        }
+    }
 }

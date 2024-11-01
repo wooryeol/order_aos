@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.LedgerAdapter
 import kr.co.kimberly.wma.common.Define
@@ -64,6 +65,8 @@ class LedgerActivity : AppCompatActivity() {
             popupDatePicker.onSelectedDate = {
                 mBinding.tvDate.text = it
                 searchMonth = it
+
+                custCd?.let { getLedgerList(it) }
             }
             popupDatePicker.show()
         }
@@ -71,17 +74,24 @@ class LedgerActivity : AppCompatActivity() {
         mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
             @SuppressLint("SetTextI18n")
             override fun onSingleClick(v: View) {
-                val popupAccountSearch = PopupAccountListSearch(mContext, mBinding.etAccount.text.toString())
-                popupAccountSearch.onItemSelect = {
-                    mBinding.btEmpty.visibility = View.VISIBLE
-                    mBinding.etAccount.visibility = View.GONE
-                    mBinding.tvAccountName.visibility = View.VISIBLE
-                    mBinding.tvAccountName.text = ("(${it.custCd}) ${it.custNm}")
-                    mBinding.tvAccountName.isSelected = true
-                    custCd = it.custCd
-                    getLedgerList(it.custCd)
+                if (mBinding.tvDate.text.isNullOrEmpty()) {
+                    Utils.popupNotice(mContext, "조회하실 날짜를 먼저 선택해주세요")
+                } else if (mBinding.etAccount.text.isNullOrEmpty()) {
+                    Utils.popupNotice(mContext, "거래처를 검색해주세요")
+                } else {
+                    val popupAccountSearch = PopupAccountListSearch(mContext, mBinding.etAccount.text.toString(), mBinding.etAccount)
+                    popupAccountSearch.onItemSelect = {
+                        mBinding.btEmpty.visibility = View.VISIBLE
+                        mBinding.etAccount.visibility = View.GONE
+                        mBinding.tvAccountName.visibility = View.VISIBLE
+                        mBinding.tvAccountName.text = ("(${it.custCd}) ${it.custNm}")
+                        mBinding.etAccount.setText(it.custNm)
+                        mBinding.tvAccountName.isSelected = true
+                        custCd = it.custCd
+                        getLedgerList(it.custCd)
+                    }
+                    popupAccountSearch.show()
                 }
-                popupAccountSearch.show()
             }
         })
 
@@ -103,6 +113,7 @@ class LedgerActivity : AppCompatActivity() {
                 mBinding.tvAccountName.visibility = View.GONE
                 mBinding.etAccount.visibility = View.VISIBLE
                 custCd = null
+                GlobalApplication.showKeyboard(mContext, mBinding.etAccount)
             }
         })
 
@@ -159,11 +170,11 @@ class LedgerActivity : AppCompatActivity() {
                         mBinding.balance.text = Utils.decimal(data.bondBalance!!)
 
                     } else {
-                        Utils.popupNotice(mContext, item?.returnMsg!!)
+                        Utils.popupNotice(mContext, item?.returnMsg!!, mBinding.etAccount)
                     }
                 } else {
                     Utils.log("${response.code()} ====> ${response.message()}")
-                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요", mBinding.etAccount)
                 }
             }
 

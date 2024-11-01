@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
@@ -42,7 +43,7 @@ class PurchaseRequestActivity: AppCompatActivity() {
     private lateinit var mLoginInfo: LoginResponseModel
 
     var purchaseAdapter: PurchaseRequestAdapter? = null
-    private var totalAmount: Int = 0
+    private var totalAmount: Long = 0
 
     private val db : DBHelper by lazy {
         DBHelper.getInstance(applicationContext)
@@ -64,38 +65,19 @@ class PurchaseRequestActivity: AppCompatActivity() {
 
         setAdapter()
 
+        // 소프트키 뒤로가기
+        this.onBackPressedDispatcher.addCallback(this, callback)
+
+        // 헤더 뒤로가기
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                // 주문 도중 나갈 경우
-                if (!purchaseAdapter?.itemList.isNullOrEmpty()) {
-                    PopupNoticeV2(mContext, "기존 주문이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
-                        object : Handler(Looper.getMainLooper()) {
-                            @SuppressLint("NotifyDataSetChanged")
-                            override fun handleMessage(msg: Message) {
-                                when (msg.what) {
-                                    Define.EVENT_OK -> {
-                                        saveData()
-                                        finish()
-                                    }
-                                    Define.EVENT_CANCEL -> {
-                                        finish()
-                                        isSave = false
-                                        db.deletePurchaseData()
-                                    }
-                                }
-                            }
-                        }
-                    ).show()
-                } else {
-                    finish()
-                }
+                goBack()
             }
         })
 
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupDoubleMessage = PopupDoubleMessage(mContext, "발주전송", "SAP Name : ${purchaseAdapter?.selectedSAP?.sapCustomerNm}\n총금액 : ${Utils.decimal(totalAmount)}원", getString(R.string.purchasePostMsg03), true)
-
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "발주전송", "SAP Name : ${purchaseAdapter?.selectedSAP?.sapCustomerNm}\n총금액 : ${Utils.decimalLong(totalAmount)}원", getString(R.string.purchasePostMsg03), true)
                 if (purchaseAdapter?.itemList!!.isEmpty()) {
                     Utils.popupNotice(mContext, "제품이 등록되지 않았습니다.")
                 } else {
@@ -125,10 +107,10 @@ class PurchaseRequestActivity: AppCompatActivity() {
             totalAmount = 0
             itemList.map {
                 val stringWithoutComma = it.amount.toString().replace(",", "")
-                totalAmount += stringWithoutComma.toInt()
+                totalAmount += stringWithoutComma.toLong()
             }
 
-            val formatTotalMoney = Utils.decimal(totalAmount)
+            val formatTotalMoney = Utils.decimalLong(totalAmount)
             mBinding.tvTotalAmount.text = "${formatTotalMoney}원"
         }
 
@@ -139,7 +121,7 @@ class PurchaseRequestActivity: AppCompatActivity() {
             list.forEach {
                 totalAmount += it.amount!!
             }
-            mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
+            mBinding.tvTotalAmount.text = "${Utils.decimalLong(totalAmount)}원"
         }
     }
 
@@ -192,10 +174,10 @@ class PurchaseRequestActivity: AppCompatActivity() {
                         Utils.log("item ====> ${item.data}")
                         Utils.log("order success ====> ${Gson().toJson(item)}")
                         Utils.toast(mContext, "주문이 전송되었습니다.")
+
                         // 주문이 전송되면 데이터 초기화
-                        SharedData.setSharedData(mContext, "purchaseSapModel", "")
-                        isSave = false
-                        db.deletePurchaseData()
+                        deleteData()
+
                         val intent = Intent(mContext, PurchaseApprovalActivity::class.java).apply {
                             putExtra("slipNo", item.data?.slipNo)
                             putExtra("sapModel", sapModel)
@@ -229,10 +211,49 @@ class PurchaseRequestActivity: AppCompatActivity() {
         }
     }
 
+    private fun deleteData() {
+        SharedData.setSharedData(mContext, "purchaseSapModel", "")
+        db.deletePurchaseData()
+        isSave = false
+    }
+
     override fun onStop() {
         super.onStop()
         if (!purchaseAdapter?.itemList.isNullOrEmpty() && isSave) {
             saveData()
+        }
+    }
+
+    // 뒤로가기 버튼
+    val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            goBack()
+        }
+    }
+
+    private fun goBack() {
+        // 주문 도중 나갈 경우
+        if (!purchaseAdapter?.itemList.isNullOrEmpty()) {
+            PopupNoticeV2(mContext, "기존 주문이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
+                object : Handler(Looper.getMainLooper()) {
+                    @SuppressLint("NotifyDataSetChanged")
+                    override fun handleMessage(msg: Message) {
+                        when (msg.what) {
+                            Define.EVENT_OK -> {
+                                saveData()
+                                finish()
+                            }
+                            Define.EVENT_CANCEL -> {
+                                deleteData()
+                                finish()
+                            }
+                        }
+                    }
+                }
+            ).show()
+        } else {
+            deleteData()
+            finish()
         }
     }
 }

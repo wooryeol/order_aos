@@ -14,63 +14,72 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.adapter.SearchDevicesAdapter
-import kr.co.kimberly.wma.common.BluetoothV2ByWoo
+import kr.co.kimberly.wma.common.Bluetooth
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSearchDevicesBinding
+import kr.co.kimberly.wma.network.model.DevicesModel
 
-class PopupSearchDevices(private val mContext: Context, private val mActivity: Activity): Dialog(mContext) {
+@SuppressLint("NotifyDataSetChanged", "MissingPermission")
+class PopupSearchDevices(private val mContext: Context): Dialog(mContext) {
 
     private lateinit var mBinding: PopupSearchDevicesBinding
-    private val searchedList : ArrayList<BluetoothDevice> = ArrayList()
-    val adapter = SearchDevicesAdapter(mContext, mActivity)
+    private lateinit var adapter: SearchDevicesAdapter
+    private lateinit var mBluetooth: Bluetooth
 
-    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = PopupSearchDevicesBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
-
         initView()
-    }
 
-    @SuppressLint("NotifyDataSetChanged", "MissingPermission")
-    private fun initView() {
-        setCancelable(false)
+        // 블루투스 검색
+        mBluetooth = Bluetooth(mContext) { item ->
+            adapter.dataList = item
+            adapter.notifyDataSetChanged()
+        }
+        mBluetooth.startScan()
 
-        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val height = Resources.getSystem().displayMetrics.heightPixels * 0.5
-        window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, height.toInt())
+        //어댑터 설정
+        setAdapter()
 
-        val mBluetooth = BluetoothV2ByWoo(mContext, mActivity, searchedList, false)
-        mBluetooth.checkBluetoothAvailable()
-
-        mBinding.isPairing.playAnimation()
+        // 로딩 애니메이션
+        setAnimation()
 
         // 재검색
         mBinding.retry.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                mBluetooth.checkBluetoothAvailable()
+                mBluetooth.startScan()
+            }
+        })
+        // 닫기 버튼
+        mBinding.closeBtn.setOnClickListener(object : OnSingleClickListener(){
+            override fun onSingleClick(v: View) {
+                dismiss()
+                mBluetooth.stopScan()
             }
         })
 
-        // 로딩 애니메이션
-        mBluetooth.bluetoothListener = object : BluetoothV2ByWoo.BluetoothListener{
-            override fun hideLoadingImage() {
-                mBinding.isPairing.visibility = View.INVISIBLE
-            }
-
-            override fun showLoadingImage() {
-                mBinding.isPairing.visibility = View.VISIBLE
-            }
-
-            override fun onChangeAdapterData() {
-                adapter.notifyDataSetChanged()
+        adapter.itemClickListener = object : SearchDevicesAdapter.ItemClickListener {
+            override fun onItemClick() {
+                mBluetooth.stopScan()
+                dismiss()
             }
         }
 
-        adapter.dataList = searchedList
+    }
 
+    private fun initView() {
+        setCancelable(false)
+        val height = Resources.getSystem().displayMetrics.heightPixels * 0.5
+        window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, height.toInt())
+        window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    }
+
+    private fun setAdapter(){
+        adapter = SearchDevicesAdapter(mContext)
         val layoutManager = LinearLayoutManager(mContext)
+        mBinding.recyclerview.adapter = adapter
         layoutManager.apply {
             reverseLayout = true
             stackFromEnd = true
@@ -81,6 +90,8 @@ class PopupSearchDevices(private val mContext: Context, private val mActivity: A
             // 리스트가 추가될 때
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 // layoutManager.scrollToPosition(0)
+                adapter.notifyDataSetChanged()
+
             }
 
             // 리스트가 update 될 때
@@ -89,22 +100,23 @@ class PopupSearchDevices(private val mContext: Context, private val mActivity: A
                 mBinding.recyclerview.scrollToPosition(adapter.dataList.size - 1)
             }
         })
+    }
 
-        mBinding.recyclerview.adapter = adapter
+    private fun setAnimation(){
+        //로딩바 애니메이션
+        mBinding.isPairing.playAnimation()
 
-        mBinding.closeBtn.setOnClickListener(object : OnSingleClickListener(){
-            override fun onSingleClick(v: View) {
-                dismiss()
-                if (mBluetooth.mBluetoothAdapter.isDiscovering) {
-                    mBluetooth.mBluetoothAdapter.cancelDiscovery()
-                }
-                mContext.unregisterReceiver(mBluetooth.mBluetoothReceiver)
+        mBluetooth.bluetoothListener = object : Bluetooth.BluetoothListener{
+            override fun hideLoadingImage() {
+                mBinding.isPairing.visibility = View.INVISIBLE
             }
-        })
 
-        adapter.itemClickListener = object : SearchDevicesAdapter.ItemClickListener {
-            override fun onItemClick() {
-                dismiss()
+            override fun showLoadingImage() {
+                mBinding.isPairing.visibility = View.VISIBLE
+            }
+
+            override fun onChangeAdapterData() {
+                adapter.notifyDataSetChanged()
             }
         }
     }

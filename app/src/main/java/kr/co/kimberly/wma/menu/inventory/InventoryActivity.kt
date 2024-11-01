@@ -93,8 +93,10 @@ class InventoryActivity : AppCompatActivity() {
         // 아이템 검색
         mBinding.search.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                if(mBinding.etProductName.text.toString().isEmpty()) {
+                if(mBinding.etProductName.text.isNullOrEmpty()) {
                     Utils.popupNotice(mContext, getString(R.string.productNameHint))
+                } else if(mBinding.tvBranchHouse.text.isNullOrEmpty()) {
+                    Utils.popupNotice(mContext, getString(R.string.branchHouseHint))
                 } else {
                     warehouseStock(mBinding.etProductName.text.toString())
                 }
@@ -119,6 +121,7 @@ class InventoryActivity : AppCompatActivity() {
                 mBinding.btProductNameEmpty.visibility = View.GONE
                 mBinding.etProductName.hint = v.context.getString(R.string.productNameHint)
                 mBinding.noSearch.visibility = View.VISIBLE
+                mBinding.recyclerview.visibility = View.GONE
                 itemList?.clear()
                 adapter?.notifyDataSetChanged()
 
@@ -235,7 +238,7 @@ class InventoryActivity : AppCompatActivity() {
                         mBinding.tvProductName.visibility = View.VISIBLE
                         mBinding.btProductNameEmpty.visibility = View.VISIBLE
                     } else {
-                        Utils.popupNotice(mContext, item?.returnMsg!!)
+                        Utils.popupNotice(mContext, item?.returnMsg!!, mBinding.etProductName)
                     }
                 } else {
                     Utils.log("${response.code()} ====> ${response.message()}")

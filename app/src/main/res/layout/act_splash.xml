@@ -20,7 +20,7 @@
             android:layout_gravity="center"
             android:text="@string/msg01"
             android:textColor="@color/white"
-            android:textSize="18dp"
+            android:textSize="16dp"
             android:textStyle="bold"/>
 
         <LinearLayout

@@ -3,6 +3,7 @@ package kr.co.kimberly.wma.menu.printer
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -10,6 +11,7 @@ import android.os.Looper
 import android.os.Message
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.example.tscdll.TSCActivity
 import com.google.gson.Gson
@@ -22,6 +24,7 @@ import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.databinding.ActPrinterOptionBinding
+import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
@@ -63,22 +66,21 @@ class PrinterOptionActivity : AppCompatActivity() {
 
         Utils.log("PrinterOptionActivity title ====> $title")
         Utils.log("PrinterOptionActivity slipNo ====> $slipNo")
+        Utils.log("PrinterOptionActivity moneySlipNo ====> $moneySlipNo")
 
         mBinding.header.headerTitle.text = title
 
+        if (moneySlipNo.isNotEmpty() && moneySlipNo != "") {
+            mBinding.title.text = getString(R.string.sendingSuccess)
+        }
+
+        // 소프트키 뒤로가기
+        this.onBackPressedDispatcher.addCallback(this, callback)
+
+        // 헤더 뒤로가기
         mBinding.header.backBtn.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupNoticeV2 = PopupNoticeV2(mContext, "인쇄를 종료하고\n처음 화면으로 돌아가시겠습니까?", object : Handler(
-                    Looper.getMainLooper()) {
-                    override fun handleMessage(msg: Message) {
-                        when(msg.what) {
-                            Define.EVENT_OK -> {
-                                finish()
-                            }
-                        }
-                    }
-                })
-                popupNoticeV2.show()
+                goBack()
             }
         })
 
@@ -220,5 +222,31 @@ class PrinterOptionActivity : AppCompatActivity() {
                 Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
         })
+    }
+
+
+    // 뒤로가기 버튼
+    val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            goBack()
+        }
+    }
+
+    private fun goBack() {
+        val popupNoticeV2 = PopupNoticeV2(mContext, "인쇄를 종료하고\n처음 화면으로 돌아가시겠습니까?", object : Handler(
+            Looper.getMainLooper()) {
+            override fun handleMessage(msg: Message) {
+                when(msg.what) {
+                    Define.EVENT_OK -> {
+                        val intent = Intent(mContext, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        }
+                        startActivity(intent)
+                        finish()
+                    }
+                }
+            }
+        })
+        popupNoticeV2.show()
     }
 }

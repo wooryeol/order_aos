@@ -24,7 +24,7 @@
                 android:layout_gravity="bottom"
                 android:layout_marginEnd="6dp"
                 android:text="@string/wma"
-                android:textSize="18dp"
+                android:textSize="16dp"
                 android:textStyle="bold"
                 android:textColor="@color/color_1A1A1A"/>
 
@@ -84,7 +84,7 @@
             android:text="@string/setting"
             android:textColor="@color/color_103C7E"
             android:textStyle="bold"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:drawableStart="@drawable/ic_setting_blue"
             android:drawablePadding="6dp"
             android:background="@drawable/bt_round_b1b4bb"/>
@@ -99,7 +99,7 @@
             android:text="@string/notice"
             android:textColor="@color/color_103C7E"
             android:textStyle="bold"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:drawableStart="@drawable/ic_notice"
             android:drawablePadding="6dp"
             android:background="@drawable/bt_round_b1b4bb"/>

@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
@@ -44,7 +45,7 @@ class OrderRegActivity : AppCompatActivity() {
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
 
     private var accountName = ""
-    private var totalAmount = 0
+    private var totalAmount: Long = 0
     private var orderAdapter: RegAdapter? = null
 
     private val db : DBHelper by lazy {
@@ -67,31 +68,13 @@ class OrderRegActivity : AppCompatActivity() {
 
         setAdapter()
 
+        // 소프트키 뒤로가기
+        this.onBackPressedDispatcher.addCallback(this, callback)
+
+        // 헤더 뒤로가기
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                // 주문 도중 나갈 경우
-                if (!orderAdapter?.dataList.isNullOrEmpty()) {
-                    PopupNoticeV2(mContext, "기존 주문이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
-                        object : Handler(Looper.getMainLooper()) {
-                            @SuppressLint("NotifyDataSetChanged")
-                            override fun handleMessage(msg: Message) {
-                                when (msg.what) {
-                                    Define.EVENT_OK -> {
-                                        saveData()
-                                        finish()
-                                    }
-                                    Define.EVENT_CANCEL -> {
-                                        isSave = false
-                                        db.deleteOrderData()
-                                        finish()
-                                    }
-                                }
-                            }
-                        }
-                    ).show()
-                } else {
-                    finish()
-                }
+                goBack()
             }
         })
 
@@ -119,7 +102,7 @@ class OrderRegActivity : AppCompatActivity() {
 
     // 주문 확인 팝업
     private fun checkOrderPopup(deliveryDate: String) {
-        val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : ${orderAdapter?.accountName}\n총금액: ${Utils.decimal(totalAmount)}원\n납기일자: $deliveryDate", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+        val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : ${orderAdapter?.accountName}\n총금액: ${Utils.decimalLong(totalAmount)}원\n납기일자: $deliveryDate", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
         popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
             override fun onCancelClick() {
                 Utils.log("취소 클릭")
@@ -145,17 +128,17 @@ class OrderRegActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun setAdapter(){
         val list = if (db.orderList != emptyArray<SearchItemModel>()) {
-            db.orderList as ArrayList<SearchItemModel>
+            db.orderList
         } else {
             arrayListOf()
         }
 
         orderAdapter = RegAdapter(mContext, mActivity, list) { items, name ->
-            var totalMoney = 0
+            var totalMoney: Long = 0
 
             items.map {
                 val stringWithoutComma = it.amount.toString().replace(",", "")
-                totalMoney += stringWithoutComma.toInt()
+                totalMoney += stringWithoutComma.toLong()
             }
 
             accountName = name.ifEmpty {
@@ -163,7 +146,7 @@ class OrderRegActivity : AppCompatActivity() {
             }
             totalAmount = totalMoney
 
-            val formatTotalMoney = Utils.decimal(totalMoney)
+            val formatTotalMoney = Utils.decimalLong(totalMoney)
             mBinding.tvTotalAmount.text = "${formatTotalMoney}원"
         }
 
@@ -174,7 +157,7 @@ class OrderRegActivity : AppCompatActivity() {
             list.forEach {
                 totalAmount += it.amount!!
             }
-            mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
+            mBinding.tvTotalAmount.text = "${Utils.decimalLong(totalAmount)}원"
         }
 
         orderAdapter?.accountName = intent.getStringExtra("orderAccountName") ?: ""
@@ -217,11 +200,10 @@ class OrderRegActivity : AppCompatActivity() {
                         val slipNo = item.data.slipNo
                         Utils.log("order success ====> ${Gson().toJson(item)}")
                         Utils.toast(mContext, "주문이 전송되었습니다.")
+
                         // 주문이 전송되면 데이터 초기화
-                        SharedData.setSharedData(mContext, "orderCustomerCd", "")
-                        SharedData.setSharedData(mContext, "orderAccountName", "")
-                        isSave = false
-                        db.deleteOrderData()
+                        deleteData()
+
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
                             //putExtra("data", data)
                             putExtra("slipNo", slipNo)
@@ -256,10 +238,50 @@ class OrderRegActivity : AppCompatActivity() {
         }
     }
 
+    private fun deleteData() {
+        SharedData.setSharedData(mContext, "orderCustomerCd", "")
+        SharedData.setSharedData(mContext, "orderAccountName", "")
+        db.deleteOrderData()
+        isSave = false
+    }
+
     override fun onStop() {
         super.onStop()
         if (!orderAdapter?.dataList.isNullOrEmpty() && isSave){
             saveData()
+        }
+    }
+
+    // 뒤로가기 버튼
+    val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            goBack()
+        }
+    }
+
+    private fun goBack() {
+        Utils.log("orderAdapter?.dataList ====> ${Gson().toJson(orderAdapter?.dataList)}")
+        if (!orderAdapter?.dataList.isNullOrEmpty()) {
+            PopupNoticeV2(mContext, "기존 주문이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
+                object : Handler(Looper.getMainLooper()) {
+                    @SuppressLint("NotifyDataSetChanged")
+                    override fun handleMessage(msg: Message) {
+                        when (msg.what) {
+                            Define.EVENT_OK -> {
+                                saveData()
+                                finish()
+                            }
+                            Define.EVENT_CANCEL -> {
+                                deleteData()
+                                finish()
+                            }
+                        }
+                    }
+                }
+            ).show()
+        } else {
+            deleteData()
+            finish()
         }
     }
 }

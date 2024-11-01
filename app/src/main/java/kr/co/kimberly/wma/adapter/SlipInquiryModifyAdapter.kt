@@ -21,6 +21,7 @@ import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
 import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
+import kr.co.kimberly.wma.db.DBHelper
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
@@ -31,16 +32,22 @@ import retrofit2.Call
 import retrofit2.Response
 import kotlin.math.ceil
 
-class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val customerNm: String, private val updateData: (ArrayList<SearchItemModel>) -> Unit): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class SlipInquiryModifyAdapter(mContext: Context,val slipList: ArrayList<SearchItemModel>, val customerCd: String, val customerNm: String, private val updateData: (ArrayList<SearchItemModel>) -> Unit): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
     private var headerViewHolder: HeaderViewHolder? = null
-    var slipList: ArrayList<SearchItemModel>? = null // 받아온 아이템 리스트
+    //var slipList: ArrayList<SearchItemModel>? = null // 받아온 아이템 리스트
     var selectedItem: SearchItemModel? = null // 선택된 제품
     var historyList: List<ProductPriceHistoryModel>? = null // 제품 단가 이력 리스트
     var popupSearchResult : PopupSearchResult? = null // 아이템 리스트
     var popupProductPriceHistory : PopupProductPriceHistory? = null // 단가 이력 팝업
     var onItemSelect: ((SearchItemModel) -> Unit)? = null
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
+
+    private val db: DBHelper by lazy { // 검색어 저장
+        DBHelper.getInstance(mContext.applicationContext)
+    }
+
+    private lateinit var searchListAdapter: CustomAutoCompleteAdapter
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -70,9 +77,9 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
         mLoginInfo = Utils.getLoginData()
         when (holder) {
             is ViewHolder -> {
-                holder.bind(slipList!![position - 1]) // 헤더가 있으므로 position - 1
+                holder.bind(slipList[position - 1]) // 헤더가 있으므로 position - 1
 
-                val data = slipList!![position-1]
+                val data = slipList[position-1]
 
 
                 holder.binding.deleteButton.setOnClickListener(object : OnSingleClickListener() {
@@ -104,7 +111,7 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
     }
 
     override fun getItemCount(): Int {
-        return slipList!!.size + 1 // 헤더뷰를 포함
+        return slipList.size + 1 // 헤더뷰를 포함
     }
 
     inner class ViewHolder(val binding: CellOrderRegBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -134,8 +141,8 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
             binding.tvBox.text = Utils.decimal(item.boxQty!!)
             binding.tvEach.text = Utils.decimal(item.unitQty!!)
             binding.tvPrice.text = "${Utils.decimal(item.netPrice!!)}원"
-            binding.tvTotal.text = Utils.decimal(item.saleQty!!)
-            binding.tvTotalAmount.text = "${Utils.decimal(item.amount!!)}원"
+            binding.tvTotal.text = Utils.decimalLong(item.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimalLong(item.amount!!)}원"
         }
     }
 
@@ -196,11 +203,10 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
                 }
             }
 
-            /*headerBinding.etProductName.setOnClickListener(object : OnSingleClickListener() {
-                override fun onSingleClick(v: View) {
-                    clearButton()
-                }
-            })*/
+            // 검색어 저장 어댑터
+            searchListAdapter = CustomAutoCompleteAdapter(context, db.searchList)
+            headerBinding.etProductName.setAdapter(searchListAdapter)
+            searchListAdapter.setAutoCompleteDropDownHeight(headerBinding.etProductName, 5)
 
             headerBinding.etProductName.setOnEditorActionListener { _, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -245,10 +251,10 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
                             val boxQty = Utils.getIntValue(headerBinding.etBox.text.toString())
                             val unitQty = Utils.getIntValue(headerBinding.etEach.text.toString())
                             val netPrice = Utils.getIntValue(headerBinding.etPrice.text.toString())
-                            val saleQty = selectedItem?.getBox!! * boxQty + unitQty
-                            val amount = saleQty * netPrice
+                            val saleQty = (selectedItem?.getBox!! * boxQty).toLong() + unitQty.toLong()
+                            val amount = saleQty * netPrice.toLong()
                             val supplyPrice = if (selectedItem?.vatYn == "01") {
-                                ceil(amount / 1.1).toInt()
+                                ceil(amount / 1.1).toLong()
                             } else {
                                 amount
                             }
@@ -366,10 +372,20 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
 
                                 // 팝업 선택 시
                                 popupSearchResult?.onItemSelect = {
-                                    slipList?.forEach { data ->
+
+                                    // 검색어 DB 저장
+                                    if (!db.searchList.contains(it.itemNm)) {
+                                        db.insertSearchData(it.itemNm ?: "")
+                                        searchListAdapter.notifyDataSetChanged()
+                                    }
+
+                                    slipList.forEach { data ->
                                         clearButton()
                                         if (data.itemCd == it.itemCd ) {
                                             Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.")
+                                            headerBinding.etProductName.setText("")
+                                            headerBinding.btProductNameEmpty.visibility = View.GONE
+                                            headerBinding.etProductName.hint = context.getString(R.string.productNameHint)
                                         } else {
                                             headerBinding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
                                             headerBinding.etProductName.visibility = View.GONE
@@ -385,14 +401,28 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
                                                 it.vatYn,
                                                 it.netPrice
                                             )
+                                            if (!headerBinding.etBox.text.isNullOrEmpty()){
+                                                headerBinding.etBox.setText("0")
+                                            }
+                                            if (!headerBinding.etEach.text.isNullOrEmpty()){
+                                                headerBinding.etEach.setText("0")
+                                            }
+                                            if (!headerBinding.etPrice.text.isNullOrEmpty()){
+                                                headerBinding.etPrice.setText("0")
+                                            }
                                             Utils.log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
                                         }
                                     }
                                 }
                             }
                         } else {
-                            Utils.popupNotice(context, item?.returnMsg!!)
-                            Utils.log("returnMsg ====> ${item.returnMsg}")
+                            Utils.popupNotice(context, item?.returnMsg ?: "잠시 후 다시 시도해주세요.", headerBinding.etProductName)
+                            Utils.log("returnMsg ====> ${item?.returnMsg}")
+                            headerBinding.etProductName.visibility = View.VISIBLE
+                            headerBinding.etProductName.setText("")
+                            headerBinding.etProductName.hint = context.getString(R.string.productNameHint)
+                            headerBinding.tvProductName.visibility = View.GONE
+                            headerBinding.btProductNameEmpty.visibility = View.GONE
                         }
                     } else {
                         Utils.log("${response.code()} ====> ${response.message()}")
@@ -428,18 +458,18 @@ class SlipInquiryModifyAdapter(mContext: Context,val customerCd: String, val cus
 
     @SuppressLint("NotifyDataSetChanged")
     fun addItem(item: SearchItemModel) {
-        slipList!!.removeAll { it.itemCd == item.itemCd }
-        slipList!!.add(item)
+        slipList.removeAll { it.itemCd == item.itemCd }
+        slipList.add(item)
         notifyDataSetChanged()
         Utils.log("updated slipList ====> ${Gson().toJson(slipList)}")
-        updateData(slipList!!)
+        updateData(slipList)
     }
 
     @SuppressLint("NotifyDataSetChanged")
     fun removeItem(item: SearchItemModel) {
-        slipList!!.remove(item)
+        slipList.remove(item)
         notifyDataSetChanged()
         Utils.log("updated slipList ====> ${Gson().toJson(slipList)}")
-        updateData(slipList!!)
+        updateData(slipList)
     }
 }

@@ -5,7 +5,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
@@ -13,12 +17,15 @@ import com.google.gson.JsonObject
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SlipInquiryModifyAdapter
 import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDeliveryDatePicker
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.databinding.ActOrderRegBinding
+import kr.co.kimberly.wma.db.DBHelper
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
@@ -40,11 +47,15 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
     private lateinit var originSlipList: ArrayList<SearchItemModel> // 기존 데이터 리스트
 
     private var modifyAdapter: SlipInquiryModifyAdapter? = null
-    private var orderSlipList: ArrayList<SearchItemModel>? = null // 오더 리스트
-    private var customerCd: String? = null
-    private var customerNm: String? = null
-    private var totalAmount: Int = 0
-    private var slipNo: String? = null
+    private lateinit var orderSlipList: ArrayList<SearchItemModel> // 오더 리스트
+    private lateinit var customerCd: String
+    private lateinit var customerNm: String
+    private lateinit var slipNo: String
+
+    private val db : DBHelper by lazy {
+        DBHelper.getInstance(applicationContext)
+    }
+    private var isSave = true // 액티비티가 종료 될 때 이 값을 통해 저장 여부 선택
 
     @SuppressLint("SetTextI18n", "NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,41 +65,25 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
-
         mLoginInfo = Utils.getLoginData()
-
-        slipNo = intent.getStringExtra("slipNo")
-        customerCd = intent.getStringExtra("customerCd")
-        customerNm = intent.getStringExtra("customerNm")
-        totalAmount = intent.getIntExtra("totalAmount", 0)
+        slipNo = intent.getStringExtra("slipNo")!!
+        customerCd = intent.getStringExtra("customerCd")!!
+        customerNm = intent.getStringExtra("customerNm")!!
         orderSlipList = intent.getSerializableExtra("orderSlipList") as ArrayList<SearchItemModel>
         originSlipList = arrayListOf()
-        originSlipList.addAll(orderSlipList!!)
-        getItemCode(orderSlipList!!)
-
-        Utils.log("SlipInquiryModifyActivity\nslipNo ====> $slipNo\ncustomerCd ====> $customerCd\ncustomerNm ====> $customerNm\ntotalAmount ====> $totalAmount\norderSlipList ====> ${Gson().toJson(orderSlipList)}")
-
+        originSlipList.addAll(orderSlipList)
+        getItemCode(orderSlipList)
         setUi()
 
-        modifyAdapter = SlipInquiryModifyAdapter(mContext, customerCd!!, customerNm!!) {items ->
-            totalAmount = 0
+        Utils.log("Slip Inquiry Modify Activity\nslipNo ====> $slipNo\ncustomerCd ====> $customerCd\ncustomerNm ====> $customerNm\ntotalAmount ====> ${totalAmount(orderSlipList)}\norderSlipList ====> ${Gson().toJson(orderSlipList)}")
 
-            items.map {
-                val stringWithoutComma = it.amount.toString().replace(",", "")
-                totalAmount += stringWithoutComma.toInt()
-            }
+        // 소프트키 뒤로가기
+        this.onBackPressedDispatcher.addCallback(this, callback)
 
-            mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
-        }
-
-        modifyAdapter?.slipList = orderSlipList
-        mBinding.recyclerview.adapter = modifyAdapter
-        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
-
+        // 헤더 뒤로가기
         mBinding.header.backBtn.setOnClickListener(object : OnSingleClickListener(){
             override fun onSingleClick(v: View) {
-                //Utils.backBtnPopup(mContext, mActivity, orderSlipList!!)
-                finish()
+                goBack()
             }
         })
 
@@ -114,9 +109,22 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
         })
     }
 
+    // 어댑터 설정
+    @SuppressLint("SetTextI18n")
+    private fun setAdapter() {
+        modifyAdapter = SlipInquiryModifyAdapter(mContext, orderSlipList, customerCd, customerNm) {items ->
+            Utils.log("items ====> ${Gson().toJson(items)}")
+            mBinding.tvTotalAmount.text = "${Utils.decimalLong(totalAmount(items))}원"
+        }
+
+        mBinding.recyclerview.adapter = modifyAdapter
+        mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
+
+    }
+
     // 수정 주문 확인 팝업
     private fun checkOrderPopup(deliveryDate: String) {
-        val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $customerNm\n총금액: ${Utils.decimal(totalAmount)}원\n납기일자: $deliveryDate", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+        val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $customerNm\n총금액: ${Utils.decimalLong(totalAmount(orderSlipList))}원\n납기일자: $deliveryDate", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
         popupDoubleMessage.itemClickListener = object: PopupDoubleMessage.ItemClickListener {
             override fun onCancelClick() {
                 Utils.log("취소 클릭함")
@@ -140,15 +148,24 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun setUi() {
+        val data = db.slipList
+        val dataList = arrayListOf<SearchItemModel>()
+
+        data.forEach {
+            if (it.slipNo == slipNo) {
+                dataList.add(it)
+            }
+        }
+
+        if (dataList.size > 0) {
+            orderSlipList = dataList
+        }
+
+        setAdapter()
+
         mBinding.header.headerTitle.text = getString(R.string.slipModify)
         mBinding.bottom.bottomButton.text = getString(R.string.titleOrder)
-        mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
-
-        mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
-                finish()
-            }
-        })
+        mBinding.tvTotalAmount.text = "${Utils.decimalLong(totalAmount(orderSlipList))}원"
     }
 
     private fun updateOrder(deliveryDate: String){
@@ -165,7 +182,7 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
             addProperty("customerCd", customerCd)
             addProperty("deliveryDate", deliveryDate)
             addProperty("preSalesType", "N")
-            addProperty("totalAmount", totalAmount)
+            addProperty("totalAmount", totalAmount(orderSlipList))
         }
         json.add("salesInfo", jsonArray)
         Utils.log("final updated order json ====> ${Gson().toJson(json)}")
@@ -186,15 +203,20 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
                     if (item?.returnCd == Define.RETURN_CD_00) {
                         Utils.log("order success ====> ${Gson().toJson(item)}")
                         val data = orderSlipList
-                        val slipNo = item.data.slipNo
+                        val newSlipNo = item.data.slipNo
                         Utils.toast(mContext, "주문이 전송되었습니다.")
                         Utils.log("returnMsg ====> ${item.returnMsg}")
+
+                        // 주문이 전송되면 데이터 초기화
+                        deleteData()
+
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
                             //putExtra("data", data)
-                            putExtra("slipNo", slipNo)
+                            putExtra("slipNo", newSlipNo)
                             putExtra("title", mContext.getString(R.string.titleOrder))
                         }
                         startActivity(intent)
+                        finish()
                     } else {
                         Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
@@ -218,9 +240,8 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
 
         for (searchItemModel in orderSlipList) {
             val matcher = searchItemModel.itemNm?.let { pattern.matcher(it) }
-            Utils.log("searchItemModel.vatYn ====> ${searchItemModel.vatYn}")
             val supplyPrice = if (searchItemModel.vatYn == "01") {
-                ceil(searchItemModel.amount!! / 1.1).toInt()
+                ceil(searchItemModel.amount!! / 1.1).toLong()
             } else {
                 searchItemModel.amount!!
             }
@@ -230,6 +251,11 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
             if (matcher!!.find()) {
                 searchItemModel.itemCd = matcher.group(1)
             }
+        }
+
+        // 전표번호 업데이트
+        orderSlipList.forEach {
+            it.slipNo = slipNo
         }
     }
 
@@ -241,13 +267,80 @@ class SlipInquiryModifyActivity : AppCompatActivity() {
 
         // itemCd 비교
         for (i in slipList.indices) {
-            val modifyItemCd = slipList[i].itemCd
-            val originItemCd = originSlipList[i].itemCd
+            val modifyItem = slipList[i]
+            val originItem = originSlipList[i]
 
-            if (modifyItemCd != originItemCd) {
+            if (modifyItem != originItem) {
                 return true
             }
         }
         return false
+    }
+
+    private fun saveData() {
+        db.deleteSlipData(slipNo)
+        modifyAdapter?.slipList?.forEach {
+            it.slipNo = slipNo
+            db.insertSlipData(it)
+        }
+    }
+
+    private fun deleteData() {
+        isSave = false
+        db.deleteSlipData(slipNo)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (!modifyAdapter?.slipList.isNullOrEmpty() && isSave){
+            saveData()
+        }
+    }
+
+    private fun totalAmount(list: ArrayList<SearchItemModel>): Long {
+        var total: Long = 0
+        list.forEach {
+            total += it.amount ?: 0
+        }
+        return total
+    }
+
+    // 뒤로가기 버튼
+    val callback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            goBack()
+        }
+    }
+
+    private fun goBack() {
+        if (!checkItem(orderSlipList, originSlipList)){
+            db.deleteSlipData(slipNo)
+            finish()
+        } else {
+            // 수정 도중 나갈 경우
+            if (!modifyAdapter?.slipList.isNullOrEmpty()) {
+                PopupNoticeV2(mContext, "기존 수정이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
+                    object : Handler(Looper.getMainLooper()) {
+                        @SuppressLint("NotifyDataSetChanged")
+                        override fun handleMessage(msg: Message) {
+                            when (msg.what) {
+                                Define.EVENT_OK -> {
+                                    saveData()
+                                    finish()
+                                }
+                                Define.EVENT_CANCEL -> {
+                                    SlipInquiryDetailActivity().dataList.clear()
+                                    deleteData()
+                                    finish()
+                                }
+                            }
+                        }
+                    }
+                ).show()
+            } else {
+                deleteData()
+                finish()
+            }
+        }
     }
 }

@@ -6,10 +6,12 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import kr.co.kimberly.wma.adapter.SapListAdapter
 import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.SapModel
@@ -55,6 +57,13 @@ class PopupSAP(mContext: Context, val dataList: ArrayList<SapModel>, private val
                 hideDialog()
             }
         }
+
+        mBinding.btnClose.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                hideDialog()
+            }
+
+        })
     }
 
     fun hideDialog() {

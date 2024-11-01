@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,10 +15,8 @@ import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActPurchaseApprovalBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
-import kr.co.kimberly.wma.network.model.OrderRegModel
 import kr.co.kimberly.wma.network.model.SapModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
-import java.text.DecimalFormat
 
 class PurchaseApprovalActivity: AppCompatActivity() {
     private lateinit var mBinding: ActPurchaseApprovalBinding
@@ -76,7 +73,7 @@ class PurchaseApprovalActivity: AppCompatActivity() {
             it.amount
         }.sum()
 
-        mBinding.tvTotalAmount.text = "${Utils.decimal(totalMoney)}원"
+        mBinding.tvTotalAmount.text = "${Utils.decimalLong(totalMoney)}원"
         mBinding.accountCode.text = "(${sapModel?.sapCustomerCd}) ${sapModel?.sapCustomerNm}"
         mBinding.purchaseAddress.text = "(${sapModel?.arriveCd}) ${sapModel?.arriveNm}"
 

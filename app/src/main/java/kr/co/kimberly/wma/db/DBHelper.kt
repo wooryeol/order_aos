@@ -63,6 +63,7 @@ class DBHelper private constructor(
         // 전표수정
         const val TABLE_SLIP = "SLIP_LIST"
         const val SLIP_ID = "ID"
+        const val SLIP_NUM = "NUM"
         const val SLIP_AMOUNT = "AMOUNT"
         const val SLIP_BOX_QTY = "BOX_QTY"
         const val SLIP_GET_BOX = "GET_BOX"
@@ -135,6 +136,23 @@ class DBHelper private constructor(
                 "$PURCHASE_SUPPLY_PRICE INTEGER, " +
                 "$PURCHASE_VAT INTEGER)"
 
+        val slipItem = "CREATE TABLE $TABLE_SLIP (" +
+                "$SLIP_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "$SLIP_NUM INTEGER, " +
+                "$SLIP_AMOUNT INTEGER, " +
+                "$SLIP_BOX_QTY INTEGER, " +
+                "$SLIP_GET_BOX INTEGER, " +
+                "$SLIP_ITEM_CD TEXT, " +
+                "$SLIP_ITEM_NM TEXT, " +
+                "$SLIP_NET_PRICE INTEGER, " +
+                "$SLIP_SALE_QTY INTEGER, " +
+                "$SLIP_SEQ INTEGER, " +
+                "$SLIP_SUPPLY_PRICE INTEGER, " +
+                "$SLIP_UNIT_QTY INTEGER, " +
+                "$SLIP_VAT INTEGER, " +
+                "$SLIP_VAT_YN TEXT, " +
+                "$SLIP_WH_STOCK INTEGER)"
+
         val searchHistory = "CREATE TABLE $TABLE_SEARCH (" +
                 "$SEARCH_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "$SEARCH_ITEM TEXT)"
@@ -143,6 +161,7 @@ class DBHelper private constructor(
         db.execSQL(orderItem)
         db.execSQL(returnItem)
         db.execSQL(purchaseItem)
+        db.execSQL(slipItem)
         db.execSQL(searchHistory)
     }
 
@@ -150,10 +169,12 @@ class DBHelper private constructor(
         val orderItem = "DROP TABLE IF EXISTS $TABLE_ORDER"
         val returnItem = "DROP TABLE IF EXISTS $TABLE_RETURN"
         val purchaseItem = "DROP TABLE IF EXISTS $TABLE_PURCHASE"
+        val slipItem = "DROP TABLE IF EXISTS $TABLE_SLIP"
         val searchHistory = "DROP TABLE IF EXISTS $TABLE_SEARCH"
         db.execSQL(orderItem)
         db.execSQL(returnItem)
         db.execSQL(purchaseItem)
+        db.execSQL(slipItem)
         db.execSQL(searchHistory)
         onCreate(db)
     }
@@ -194,16 +215,16 @@ class DBHelper private constructor(
             if (cursor.moveToFirst()) {
                 do {
                     val item = SearchItemModel()
-                    item.amount = cursor.getInt(cursor.getColumnIndex(ORDER_AMOUNT))
+                    item.amount = cursor.getLong(cursor.getColumnIndex(ORDER_AMOUNT))
                     item.boxQty = cursor.getInt(cursor.getColumnIndex(ORDER_BOX_QTY))
                     item.getBox = cursor.getInt(cursor.getColumnIndex(ORDER_GET_BOX))
                     item.itemCd = cursor.getString(cursor.getColumnIndex(ORDER_ITEM_CD))
                     item.itemNm = cursor.getString(cursor.getColumnIndex(ORDER_ITEM_NM))
                     item.netPrice = cursor.getInt(cursor.getColumnIndex(ORDER_NET_PRICE))
-                    item.saleQty = cursor.getInt(cursor.getColumnIndex(ORDER_SALE_QTY))
-                    item.supplyPrice = cursor.getInt(cursor.getColumnIndex(ORDER_SUPPLY_PRICE))
+                    item.saleQty = cursor.getLong(cursor.getColumnIndex(ORDER_SALE_QTY))
+                    item.supplyPrice = cursor.getLong(cursor.getColumnIndex(ORDER_SUPPLY_PRICE))
                     item.unitQty = cursor.getInt(cursor.getColumnIndex(ORDER_UNIT_QTY))
-                    item.vat = cursor.getInt(cursor.getColumnIndex(ORDER_VAT))
+                    item.vat = cursor.getLong(cursor.getColumnIndex(ORDER_VAT))
                     items.add(item)
                 } while (cursor.moveToNext())
             }
@@ -234,7 +255,6 @@ class DBHelper private constructor(
 
     fun deleteOrderData() {
         val db = this.writableDatabase
-        Utils.log("111")
         db.delete(TABLE_ORDER, null, null)
         db.close()
     }
@@ -248,16 +268,16 @@ class DBHelper private constructor(
             if (cursor.moveToFirst()) {
                 do {
                     val item = SearchItemModel()
-                    item.amount = cursor.getInt(cursor.getColumnIndex(RETURN_AMOUNT))
+                    item.amount = cursor.getLong(cursor.getColumnIndex(RETURN_AMOUNT))
                     item.boxQty = cursor.getInt(cursor.getColumnIndex(RETURN_BOX_QTY))
                     item.getBox = cursor.getInt(cursor.getColumnIndex(RETURN_GET_BOX))
                     item.itemCd = cursor.getString(cursor.getColumnIndex(RETURN_ITEM_CD))
                     item.itemNm = cursor.getString(cursor.getColumnIndex(RETURN_ITEM_NM))
                     item.netPrice = cursor.getInt(cursor.getColumnIndex(RETURN_NET_PRICE))
-                    item.saleQty = cursor.getInt(cursor.getColumnIndex(RETURN_SALE_QTY))
-                    item.supplyPrice = cursor.getInt(cursor.getColumnIndex(RETURN_SUPPLY_PRICE))
+                    item.saleQty = cursor.getLong(cursor.getColumnIndex(RETURN_SALE_QTY))
+                    item.supplyPrice = cursor.getLong(cursor.getColumnIndex(RETURN_SUPPLY_PRICE))
                     item.unitQty = cursor.getInt(cursor.getColumnIndex(RETURN_UNIT_QTY))
-                    item.vat = cursor.getInt(cursor.getColumnIndex(RETURN_VAT))
+                    item.vat = cursor.getLong(cursor.getColumnIndex(RETURN_VAT))
                     items.add(item)
                 } while (cursor.moveToNext())
             }
@@ -301,15 +321,15 @@ class DBHelper private constructor(
             if (cursor.moveToFirst()) {
                 do {
                     val item = SearchItemModel()
-                    item.amount = cursor.getInt(cursor.getColumnIndex(PURCHASE_AMOUNT))
+                    item.amount = cursor.getLong(cursor.getColumnIndex(PURCHASE_AMOUNT))
                     item.boxQty = cursor.getInt(cursor.getColumnIndex(PURCHASE_BOX_QTY))
                     item.getBox = cursor.getInt(cursor.getColumnIndex(PURCHASE_GET_BOX))
                     item.itemCd = cursor.getString(cursor.getColumnIndex(PURCHASE_ITEM_CD))
                     item.itemNm = cursor.getString(cursor.getColumnIndex(PURCHASE_ITEM_NM))
                     item.orderPrice = cursor.getInt(cursor.getColumnIndex(PURCHASE_ORDER_PRICE))
-                    item.saleQty = cursor.getInt(cursor.getColumnIndex(PURCHASE_SALE_QTY))
-                    item.supplyPrice = cursor.getInt(cursor.getColumnIndex(PURCHASE_SUPPLY_PRICE))
-                    item.vat = cursor.getInt(cursor.getColumnIndex(PURCHASE_VAT))
+                    item.saleQty = cursor.getLong(cursor.getColumnIndex(PURCHASE_SALE_QTY))
+                    item.supplyPrice = cursor.getLong(cursor.getColumnIndex(PURCHASE_SUPPLY_PRICE))
+                    item.vat = cursor.getLong(cursor.getColumnIndex(PURCHASE_VAT))
                     items.add(item)
                 } while (cursor.moveToNext())
             }
@@ -341,6 +361,70 @@ class DBHelper private constructor(
         val db = this.writableDatabase
         db.delete(TABLE_PURCHASE, null, null)
         db.close()
+    }
+
+    val slipList: List<SearchItemModel>
+        @SuppressLint("Recycle", "Range")
+        get() {
+            val items = ArrayList<SearchItemModel>()
+            val db = this.writableDatabase
+            val cursor = db.query(TABLE_SLIP, null, null, null, null, null, null)
+            if (cursor.moveToFirst()) {
+                do {
+                    val item = SearchItemModel()
+                    item.slipNo = cursor.getString(cursor.getColumnIndex(SLIP_NUM))
+                    item.amount = cursor.getLong(cursor.getColumnIndex(SLIP_AMOUNT))
+                    item.boxQty = cursor.getInt(cursor.getColumnIndex(SLIP_BOX_QTY))
+                    item.getBox = cursor.getInt(cursor.getColumnIndex(SLIP_GET_BOX))
+                    item.itemCd = cursor.getString(cursor.getColumnIndex(SLIP_ITEM_CD))
+                    item.itemNm = cursor.getString(cursor.getColumnIndex(SLIP_ITEM_NM))
+                    item.netPrice = cursor.getInt(cursor.getColumnIndex(SLIP_NET_PRICE))
+                    item.saleQty = cursor.getLong(cursor.getColumnIndex(SLIP_SALE_QTY))
+                    item.slipSeq = cursor.getInt(cursor.getColumnIndex(SLIP_SEQ))
+                    item.supplyPrice = cursor.getLong(cursor.getColumnIndex(SLIP_SUPPLY_PRICE))
+                    item.unitQty = cursor.getInt(cursor.getColumnIndex(SLIP_UNIT_QTY))
+                    item.vat = cursor.getLong(cursor.getColumnIndex(SLIP_VAT))
+                    item.vatYn = cursor.getString(cursor.getColumnIndex(SLIP_VAT_YN))
+                    item.whStock = cursor.getInt(cursor.getColumnIndex(SLIP_WH_STOCK))
+                    items.add(item)
+                } while (cursor.moveToNext())
+            }
+            db.close()
+            Utils.log("저장된 전표 데이터 ====> ${Gson().toJson(items)}")
+            return items
+        }
+
+    fun insertSlipData(item: SearchItemModel) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put(SLIP_NUM, item.slipNo)
+            put(SLIP_AMOUNT, item.amount)
+            put(SLIP_BOX_QTY, item.boxQty)
+            put(SLIP_GET_BOX, item.getBox)
+            put(SLIP_ITEM_CD, item.itemCd)
+            put(SLIP_ITEM_NM, item.itemNm)
+            put(SLIP_NET_PRICE, item.netPrice)
+            put(SLIP_SALE_QTY, item.saleQty)
+            put(SLIP_SEQ, item.slipSeq)
+            put(SLIP_SUPPLY_PRICE, item.supplyPrice)
+            put(SLIP_UNIT_QTY, item.unitQty)
+            put(SLIP_VAT, item.vat)
+            put(SLIP_VAT_YN, item.vatYn)
+            put(SLIP_WH_STOCK, item.whStock)
+        }
+
+        db.insert(TABLE_SLIP, null, values)
+        db.close()
+        Utils.log("전표 데이터 저장 성공")
+    }
+
+    fun deleteSlipData(slipNo: String) {
+        val db = this.writableDatabase
+        val whereClause = "$SLIP_NUM = ?"
+        val whereArgs = arrayOf(slipNo)
+        db.delete(TABLE_SLIP, whereClause, whereArgs)
+        db.close()
+        Utils.log("전표 번호 $slipNo 의 데이터 삭제 성공")
     }
 }
 

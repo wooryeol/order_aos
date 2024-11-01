@@ -5,6 +5,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,11 +16,14 @@ import com.google.gson.JsonObject
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SlipInquiryDetailAdapter
 import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActSlipInquiryDetailBinding
+import kr.co.kimberly.wma.db.DBHelper
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
@@ -35,12 +41,18 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
     private lateinit var mActivity: Activity
     private lateinit var mLoginInfo: LoginResponseModel
 
-    private var orderSlipList: ArrayList<SearchItemModel>? = null
-    private var customerCd: String? = null
-    private var customerNm: String? = null
-    private var enableButtonYn: String? = null
-    private var totalAmount: Int? = null
-    private var slipNo: String? = null
+    private lateinit var orderSlipList: ArrayList<SearchItemModel>
+    private lateinit var customerCd: String
+    private lateinit var customerNm: String
+    private lateinit var enableButtonYn: String
+    private var totalAmount: Int = 0
+    private lateinit var slipNo: String
+
+    private val db : DBHelper by lazy {
+        DBHelper.getInstance(applicationContext)
+    }
+
+    val dataList = arrayListOf<SearchItemModel>()
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,10 +64,10 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
         mActivity = this
         mLoginInfo = Utils.getLoginData()!!
 
-        slipNo = intent.getStringExtra("slipNo")
-        customerCd = intent.getStringExtra("customerCd")
-        customerNm = intent.getStringExtra("customerNm")
-        enableButtonYn = intent.getStringExtra("enableButtonYn")
+        slipNo = intent.getStringExtra("slipNo")!!
+        customerCd = intent.getStringExtra("customerCd")!!
+        customerNm = intent.getStringExtra("customerNm")!!
+        enableButtonYn = intent.getStringExtra("enableButtonYn")!!
         totalAmount = intent.getIntExtra("totalAmount", 0)
         orderSlipList = intent.getSerializableExtra("list") as ArrayList<SearchItemModel>
 
@@ -124,17 +136,48 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
         })
     }
     private fun moveToEditPage() {
-        val intent = Intent(mContext, SlipInquiryModifyActivity::class.java).apply {
-            putExtra("slipNo", slipNo)
-            //test
-            //putExtra("slipNo", "20240600015")
-            putExtra("customerCd", customerCd)
-            putExtra("customerNm", customerNm)
-            putExtra("enableButtonYn", enableButtonYn)
-            putExtra("totalAmount", totalAmount)
-            putExtra("orderSlipList", orderSlipList)
+        val data = db.slipList
+
+
+        dataList.clear()
+        data.forEach {
+            if (it.slipNo == slipNo) {
+                dataList.add(it)
+            }
         }
-        startActivity(intent)
+
+        val intent = Intent(mContext, SlipInquiryModifyActivity::class.java)
+        //test
+        //putExtra("slipNo", "20240600015")
+        intent.putExtra("slipNo", slipNo)
+        intent.putExtra("customerCd", customerCd)
+        intent.putExtra("customerNm", customerNm)
+        intent.putExtra("enableButtonYn", enableButtonYn)
+        intent.putExtra("totalAmount", totalAmount)
+
+        if (checkItem(dataList, orderSlipList) && dataList.isNotEmpty()) {
+            val popup = PopupSingleMessage(mContext, "거래처: (${customerCd}) $customerNm", "기존에 수정하던 전표가 남아있습니다.\n저장된 전표로 계속 진행 하시겠습니까?", object : Handler(
+                Looper.getMainLooper()) {
+                override fun handleMessage(msg: Message) {
+                    when (msg.what) {
+                        Define.EVENT_OK -> {
+                            intent.putExtra("orderSlipList", dataList)
+                            startActivity(intent)
+                        }
+                        Define.EVENT_CANCEL -> {
+                            db.deleteSlipData(slipNo)
+                            dataList.clear()
+                            intent.putExtra("orderSlipList", orderSlipList)
+                            startActivity(intent)
+                            }
+                        }
+                    }
+                })
+            popup.show()
+        } else {
+            intent.putExtra("orderSlipList", orderSlipList)
+            startActivity(intent)
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -155,9 +198,9 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun showList() {
-        mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount!!)}원"
+        mBinding.tvTotalAmount.text = "${Utils.decimal(totalAmount)}원"
         val adapter = SlipInquiryDetailAdapter(mContext) { _, _ -> }
-        adapter.dataList = orderSlipList!!
+        adapter.dataList = orderSlipList
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
     }
@@ -213,5 +256,31 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
                 Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
         })
+    }
+
+    private fun checkItem(slipList: ArrayList<SearchItemModel>?, originSlipList: ArrayList<SearchItemModel>): Boolean {
+        // 크기 비교
+        if (slipList?.size != originSlipList.size) {
+            return true
+        }
+
+        // itemCd 비교
+        for (i in slipList.indices) {
+            val modifyItem = slipList[i]
+            val originItem = originSlipList[i]
+
+            if (modifyItem.amount != originItem.amount ||
+                modifyItem.boxQty != originItem.boxQty ||
+                modifyItem.getBox != originItem.getBox ||
+                modifyItem.itemNm != originItem.itemNm ||
+                modifyItem.netPrice != originItem.netPrice ||
+                modifyItem.saleQty != originItem.saleQty ||
+                modifyItem.unitQty != originItem.unitQty ||
+                modifyItem.vatYn != originItem.vatYn ||
+                modifyItem.whStock != originItem.whStock) {
+                return true
+            }
+        }
+        return false
     }
 }

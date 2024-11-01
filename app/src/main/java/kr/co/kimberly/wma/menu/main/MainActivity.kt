@@ -7,8 +7,10 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.MainMenuAdapter
 import kr.co.kimberly.wma.common.Define
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         mActivity = this
 
         mLoginInfo = Utils.getLoginData()
-        Utils.log("mainActivity mLoginInfo =====> $mLoginInfo")
+        Utils.log("mainActivity mLoginInfo =====> ${Gson().toJson(mLoginInfo)}")
 
         // 앱 버전 체크
         if (isVersionCheck) {
@@ -143,6 +145,21 @@ class MainActivity : AppCompatActivity() {
 
         if (isVersionCheck) {
             appVersionCheck()
+        }
+    }
+
+    private var clickTime: Long = 0
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        val current = System.currentTimeMillis()
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            if(current - clickTime >= 2000) {
+                PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null).show()
+            } else {
+                finish()
+            }
+        } else {
+            super.onBackPressed()
         }
     }
 }

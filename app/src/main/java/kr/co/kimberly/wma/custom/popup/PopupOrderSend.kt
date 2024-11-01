@@ -1,6 +1,7 @@
 package kr.co.kimberly.wma.custom.popup
 
 import android.app.Dialog
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -11,12 +12,12 @@ import androidx.appcompat.app.AppCompatActivity
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupOrderSendBinding
+import kr.co.kimberly.wma.network.model.BalanceModel
 
-class PopupOrderSend(private val mContext: AppCompatActivity, handler: Handler): Dialog(mContext) {
+class PopupOrderSend(mContext: Context, item: BalanceModel, handler: Handler): Dialog(mContext) {
 
     private lateinit var mBinding: PopupOrderSendBinding
     private val mHandler = handler
-    private var context = mContext
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

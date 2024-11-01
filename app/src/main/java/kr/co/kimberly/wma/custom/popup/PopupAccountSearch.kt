@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
@@ -88,6 +89,7 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
                 mBinding.noSearch.visibility = View.GONE
                 mBinding.recyclerview.visibility = View.VISIBLE
                 adapter?.notifyDataSetChanged()
+                GlobalApplication.showKeyboard(context, mBinding.etAccount)
             }
         })
 
@@ -119,14 +121,6 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
             dismiss()
         }
     }
-    fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-            val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager?
-            imm!!.hideSoftInputFromWindow(mBinding.btLogin.windowToken, 0) //hide keyboard
-            return true
-        }
-        return false
-    }
 
     private fun searchCustomer() {
         val loading = PopupLoading(context)
@@ -157,7 +151,7 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
                             mBinding.noSearch.visibility = View.GONE
                         }
                     } else {
-                        Utils.popupNotice(context, item?.returnMsg!!)
+                        Utils.popupNotice(context, item?.returnMsg!!, mBinding.etAccount)
                     }
                 } else {
                     Utils.log("${response.code()} ====> ${response.message()}")
