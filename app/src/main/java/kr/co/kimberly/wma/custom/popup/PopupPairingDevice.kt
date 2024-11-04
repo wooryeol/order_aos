@@ -1,9 +1,7 @@
 package kr.co.kimberly.wma.custom.popup
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Dialog
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -12,16 +10,13 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
-import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
-import android.widget.Toast
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.PopupPairingScannerBinding
-import kr.co.kimberly.wma.databinding.PopupParingPrinterBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 
-class PopupPairingDevice(private val mContext: Context, private val mActivity: Activity) {
-
+class PopupPairingDevice(private val mContext: Context, private val listener: SettingActivity.PopupListener) {
     private var scannerBinding: PopupPairingScannerBinding? = null
     private val mDialog = Dialog(mContext)
     private val bluetoothReceiver = object : BroadcastReceiver() {
@@ -38,6 +33,8 @@ class PopupPairingDevice(private val mContext: Context, private val mActivity: A
                     intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                 }
                 if (paired?.bondState == BluetoothDevice.BOND_BONDED) {
+                    Utils.toast(mContext, "기기가 연결되었습니다.")
+                    listener.popupClosed()
                     mDialog.dismiss()
                 }
             }

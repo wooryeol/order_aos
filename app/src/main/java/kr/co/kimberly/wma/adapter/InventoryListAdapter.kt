@@ -6,19 +6,9 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.flow.combine
-import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Utils
-import kr.co.kimberly.wma.custom.popup.PopupPairingDevice
-import kr.co.kimberly.wma.databinding.CellCollectBinding
 import kr.co.kimberly.wma.databinding.CellInventoryBinding
-import kr.co.kimberly.wma.databinding.CellPairedDevicesBinding
-import kr.co.kimberly.wma.menu.setting.SettingActivity
-import kr.co.kimberly.wma.network.model.AccountModel
-import kr.co.kimberly.wma.network.model.DevicesModel
-import kr.co.kimberly.wma.network.model.InventoryModel
 import kr.co.kimberly.wma.network.model.WarehouseStockModel
-import java.util.ArrayList
 
 class InventoryListAdapter(context: Context, activity: Activity): RecyclerView.Adapter<InventoryListAdapter.ViewHolder>() {
 

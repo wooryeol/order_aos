@@ -14,7 +14,6 @@ import kr.co.kimberly.wma.databinding.PopupNoticeV2Binding
 
 class PopupNoticeV2(mContext: Context, private val msg:String, val mHandler: Handler): Dialog(mContext) {
     private lateinit var mBinding: PopupNoticeV2Binding
-    private val context = mContext
     var itemClickListener: ItemClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

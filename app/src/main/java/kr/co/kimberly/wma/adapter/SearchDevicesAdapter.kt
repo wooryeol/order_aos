@@ -1,47 +1,44 @@
 package kr.co.kimberly.wma.adapter
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupPairingDevice
 import kr.co.kimberly.wma.databinding.CellSearchDevicesBinding
-import kr.co.kimberly.wma.network.model.DevicesModel
-import java.util.ArrayList
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 
-class SearchDevicesAdapter(context: Context): RecyclerView.Adapter<SearchDevicesAdapter.ViewHolder>() {
-    var dataList = ArrayList<DevicesModel>()
+class SearchDevicesAdapter(context: Context, private val listener: SettingActivity.PopupListener): RecyclerView.Adapter<SearchDevicesAdapter.ViewHolder>() {
+    var dataList = ArrayList<BluetoothDevice>()
     var mContext = context
     var itemClickListener: ItemClickListener? = null
 
     inner class ViewHolder(val binding: CellSearchDevicesBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("NotifyDataSetChanged", "MissingPermission")
-        fun bind(itemModel: DevicesModel) {
-            Utils.log("itemModel ====> $itemModel")
+        fun bind(itemModel: BluetoothDevice) {
+            binding.deviceName.text = itemModel.name
+            binding.deviceAddress.text = itemModel.address
 
-            binding.deviceName.text = itemModel.deviceName
-            binding.deviceAddress.text = itemModel.deviceAddress
-
-            /*if (SettingActivity.isRadioChecked == 1) {
+            if (itemModel.name.startsWith(Define.SCANNER_NAME)) {
                 binding.deviceIcon.setImageResource(R.drawable.adf_scanner)
             } else {
                 binding.deviceIcon.setImageResource(R.drawable.print)
-            }*/
+            }
 
-           /* val paringDialog = PopupPairingDevice(mContext, mActivity)
+
             itemView.setOnClickListener(object: OnSingleClickListener(){
                 override fun onSingleClick(v: View) {
-                    if (SettingActivity.isRadioChecked == 1) {
-                        paringDialog.show(itemModel)
-                        itemClickListener?.onItemClick()
-                    } else {
-                        itemModel.createBond()
-                        SharedData.setSharedData(mContext, SharedData.PRINTER_NAME, itemModel.name)
-                        SharedData.setSharedData(mContext, SharedData.PRINTER_ADDR, itemModel.address)
-                    }
+                    val paringDialog = PopupPairingDevice(mContext, listener)
+                    paringDialog.show(itemModel)
+                    itemClickListener?.onItemClick()
                 }
-            })*/
+            })
         }
     }
 

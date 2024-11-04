@@ -15,6 +15,10 @@ object Define {
     const val EVENT_OK = 10000
     const val EVENT_CANCEL = 10001
     const val REQUEST_CODE = 1
+    // 블루투스
+    const val SCANNER_NAME = "KDC"
+    const val PRINTER_NAME = "Alpha"
+    const val EVENT_RETRY = 888
 
     // 테스트
     const val IS_TEST = true
@@ -62,4 +66,5 @@ object Define {
     const val CASH = "CC"
     const val NOTE = "BB"
     const val BOTH = "CB"
+
 }

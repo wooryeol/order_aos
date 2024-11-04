@@ -16,10 +16,10 @@ import android.widget.Toast
 import com.google.gson.Gson
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import kr.co.kimberly.wma.network.model.DevicesModel
+import kr.co.kimberly.wma.network.model.DeviceModel
 
 @SuppressLint("MissingPermission")
-class Bluetooth(context: Context, private val searchedList: (ArrayList<DevicesModel>) -> Unit) {
+class Bluetooth(context: Context, private val searchedList: (ArrayList<DeviceModel>) -> Unit) {
     interface BluetoothListener {
         fun hideLoadingImage()
         fun showLoadingImage()
@@ -32,7 +32,11 @@ class Bluetooth(context: Context, private val searchedList: (ArrayList<DevicesMo
     private val bluetoothLeScanner: BluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
      var bluetoothListener: BluetoothListener? = null
 
-    private val scanList = ArrayList<DevicesModel>()
+    private val scanSettings: ScanSettings = ScanSettings.Builder()
+        .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
+        .build()
+
+    private val scanList = ArrayList<DeviceModel>()
 
     private val scanCallback: ScanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -42,15 +46,13 @@ class Bluetooth(context: Context, private val searchedList: (ArrayList<DevicesMo
                 if(result.scanRecord?.serviceUuids != null) {
                     uuid = result.scanRecord!!.serviceUuids.toString()
                 }
-                val scanItem = DevicesModel(
+                val scanItem = DeviceModel(
                     result.device.name?: "null",
-                    uuid,
-                    result.device.address?: "null",
-                    false
+                    result.device.address?: "null"
                 )
                 Utils.log("scanItem ====> ${scanItem.deviceName}")
 
-                if (scanItem.deviceName.startsWith("Alpha") || scanItem.deviceName.contains("KDC")){
+                if (scanItem.deviceName.startsWith(Define.PRINTER_NAME) || scanItem.deviceName.contains(Define.SCANNER_NAME)){
                     if(!scanList.contains(scanItem)) {
 
                         scanList.add(scanItem)
@@ -101,10 +103,6 @@ class Bluetooth(context: Context, private val searchedList: (ArrayList<DevicesMo
     }
 
     fun startScan(){
-        val scanSettings: ScanSettings = ScanSettings.Builder()
-            .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
-            .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
-            .build()
         bluetoothLeScanner.startScan(null, scanSettings, scanCallback)
         bluetoothListener?.showLoadingImage()
     }
@@ -115,7 +113,7 @@ class Bluetooth(context: Context, private val searchedList: (ArrayList<DevicesMo
         Utils.log("scanList ====> ${Gson().toJson(scanList)}")
     }
 
-    fun connectDevice(deviceData: DevicesModel){
+    fun connectDevice(deviceData: DeviceModel){
         bluetoothAdapter
             .getRemoteDevice(deviceData.deviceAddress)
             .connectGatt(mContext, false, gattCallback)
