@@ -2,6 +2,7 @@ package kr.co.kimberly.wma.menu.`return`
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,22 +11,30 @@ import android.os.Looper
 import android.os.Message
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.RegAdapter
+import kr.co.kimberly.wma.common.BarcodeViewModel
+import kr.co.kimberly.wma.common.ConnectThread
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.databinding.ActReturnRegBinding
 import kr.co.kimberly.wma.db.DBHelper
 import kr.co.kimberly.wma.menu.printer.PrinterOptionActivity
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
@@ -35,8 +44,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Response
+import java.util.UUID
 
-
+@SuppressLint("MissingPermission", "SetTextI18n")
 class ReturnRegActivity : AppCompatActivity() {
     private lateinit var mBinding: ActReturnRegBinding
     private lateinit var mContext: Context
@@ -46,13 +56,13 @@ class ReturnRegActivity : AppCompatActivity() {
     private var accountName = ""
     private var totalAmount: Long = 0
     private var returnAdapter: RegAdapter? = null
+    private var thread : ConnectThread? = null
 
     private val db : DBHelper by lazy {
         DBHelper.getInstance(applicationContext)
     }
     private var isSave = true // 액티비티가 종료 될 때 이 값을 통해 저장 여부 선택
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActReturnRegBinding.inflate(layoutInflater)
@@ -95,6 +105,112 @@ class ReturnRegActivity : AppCompatActivity() {
                 }
             }
         })
+
+        mBinding.header.scanBtn.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
+                // 사용 여부 확인
+                if (!isScannerConnected) {
+                    val popupNotice = PopupNotice(mContext, mContext.getString(R.string.msg_scan_connect_error))
+                    popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+                        override fun onOkClick() {
+                            val intent = Intent(mContext, SettingActivity::class.java)
+                            startActivity(intent)
+                        }
+                    }
+                    popupNotice.show()
+                    return
+                }
+                if (thread != null) {
+                    thread?.cancel()
+                    thread = null
+                    mBinding.header.scanBtn.setColorFilter(getColor(R.color.trans))
+                } else {
+                    checkScanner()
+                }
+            }
+        })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        returnAdapter?.cleanup()
+        thread?.cancel()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        thread?.cancel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkScanner()
+    }
+    private fun checkScanner(){
+        val isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
+        if (isScannerConnected) {
+            mBinding.header.scanBtn.setColorFilter(getColor(R.color.black))
+            val scanner = SharedData.getSharedData(mContext, SharedData.SCANNER_ADDR, "")
+            if (scanner.isNotEmpty()){
+                Utils.toast(mContext, "기기를 연결 중입니다.")
+                connectDevice(scanner)
+            }
+        }
+    }
+
+    // 디바이스에 연결
+    private fun connectDevice(deviceAddress: String) {
+        val bluetoothAdapter: BluetoothAdapter  = BluetoothAdapter.getDefaultAdapter()
+        /**
+         * 기기의 UUID를 가져와야 할 떄 사용하는 코드
+         **/
+        /*val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(scanner)
+
+        // UUID 요청
+        device.fetchUuidsWithSdp()
+
+        // BroadcastReceiver 설정
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val action = intent.action
+                if (BluetoothDevice.ACTION_UUID == action) {
+                    val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val uuids: Array<out Parcelable>? = intent.getParcelableArrayExtra(BluetoothDevice.EXTRA_UUID)
+
+                    // UUID 목록을 로그에 출력하거나 사용
+                    uuids?.forEach { uuid ->
+                        Utils.log("Device UUID: ${uuid}")
+                    }
+                }
+            }
+        }
+
+        // IntentFilter 설정 및 리시버 등록
+        val filter = IntentFilter(BluetoothDevice.ACTION_UUID)
+        registerReceiver(receiver, filter)*/
+
+        bluetoothAdapter.let { adapter ->
+            // 기기 검색을 수행중이라면 취소
+            if (adapter.isDiscovering) {
+                adapter.cancelDiscovery()
+            }
+
+            // 서버의 역할을 수행 할 Device 획득
+            val device = adapter.getRemoteDevice(deviceAddress)
+            // UUID 선언
+            val uuid = UUID.fromString(Define.UUID)
+            try {
+                GlobalScope.launch(Dispatchers.IO) {
+                    thread = ConnectThread(uuid, device, mContext)
+                    thread?.run()
+                }
+                Utils.toast(mContext,"${device.name}과 연결되었습니다.")
+            } catch (e: Exception) { // 연결에 실패할 경우 호출됨
+                Utils.log("스캐너의 전원이 꺼져 있습니다. 기기를 확인해주세요.")
+                return
+            }
+        }
     }
 
     // 어댑터 세팅
@@ -106,7 +222,7 @@ class ReturnRegActivity : AppCompatActivity() {
             arrayListOf()
         }
 
-        returnAdapter = RegAdapter(mContext, mActivity, list) { items, name ->
+        returnAdapter = RegAdapter(mContext, list) { items, name ->
             var totalMoney: Long = 0
 
             items.map {

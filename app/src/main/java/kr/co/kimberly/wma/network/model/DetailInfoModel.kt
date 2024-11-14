@@ -26,7 +26,6 @@ data class DetailInfoModel (
     val registerImgYn: String? = null, // 이미지등록여부
     val imgUrl: String? = null, // 이미지URL
     val itemSeq: Int? = null, // 품목 순번
-    val itmeCd: Int? = null, // 품목 코드
     val saleQty: Int? = null, // 판매 수량(EA)
     val netPrice: Int? = null, // 단가
     val supplyPrice: Int? = null, // 공급가

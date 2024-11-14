@@ -5,6 +5,7 @@ import java.io.Serializable
 data class SlipPrintModel (
     val moneySlipNo: String = "", // 수금전표 번호
     val customerNm: String = "", // 거래처명
+    val customerCd: String = "", // 거래처명
     val collectionDate: String = "", // 수금일자
     val collectionType: String = "", // 수금방법
     val cashAmount: Int = 0, // 현금수금액

@@ -73,7 +73,7 @@ class PurchaseApprovalActivity: AppCompatActivity() {
             it.amount
         }.sum()
 
-        mBinding.tvTotalAmount.text = "${Utils.decimalLong(totalMoney)}원"
+        mBinding.tvTotalAmount.text = "${Utils.decimal(totalMoney)}원"
         mBinding.accountCode.text = "(${sapModel?.sapCustomerCd}) ${sapModel?.sapCustomerNm}"
         mBinding.purchaseAddress.text = "(${sapModel?.arriveCd}) ${sapModel?.arriveNm}"
 

@@ -56,8 +56,11 @@ class MainActivity : AppCompatActivity() {
         list.add(MainMenuModel(R.drawable.menu04, getString(R.string.menu04), Define.MENU04))
         list.add(MainMenuModel(R.drawable.menu05, getString(R.string.menu05), Define.MENU05))
         list.add(MainMenuModel(R.drawable.menu06, getString(R.string.menu06), Define.MENU06))
-        list.add(MainMenuModel(R.drawable.menu07, getString(R.string.menu07), Define.MENU07))
-        list.add(MainMenuModel(R.drawable.menu08, getString(R.string.menu08), Define.MENU08))
+        //list.add(MainMenuModel(R.drawable.menu07, getString(R.string.menu07), Define.MENU07))
+        // 로그인 시 authorityBuy 값이 Y일 경우에면 구매요청 보이도록
+        if (mLoginInfo?.authorityBuy == "Y"){
+            list.add(MainMenuModel(R.drawable.menu08, getString(R.string.menu08), Define.MENU08))
+        }
         list.add(MainMenuModel(R.drawable.menu09, getString(R.string.menu09), Define.MENU09))
 
         val adapter = MainMenuAdapter(mContext, mActivity)

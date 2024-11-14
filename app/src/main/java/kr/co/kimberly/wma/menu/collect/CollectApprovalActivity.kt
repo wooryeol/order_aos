@@ -64,7 +64,7 @@ class CollectApprovalActivity : AppCompatActivity() {
         // 인쇄
         mBinding.printBtn.setOnClickListener {
             if (mBinding.printQuantity.text.isNotEmpty()) {
-                val dlg = PopupPrintDone(this, mActivity)
+                val dlg = PopupPrintDone(this)
                 dlg.show()
             } else {
                 Utils.popupNotice(mContext, "인쇄 수량을 적어주세요.")

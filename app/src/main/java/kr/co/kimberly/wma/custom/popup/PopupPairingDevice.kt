@@ -32,10 +32,17 @@ class PopupPairingDevice(private val mContext: Context, private val listener: Se
                 } else {
                     intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                 }
-                if (paired?.bondState == BluetoothDevice.BOND_BONDED) {
-                    Utils.toast(mContext, "기기가 연결되었습니다.")
-                    listener.popupClosed()
-                    mDialog.dismiss()
+                when (paired?.bondState) {
+                    BluetoothDevice.BOND_BONDED -> {
+                        Utils.toast(mContext, "기기가 연결되었습니다.")
+                        listener.popupClosed()
+                        mDialog.dismiss()
+                    }
+
+                    BluetoothDevice.BOND_NONE -> {
+                        Utils.toast(mContext, "기기 연결에 실패했습니다. 다시 시도해 주세요.")
+                        mDialog.dismiss()
+                    }
                 }
             }
         }

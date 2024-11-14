@@ -467,7 +467,7 @@
                             android:layout_marginEnd="12dp"
                             tools:ignore="SpUsage" />
 
-                        <EditText
+                        <kr.co.kimberly.wma.custom.DateFormat
                             android:singleLine="true"
                             android:id="@+id/expireDateText"
                             android:layout_width="0dp"
@@ -477,7 +477,7 @@
                             android:background="@drawable/et_round_c9cbd0"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
-                            android:inputType="date"
+                            android:inputType="number"
                             tools:ignore="Autofill,SpUsage,TextFields" />
 
                     </LinearLayout>

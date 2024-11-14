@@ -2,7 +2,10 @@ package kr.co.kimberly.wma.adapter
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -10,11 +13,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.content.ContextCompat.RECEIVER_EXPORTED
+import androidx.core.content.ContextCompat.registerReceiver
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.LifecycleOwner
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.common.BarcodeViewModel
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
@@ -28,6 +36,7 @@ import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
 import kr.co.kimberly.wma.db.DBHelper
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
@@ -36,11 +45,11 @@ import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
 import retrofit2.Call
 import retrofit2.Response
+import kotlin.Int.Companion.MAX_VALUE
 import kotlin.math.ceil
 
-class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchItemModel>, private val updateData: ((ArrayList<SearchItemModel>, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private val updateData: ((ArrayList<SearchItemModel>, String) -> Unit)): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var context = mContext
-    var activity = mActivity
     var dataList = list
     var selectedItem: SearchItemModel? = null // 선택된 제품
     var historyList: List<ProductPriceHistoryModel>? = null // 제품 단가 이력 리스트
@@ -49,7 +58,25 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
     var popupResultNothing : PopupNotice? = null // 조회 내역 없을 때
     var onItemSelect: ((SearchItemModel) -> Unit)? = null // 제품 수정 시
     var onItemDelete: ((SearchItemModel) -> Unit)? = null // 제품 삭제 시
+    var onItemScan: ((String) -> Unit)? = null // 제품 스캔 시
     var customerCd: String ? = null
+
+    private var barcodeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            when (val barcode = intent?.getStringExtra("data")) {
+                null -> {
+                    // 데이터가 null일 때 아무것도 하지 않음
+                    Utils.popupNotice(context, "바코드를 다시 스캔해주세요")
+                }
+                else -> {
+                    if (barcode.isNotEmpty()) {
+                        Utils.log("adapter barcode data ====> $barcode")
+                        onItemScan?.invoke(barcode)
+                    }
+                }
+            }
+        }
+    }
 
     var accountName : String? = null
     private lateinit var mLoginInfo: LoginResponseModel // 로그인 정보
@@ -136,13 +163,13 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
             binding.tvBox.text = Utils.decimal(item.boxQty!!)
             binding.tvEach.text = Utils.decimal(item.unitQty!!)
             binding.tvPrice.text = "${Utils.decimal(item.netPrice!!)}원"
-            binding.tvTotal.text = Utils.decimalLong(item.saleQty!!)
-            binding.tvTotalAmount.text = "${Utils.decimalLong(item.amount!!)}원"
+            binding.tvTotal.text = Utils.decimal(item.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimal(item.amount!!)}원"
         }
     }
 
     inner class HeaderViewHolder(val binding: HeaderRegBinding) : RecyclerView.ViewHolder(binding.root) {
-        @SuppressLint("SetTextI18n")
+        @SuppressLint("SetTextI18n", "WrongConstant")
         fun bind() {
             if (accountName?.isNotEmpty() == true) {
                 binding.accountName.text = accountName
@@ -217,7 +244,7 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                             Utils.popupNotice(v.context, "제품명을 입력해주세요")
                         } else {
                             // 아이템 리스트 검색
-                            searchItem(binding.etProductName.text.toString(), binding.root.context)
+                            searchItem(binding.etProductName.text.toString(), Define.SEARCH)
                             GlobalApplication.hideKeyboard(context, v)
                         }
                     }
@@ -299,10 +326,15 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                             val boxQty = Utils.getIntValue(binding.etBox.text.toString())
                             val unitQty = Utils.getIntValue(binding.etEach.text.toString())
                             val netPrice = Utils.getIntValue(binding.etPrice.text.toString())
-                            val saleQty = (selectedItem?.getBox!! * boxQty).toLong() + unitQty.toLong()
-                            val amount = saleQty * netPrice.toLong()
+                            val saleQty = (selectedItem?.getBox!! * boxQty) + unitQty
+                            val amount = if ((saleQty.toLong() * netPrice.toLong()) > MAX_VALUE.toLong()) {
+                                Utils.popupNotice(context, "입력하신 값이 너무 큽니다.")
+                                return
+                            } else {
+                                saleQty * netPrice
+                            }
                             val supplyPrice = if (selectedItem?.vatYn == "01") {
-                                ceil(amount/1.1).toLong()
+                                ceil(amount/1.1).toInt()
                             } else {
                                 amount
                             }
@@ -310,39 +342,49 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
 
                             if (netPrice == 0) {
                                 Utils.popupNotice(context, "단가에는 0이 들어갈 수 없습니다.")
-                            } else {
-                                if (boxQty == 0 && unitQty == 0) {
-                                    Utils.popupNotice(context, "박스 혹은 낱개의 수량을 확인해주세요")
-                                } else {
-                                    val model = SearchItemModel(
-                                        itemNm = itemName,
-                                        itemCd = itemCd!!,
-                                        netPrice = netPrice,
-                                        getBox = selectedItem?.getBox!!,
-                                        boxQty = boxQty,
-                                        unitQty = unitQty,
-                                        saleQty = saleQty,
-                                        supplyPrice = supplyPrice,
-                                        vat = vat,
-                                        vatYn = selectedItem?.vatYn,
-                                        amount = amount
-                                    )
-
-                                    Utils.log("added item =====> ${Gson().toJson(model)}")
-                                    addItem(model, accountName!!)
-
-                                    binding.etProductName.text = null
-                                    binding.etProductName.visibility = View.VISIBLE
-                                    binding.tvProductName.text = null
-                                    binding.tvProductName.visibility = View.GONE
-                                    binding.searchResult.text = v.context.getString(R.string.searchResult)
-                                    binding.etBox.setText(v.context.getString(R.string.zero))
-                                    binding.etEach.setText(v.context.getString(R.string.zero))
-                                    binding.etPrice.setText(v.context.getString(R.string.zero))
-
-                                    GlobalApplication.hideKeyboard(context, binding.root)
-                                }
+                                return
                             }
+
+                            if (boxQty == 0 && unitQty == 0) {
+                                Utils.popupNotice(context, "박스 혹은 낱개의 수량을 확인해주세요")
+                                return
+                            }
+
+                            /*val doubleText = amount.toDouble()
+                            Utils.log("doubleText ====> $doubleText")
+                            if (doubleText > MAX_VALUE || doubleText < Int.MIN_VALUE) {
+                                Utils.popupNotice(context, "입력하신 값이 너무 큽니다.")
+                                return
+                            }*/
+
+                            val model = SearchItemModel(
+                                itemNm = itemName,
+                                itemCd = itemCd!!,
+                                netPrice = netPrice,
+                                getBox = selectedItem?.getBox!!,
+                                boxQty = boxQty,
+                                unitQty = unitQty,
+                                saleQty = saleQty,
+                                supplyPrice = supplyPrice,
+                                vat = vat,
+                                vatYn = selectedItem?.vatYn,
+                                amount = amount
+                            )
+
+                            Utils.log("added item =====> ${Gson().toJson(model)}")
+                            addItem(model, accountName!!)
+
+                            binding.etProductName.text = null
+                            binding.etProductName.visibility = View.VISIBLE
+                            binding.tvProductName.text = null
+                            binding.tvProductName.visibility = View.GONE
+                            binding.searchResult.text = v.context.getString(R.string.searchResult)
+                            binding.etBox.setText(v.context.getString(R.string.zero))
+                            binding.etEach.setText(v.context.getString(R.string.zero))
+                            binding.etPrice.setText(v.context.getString(R.string.zero))
+
+                            GlobalApplication.hideKeyboard(context, binding.root)
+
                         } catch (e: Exception) {
                             Utils.log("error >>> $e")
                             Utils.popupNotice(v.context, "올바른 값을 입력해주세요")
@@ -382,6 +424,18 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                     GlobalApplication.showKeyboard(context, binding.etProductName)
                 }
             })
+
+            // 아이템 스캔
+            onItemScan = {
+                if (binding.accountName.text.isNullOrEmpty()) {
+                    Utils.popupNotice(context, "거래처를 먼저 검색해주세요")
+                } else {
+                    searchItem(it, Define.BARCODE)
+                }
+            }
+
+            val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+            context.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
         }
 
         // 단가 정보 조회
@@ -423,11 +477,10 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
         }
 
         // 검색 아이템 리스트 조회
-        fun searchItem(searchCondition: String, context: Context) {
+        fun searchItem(searchCondition: String, searchType: String) {
             val loading = PopupLoading(context)
             loading.show()
             val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-            val searchType = Define.SEARCH
             val orderYn = Define.PURCHASE_NO
 
             val call = service.item(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, customerCd!!, searchType, orderYn, searchCondition)
@@ -476,10 +529,18 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
                                     } else {
                                         dataList.forEach {item ->
                                             if (item.itemCd == it.itemCd) {
-                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.", binding.etProductName)
-                                                binding.etProductName.setText("")
-                                                binding.btProductNameEmpty.visibility = View.GONE
-                                                binding.etProductName.hint = context.getString(R.string.productNameHint)
+                                                val popupNotice = PopupNotice(context, context.getString(R.string.msg_same_product))
+                                                popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+                                                    override fun onOkClick() {
+                                                        binding.etProductName.setText("")
+                                                        binding.btProductNameEmpty.visibility = View.GONE
+                                                        binding.etProductName.hint = context.getString(R.string.productNameHint)
+                                                        binding.tvProductName.visibility = View.GONE
+                                                        binding.etProductName.visibility = View.VISIBLE
+                                                        binding.searchResult.text = context.getString(R.string.searchResult)
+                                                    }
+                                                }
+                                                popupNotice.show()
                                             } else {
                                                 binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
                                                 binding.etProductName.visibility = View.GONE
@@ -552,5 +613,9 @@ class RegAdapter(mContext: Context, mActivity: Activity, list: ArrayList<SearchI
     fun clear(itemName: String) {
         dataList.clear()
         updateData(dataList, itemName)
+    }
+
+    fun cleanup() {
+        context.unregisterReceiver(barcodeReceiver)
     }
 }

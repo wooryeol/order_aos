@@ -166,7 +166,7 @@ class SlipInquiryActivity : AppCompatActivity() {
     }
     private fun setUi(){
         mBinding.header.headerTitle.text = getString(R.string.menu04)
-        mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
+        mBinding.header.scanBtn.visibility = View.GONE
         mBinding.radioOrder.isChecked = true
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {

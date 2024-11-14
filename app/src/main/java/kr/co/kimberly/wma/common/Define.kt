@@ -15,32 +15,31 @@ object Define {
     const val EVENT_OK = 10000
     const val EVENT_CANCEL = 10001
     const val REQUEST_CODE = 1
+
     // 블루투스
     const val SCANNER_NAME = "KDC"
     const val PRINTER_NAME = "Alpha"
     const val EVENT_RETRY = 888
 
     // 테스트
-    const val IS_TEST = true
+    const val IS_TEST = false
 
     // provider
     const val fileProvider = "kr.co.kimberly.wma.fileprovider"
-
-    // 권한
-    const val REQUEST_ENABLE_BT = 100
 
     // 날짜
     const val YEAR = "year"
     const val MONTH = "month"
     const val DAY = "day"
     const val TODAY = "today"
+
     // 주소
     private const val DEV_URL = "https://192.168.110.42" /*개발*/
     private const val PRO_URL = "https://m2.ykwma.co.kr" /*운영*/
 
     const val URL = PRO_URL
 
-    // 블루투스 유형
+    // 품목 검색 유형
     const val SEARCH = "T"
     const val BARCODE = "B"
 
@@ -67,4 +66,11 @@ object Define {
     const val NOTE = "BB"
     const val BOTH = "CB"
 
+    // 스캐너
+    const val UUID = "00001101-0000-1000-8000-00805f9b34fb"
+    const val PRINTER_UUID = "00000000-deca-fade-deca-deafdecacaff"
+
+    // 프린트 유형
+    const val TYPE_MENU = "M"
+    const val TYPE_COMBINE = "U"
 }

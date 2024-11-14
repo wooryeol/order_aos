@@ -31,4 +31,8 @@ data class DataModel<T>(
     val customerStdAddress: String? = null, // 거래처 기본 주소
     val customerDtlAddress: String? = null, // 거래처 상세 주소
     val telNo: String? = null, // 거래처 전화번호
+    val itemInfo: List<SearchItemModel>? = null, // 출력 데이터
+    val balanceAmount: Int? = null, // 전일미수금
+    val outcomeAmount: Int? = null, // 금일매출액
+    val totalBalanceAmount: Int? = null, // 총외상잔고
 ) : Serializable

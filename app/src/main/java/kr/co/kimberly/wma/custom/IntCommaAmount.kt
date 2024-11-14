@@ -14,7 +14,7 @@ import kr.co.kimberly.wma.common.Utils
 import java.text.DecimalFormat
 
 @SuppressLint("ClickableViewAccessibility")
-class IntComma(context: Context, attrs: AttributeSet?) : AppCompatEditText(context, attrs) {
+class IntCommaAmount(context: Context, attrs: AttributeSet?) : AppCompatEditText(context, attrs) {
 
     private var inputText = ""
 
@@ -46,11 +46,11 @@ class IntComma(context: Context, attrs: AttributeSet?) : AppCompatEditText(conte
                     val decimalFormat = DecimalFormat("#,###")
 
                     // Int 범위 확인
-                    if (doubleText > Int.MAX_VALUE || doubleText < Int.MIN_VALUE) {
+                    if (doubleText > 1000000 || doubleText < Int.MIN_VALUE) {
                         Utils.popupNotice(context,"입력하신 숫자가 너무 큽니다.\n" +
-                                "${Utils.decimal(Int.MAX_VALUE)}보다 작은 숫자를 입력해주세요", this@IntComma)
+                                "1,000,000보다 작은 숫자를 입력해주세요", this@IntCommaAmount)
 
-                        inputText = Utils.decimal(Int.MAX_VALUE)
+                        inputText ="1,000,000"
                         setText(inputText)
                         setSelection(inputText.length)
 

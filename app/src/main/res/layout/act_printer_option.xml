@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -55,7 +56,7 @@
             android:textSize="14dp"
             android:textColor="@color/color_7E828B" />
 
-        <EditText
+        <kr.co.kimberly.wma.custom.IntComma
             android:id="@+id/printQuantity"
             android:singleLine="true"
             android:layout_width="0dp"
@@ -66,11 +67,13 @@
             android:paddingVertical="10dp"
             android:paddingHorizontal="12dp"
             android:inputType="number"
-            android:gravity="end" />
+            android:gravity="end"
+            tools:ignore="SpUsage" />
 
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/printType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
@@ -86,11 +89,12 @@
             android:textColor="@color/color_7E828B" />
 
         <RadioGroup
+            android:id="@+id/radioGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <RadioButton
-                android:id="@+id/radioScanner01"
+                android:id="@+id/radioMenu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="20dp"
@@ -99,7 +103,7 @@
                 android:theme="@style/CustomRadioButton"/>
 
             <RadioButton
-                android:id="@+id/radioScanner"
+                android:id="@+id/radioCombine"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/printerIntegratedOption"
@@ -118,6 +122,20 @@
         android:textSize="14dp"
         android:textStyle="bold"
         android:textColor="@drawable/txt_1d6de5_white"
-        android:background="@drawable/bt_round_border_1d6de5" />
+        android:background="@drawable/bt_round_border_1d6de5"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/unableBtn"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginHorizontal="16dp"
+        android:text="@string/print"
+        android:textSize="14dp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:background="@drawable/bt_round_c9cbd0"
+        tools:ignore="SpUsage" />
 
 </LinearLayout>

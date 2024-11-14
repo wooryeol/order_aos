@@ -52,6 +52,8 @@ class LedgerActivity : AppCompatActivity() {
 
         // 헤더 설정
         mBinding.header.headerTitle.text = getString(R.string.menu05)
+        mBinding.header.scanBtn.visibility = View.GONE
+
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 finish()

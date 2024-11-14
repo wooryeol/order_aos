@@ -20,7 +20,6 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.adapter.SearchDevicesAdapter
-import kr.co.kimberly.wma.common.Bluetooth
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener

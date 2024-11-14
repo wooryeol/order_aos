@@ -186,8 +186,7 @@ class LoginActivity : AppCompatActivity() {
 
         val obj = json.toString()
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
-        Utils.log("body ====> ${Gson().toJson(json)}")
-        Utils.log("body 222 ====> $json")
+
         val call = service.postLogin(body)
         call.enqueue(object : retrofit2.Callback<ResultModel<List<LoginResponseModel>>> {
             override fun onResponse(
@@ -247,7 +246,7 @@ class LoginActivity : AppCompatActivity() {
                             SharedData.setSharedData(mContext, "phoneNumber", tm.line1Number)
                         } else {
                             //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")
-                            Utils.popupNotice(mContext, "권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+                            Utils.popupNotice(mContext, "휴대폰 번호를 가져올 수 없습니다.")
                         }
                     } else {
                         //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")

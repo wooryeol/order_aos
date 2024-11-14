@@ -5,7 +5,6 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -13,17 +12,16 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.support.multidex.BuildConfig
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.multidex.BuildConfig
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
-import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
@@ -52,8 +50,9 @@ class SettingActivity : AppCompatActivity() {
     private var popupListener : PopupListener? = null //PopupPairingDevice 에서 사용
     private var mAgencyCode: String? = null // 대리점 코드
     private var mPhoneNumber : String? = null // 연락처
-    private var isGranted = false
-
+    private var isGranted = false // 최초 퍼미션 허용 여부
+    private var isPrinterConnected = false // 프린터 선택 확인
+    private var isScannerConnected = false // 프린터 선택 확인
 
     private val bluetoothManager: BluetoothManager by lazy {
         getSystemService(BluetoothManager::class.java)
@@ -96,6 +95,9 @@ class SettingActivity : AppCompatActivity() {
 
         requestPermission()
 
+        //대리점 코드 및 전화번호, 기기 사용 여부 세팅
+        getInfoSetting()
+
         if (!BuildConfig.DEBUG) {
             mBinding.mobileNumber.text = "01029812904"
             mBinding.accountCode.setText("C000000")
@@ -114,6 +116,7 @@ class SettingActivity : AppCompatActivity() {
             }
         })
 
+        // 기기 찾기
         mBinding.bottom.bottomButton.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 if (isGranted){
@@ -125,8 +128,30 @@ class SettingActivity : AppCompatActivity() {
             }
         })
 
-        //대리점 코드 및 전화번호 세팅
-        getInfoSetting()
+        // 기기 사용 여부
+        mBinding.checkBoxPrint.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                if (!isPrinterConnected) {
+                    Utils.popupNotice(mContext, "사용하실 프린터를 페어링 된 장치에서 선택하세요.")
+                    mBinding.checkBoxPrint.isChecked = false
+                    isPrinterConnected = false
+                } else {
+                    SharedData.setSharedData(mContext, "isPrinterConnected", mBinding.checkBoxPrint.isChecked)
+                }
+            }
+        })
+
+        mBinding.checkBoxScanner.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                if (!isScannerConnected) {
+                    Utils.popupNotice(mContext, "사용하실 스캐너를 페어링 된 장치에서 선택하세요.")
+                    mBinding.checkBoxScanner.isChecked = false
+                    isScannerConnected = false
+                } else {
+                    SharedData.setSharedData(mContext, "isScannerConnected", mBinding.checkBoxScanner.isChecked)
+                }
+            }
+        })
 
         // BluetoothAdapter가 Null이라면 블루투스를 지원하지 않는 것이므로 종료
         if(bluetoothAdapter == null) {
@@ -138,6 +163,8 @@ class SettingActivity : AppCompatActivity() {
     private fun getInfoSetting() {
         mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
+        isPrinterConnected = SharedData.getSharedData(mContext, "isPrinterConnected", false)
+        isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
 
         if (mAgencyCode != "") {
             mBinding.accountCode.setText(mAgencyCode.toString())
@@ -146,10 +173,25 @@ class SettingActivity : AppCompatActivity() {
         if (mPhoneNumber != "") {
             mBinding.mobileNumber.text = mPhoneNumber.toString()
         }
+
+        if (isPrinterConnected) mBinding.checkBoxPrint.isChecked = true
+        if (isScannerConnected) mBinding.checkBoxScanner.isChecked = true
     }
 
+    // 페어링된 기기를 보여주는 어댑터
     private fun showPairedList(data: ArrayList<Pair<String, String>>){
-        val adapter = PairedDevicesAdapter(mContext, mActivity)
+        val adapter = PairedDevicesAdapter(mContext) { isScanner, isPrinter ->
+            isScannerConnected = isScanner
+            isPrinterConnected = isPrinter
+
+            if (mBinding.checkBoxPrint.isChecked && !isPrinter){
+                mBinding.checkBoxPrint.isChecked = false
+            }
+
+            if (mBinding.checkBoxScanner.isChecked && !isScanner){
+                mBinding.checkBoxScanner.isChecked = false
+            }
+        }
         adapter.dataList = data
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)

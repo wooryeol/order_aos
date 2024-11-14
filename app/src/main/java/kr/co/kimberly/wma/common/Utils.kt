@@ -245,4 +245,13 @@ object Utils {
     fun toast(context: Context, msg: String){
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
     }
+
+    /**
+     * 단말기 모델 가져오기
+     * @param context
+     * @return 단말기 모델
+     */
+    fun appDeviceName(): String? {
+        return Build.MODEL
+    }
 }

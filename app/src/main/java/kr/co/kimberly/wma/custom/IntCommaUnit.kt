@@ -45,10 +45,10 @@ class IntCommaUnit(context: Context, attrs: AttributeSet?) : AppCompatEditText(c
                     val doubleText = strNumber.toDoubleOrNull() ?: 0.0
 
                     // Int 범위 확인
-                    if (doubleText > 1000 || doubleText < Int.MIN_VALUE) {
-                        Utils.popupNotice(context,"입력하신 숫자가 너무 큽니다.\n1,000보다 작은 숫자를 입력해주세요", this@IntCommaUnit)
+                    if (doubleText > 999 || doubleText < Int.MIN_VALUE) {
+                        Utils.popupNotice(context,"입력하신 숫자가 너무 큽니다.\n999보다 작은 숫자를 입력해주세요", this@IntCommaUnit)
 
-                        inputText = "1,000"
+                        inputText = "999"
                         setText(inputText)
                         setSelection(inputText.length)
 

@@ -62,7 +62,7 @@ interface ApiClientService {
     @POST("wma/moneySlip/add")
     fun slipAdd(
         @Body requestBody: RequestBody
-    ): Call<ResultModel<DataModel<Unit>>>
+    ): Call<ResultModel<SlipPrintModel>>
 
     // 고객 조회
     @GET("wma/customer/list")
@@ -135,6 +135,7 @@ interface ApiClientService {
         @Query("agencyCd") agencyCd: String,
         @Query("userId") userId: String,
         @Query("warehouseCd") warehouseCd: String,
+        @Query("searchType") searchType: String,
         @Query("searchCondition") searchCondition: String,
     ): Call<ResultModel<List<WarehouseStockModel>>>
 
@@ -153,6 +154,7 @@ interface ApiClientService {
         @Query("agencyCd") agencyCd: String,
         @Query("userId") userId: String,
         @Query("searchType") searchType: String,
+        @Query("subSearchType") subSearchType: String? = null,
         @Query("searchCd") searchCd: String,
     ): Call<ResultModel<DetailInfoModel>> // unit에는 customerModel or searchItemModel
 
@@ -193,16 +195,18 @@ interface ApiClientService {
     fun getMoneySlipPrint(
         @Query("agencyCd") agencyCd: String,
         @Query("userId") userId: String,
-        @Query("moneySlip") moneySlip: String,
-    ): Call<ResultModel<DataModel<SlipPrintModel>>>
+        @Query("moneySlipNo") moneySlip: String,
+    ): Call<ResultModel<SlipPrintModel>>
 
     // 주문&반품 전표 출력
     @GET("wma/orderSlipPrint/info")
     fun getOrderSlipPrint(
         @Query("agencyCd") agencyCd: String,
         @Query("userId") userId: String,
+        @Query("printType") printType: String,
         @Query("slipNo") slipNo: String,
-    ): Call<ResultModel<DataModel<DetailInfoModel>>>
+    //): Call<ResultModel<DataModel<DetailInfoModel>>>
+    ): Call<ResultModel<Any>>
 
     companion object {
         private val logging = HttpLoggingInterceptor().apply {

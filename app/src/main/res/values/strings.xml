@@ -207,10 +207,16 @@
     <string name="purchasePostMsg03">전송을 하시겠습니까?</string>
     <string name="purchaseSlip">구매전표 :</string>
     <string name="distributorCode">대리점코드 :</string>
+    <string name="msg_same_product">동일한 제품이 주문 리스트에 있습니다.</string>
 
     <!-- 프린트 -->
     <string name="titleReturn">반품승인</string>
     <string name="titleOrder">주문승인</string>
     <string name="titleCollect">수금승인</string>
     <string name="payMethod">결제방법</string>
+
+    <!-- 스캐너 -->
+    <string name="msg_scan_error">바코드를 다시 스캔해 주세요.</string>
+    <string name="msg_scan_connect_error">"환경설정에서 스캐너 사용 여부를 확인해 주세요."</string>
+    <string name="msg_print_connect_error">"환경설정에서 프린터 사용 여부를 확인해 주세요."</string>
 </resources>

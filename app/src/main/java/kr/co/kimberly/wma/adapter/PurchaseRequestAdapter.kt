@@ -2,7 +2,10 @@ package kr.co.kimberly.wma.adapter
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -10,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.content.ContextCompat.RECEIVER_EXPORTED
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -20,6 +24,7 @@ import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupDoubleMessage
 import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.custom.popup.PopupOk
 import kr.co.kimberly.wma.custom.popup.PopupProductPriceHistory
@@ -55,6 +60,24 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
 
     var onItemSelect: ((SearchItemModel) -> Unit)? = null // 선택된 제품
     var onItemDelete: ((SearchItemModel) -> Unit)? = null // 선택된 제품 삭제
+    var onItemScan: ((String) -> Unit)? = null // 아이템 스캔
+
+    private var barcodeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            when (val barcode = intent?.getStringExtra("data")) {
+                null -> {
+                    // 데이터가 null일 때 아무것도 하지 않음
+                    Utils.popupNotice(context, "바코드를 다시 스캔해주세요")
+                }
+                else -> {
+                    if (barcode.isNotEmpty()) {
+                        Utils.log("adapter barcode data ====> $barcode")
+                        onItemScan?.invoke(barcode)
+                    }
+                }
+            }
+        }
+    }
 
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
 
@@ -141,12 +164,13 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             binding.tvBoxEach.text = "BOX(${item.getBox}EA): "
             binding.tvBox.text = Utils.decimal(item.boxQty!!)
             binding.tvPrice.text = "${Utils.decimal(item.orderPrice!!)}원"
-            binding.tvTotal.text = Utils.decimalLong(item.saleQty!!)
-            binding.tvTotalAmount.text = "${Utils.decimalLong(item.amount!!)}원"
+            binding.tvTotal.text = Utils.decimal(item.saleQty!!)
+            binding.tvTotalAmount.text = "${Utils.decimal(item.amount!!)}원"
         }
     }
 
     inner class HeaderViewHolder(private val binding: HeaderPurchaseRequesetBinding) : RecyclerView.ViewHolder(binding.root) {
+        @SuppressLint("WrongConstant")
         fun bind() {
             Utils.log("selectedSAP ====> ${Gson().toJson(selectedSAP)}")
             setSAPInfo(selectedSAP)
@@ -250,7 +274,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                         Utils.popupNotice(context, "제품명을 입력해주세요")
                     } else {
                         // 아이템 리스트 검색
-                        searchItem(binding.etProductName.text.toString(), binding.root.context)
+                        searchItem(binding.etProductName.text.toString(), binding.root.context, Define.SEARCH)
                     }
                 }
             })
@@ -309,10 +333,10 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                         try {
                             val itemName = binding.searchResult.text.toString()
                             val boxQty = Utils.getIntValue(binding.etBox.text.toString())
-                            val saleQty = (boxQty * selectedItem?.getBox!!).toLong()
-                            val amount = saleQty * selectedItem?.orderPrice!!.toLong()
+                            val saleQty = (boxQty * selectedItem?.getBox!!)
+                            val amount = saleQty * selectedItem?.orderPrice!!
                             val supplyPrice = if (selectedItem?.vatYn == "01") {
-                                ceil(amount/1.1).toLong()
+                                ceil(amount/1.1).toInt()
                             } else {
                                 amount
                             }
@@ -358,6 +382,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                             Utils.popupNotice(v.context, "올바른 값을 입력해주세요")
                         }
                     }
+                    binding.btAddOrder.text = context.getString(R.string.addOrder)
                 }
             })
 
@@ -379,6 +404,22 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                     binding.etProductName.hint = v.context.getString(R.string.productNameHint)
                 }
             })
+
+            // 아이템 스캔
+            onItemScan = {
+                if (selectedSAP.sapCustomerCd.isNullOrEmpty()){
+                    Utils.popupNotice(context, "SAP Code를 선택해주세요")
+                } else if(selectedSAP.arriveCd.isNullOrEmpty()){
+                    Utils.popupNotice(context, "배송처를 선택해주세요")
+                } else {
+                    // 아이템 리스트 검색
+                    Utils.log("adapter barcode data ====> $it")
+                    searchItem(it, binding.root.context, Define.BARCODE)
+                }
+            }
+
+            val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+            context.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
         }
 
         // SAP Code 조회
@@ -386,7 +427,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             val loading = PopupLoading(context)
         loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-            //val call = service.sapCode(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!)
+            val call = service.sapCode(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!)
 
             //RETURN_CD_00 배송처 없음
             //val call = service.sapCode("C000028", "mb2004")
@@ -395,7 +436,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             //val call = service.sapCode("C000537", "mb2004")
 
             //RETURN_CD_91 SAP 코드 1개 & 배송처 코드 N개
-            val call = service.sapCode("C000032", "mb2004")
+            //val call = service.sapCode("C000032", "mb2004")
             //val call = service.sapCode("C000541", "mb2004")
 
             call.enqueue(object : retrofit2.Callback<ResultModel<List<SapModel>>> {
@@ -473,9 +514,9 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             val loading = PopupLoading(context)
         loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-            //val call = service.shipping(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, sapCustomerCd)
+            val call = service.shipping(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, sapCustomerCd)
 
-            val call = service.shipping("C000032", "mb2004", sapCustomerCd)
+            //val call = service.shipping("C000032", "mb2004", sapCustomerCd)
 
             //RETURN_CD_00 배송처 1개
             //val call = service.shipping("C000537", "mb2004", sapCustomerCd)
@@ -588,11 +629,10 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
         }
 
         // 검색 아이템 리스트 조회
-        fun searchItem(searchCondition: String, context: Context) {
+        fun searchItem(searchCondition: String, context: Context, searchType: String) {
             val loading = PopupLoading(context)
             loading.show()
             val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-            val searchType = Define.SEARCH
             val orderYn = Define.PURCHASE_YES
 
             val call = service.item(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, selectedSAP.sapCustomerCd!!, searchType, orderYn, searchCondition)
@@ -648,10 +688,18 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                     } else {
                                         itemList.forEach { item ->
                                             if (item.itemCd == it.itemCd) {
-                                                Utils.popupNotice(context, "동일한 제품이 주문 리스트에 있습니다.", binding.etProductName)
-                                                binding.etProductName.setText("")
-                                                binding.btProductNameEmpty.visibility = View.GONE
-                                                binding.etProductName.hint = context.getString(R.string.productNameHint)
+                                                val popupNotice = PopupNotice(context, context.getString(R.string.msg_same_product))
+                                                popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+                                                    override fun onOkClick() {
+                                                        binding.etProductName.setText("")
+                                                        binding.btProductNameEmpty.visibility = View.GONE
+                                                        binding.etProductName.hint = context.getString(R.string.productNameHint)
+                                                        binding.tvProductName.visibility = View.GONE
+                                                        binding.etProductName.visibility = View.VISIBLE
+                                                        binding.searchResult.text = context.getString(R.string.searchResult)
+                                                    }
+                                                }
+                                                popupNotice.show()
                                             } else {
                                                 //본사 발주 가능 시
                                                 if (it.enableOrderYn == "Y") {
@@ -781,5 +829,9 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
     fun clear() {
         itemList.clear()
         updateData(itemList, selectedSAP)
+    }
+
+    fun cleanup() {
+        context.unregisterReceiver(barcodeReceiver)
     }
 }

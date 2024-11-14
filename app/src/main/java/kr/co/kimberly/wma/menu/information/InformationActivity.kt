@@ -3,8 +3,11 @@ package kr.co.kimberly.wma.menu.information
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
@@ -18,14 +21,21 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.common.ConnectThread
 import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupAccountInformation
 import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.databinding.ActInformationBinding
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.DetailInfoModel
@@ -35,6 +45,7 @@ import kr.co.kimberly.wma.network.model.SearchItemModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
 import retrofit2.Response
+import java.util.UUID
 
 class InformationActivity : AppCompatActivity() {
     private lateinit var mBinding: ActInformationBinding
@@ -49,6 +60,25 @@ class InformationActivity : AppCompatActivity() {
     private var accountName = ""
     private var itemName = ""
 
+    private var thread : ConnectThread? = null // 스캐너 연결
+    var onItemScan: ((String) -> Unit)? = null // 제품 삭제 시
+    private var barcodeReceiver = object : BroadcastReceiver() { // 스캐너 값 읽어오는 부분
+        override fun onReceive(context: Context, intent: Intent?) {
+            when (val barcode = intent?.getStringExtra("data")) {
+                null -> {
+                    // 데이터가 null일 때 아무것도 하지 않음
+                    Utils.popupNotice(context, "바코드를 다시 스캔해주세요")
+                }
+                else -> {
+                    if (barcode.isNotEmpty()) {
+                        Utils.log("adapter barcode data ====> $barcode")
+                        onItemScan?.invoke(barcode)
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActInformationBinding.inflate(layoutInflater)
@@ -62,8 +92,6 @@ class InformationActivity : AppCompatActivity() {
 
         setSetting()
 
-        //헤더 설정
-        mBinding.header.headerTitle.text = getString(R.string.menu09)
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 finish()
@@ -109,9 +137,108 @@ class InformationActivity : AppCompatActivity() {
                 false
             }
         }
+
+        mBinding.header.scanBtn.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                val isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
+                // 사용 여부 확인
+                if (!isScannerConnected) {
+                    val popupNotice = PopupNotice(mContext, mContext.getString(R.string.msg_scan_connect_error))
+                    popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+                        override fun onOkClick() {
+                            val intent = Intent(mContext, SettingActivity::class.java)
+                            startActivity(intent)
+                        }
+                    }
+                    popupNotice.show()
+                    return
+                }
+                if (thread != null) {
+                    thread?.cancel()
+                    thread = null
+                    mBinding.header.scanBtn.setColorFilter(getColor(R.color.trans))
+                } else {
+                    checkScanner()
+                }
+            }
+        })
+
+        // 아이템 바코드 스캔
+        onItemScan = {
+            mBinding.productInfo.isChecked = true
+            mBinding.etSearch.hint = getString(R.string.productHint)
+            mBinding.productInfoLayout.visibility = View.VISIBLE
+            mBinding.accountInfoLayout.visibility = View.GONE
+            mSearchType = Define.TYPE_ITEM
+            getDetailInfo(it, Define.BARCODE)
+        }
+
+        val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+        mContext.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        thread?.cancel()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        thread?.cancel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkScanner()
+    }
+
+    // 디바이스에 연결
+    @SuppressLint("MissingPermission")
+    private fun connectDevice(deviceAddress: String) {
+        val bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        /**
+         * 기기의 UUID를 가져와야 할 떄 사용하는 코드
+         **/
+
+        bluetoothAdapter.let { adapter ->
+            // 기기 검색을 수행중이라면 취소
+            if (adapter.isDiscovering) {
+                adapter.cancelDiscovery()
+            }
+
+            // 서버의 역할을 수행 할 Device 획득
+            val device = adapter.getRemoteDevice(deviceAddress)
+            // UUID 선언
+            val uuid = UUID.fromString(Define.UUID)
+            try {
+                GlobalScope.launch(Dispatchers.IO) {
+                    thread = ConnectThread(uuid, device, mContext)
+                    thread?.run()
+                }
+                Utils.toast(mContext,"${device.name}과 연결되었습니다.")
+            } catch (e: Exception) { // 연결에 실패할 경우 호출됨
+                Utils.log("스캐너의 전원이 꺼져 있습니다. 기기를 확인해주세요.")
+                return
+            }
+        }
+    }
+
+    private fun checkScanner(){
+        val isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
+        if (isScannerConnected) {
+            mBinding.header.scanBtn.setColorFilter(getColor(R.color.black))
+            val scanner = SharedData.getSharedData(mContext, SharedData.SCANNER_ADDR, "")
+            if (scanner.isNotBlank()){
+                Utils.toast(mContext, "기기를 연결 중입니다.")
+                connectDevice(scanner)
+            }
+        }
     }
 
     private fun setSetting() {
+        //헤더 설정
+        mBinding.header.headerTitle.text = getString(R.string.menu09)
+
         radioGroupCheckedListener = OnCheckedChangeListener { _, checkedId ->
             hideKeyboard()
             when(checkedId) {
@@ -139,7 +266,6 @@ class InformationActivity : AppCompatActivity() {
                         mBinding.btProductNameEmpty.visibility = View.VISIBLE
                         mBinding.etSearch.visibility = View.GONE
                     } else {
-                        mBinding.etSearch.hint = getString(R.string.accountHint)
                         mBinding.etSearch.visibility = View.VISIBLE
                         mBinding.tvProductName.visibility = View.GONE
                         mBinding.btProductNameEmpty.visibility = View.GONE
@@ -228,9 +354,8 @@ class InformationActivity : AppCompatActivity() {
 
                                     val popupAccountInformation = PopupAccountInformation(mContext, null, itemList)
                                     popupAccountInformation.onItemSelect = {
-                                        mBinding.tvProductName.text = it.itemNm
                                         itemName = it.itemNm.toString()
-                                        getDetailInfo(it.itemCd.toString())
+                                        getDetailInfo(it.itemCd.toString(), Define.SEARCH)
                                     }
                                     popupAccountInformation.show()
                                 }
@@ -260,11 +385,12 @@ class InformationActivity : AppCompatActivity() {
 
 
     // 상세 정보 조회
-    private fun getDetailInfo(searchCd: String) {
+    private fun getDetailInfo(searchCd: String, subSearchType: String? = null) {
         val loading = PopupLoading(mContext)
         loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        val call = service.masterInfoDetail(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, mSearchType!!, searchCd)
+        val call = service.masterInfoDetail(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, mSearchType!!, subSearchType , searchCd)
+
         //test
         //val call = service.masterInfoDetail("C000000", "mb2004", mSearchType!!, searchCd)
 
@@ -300,7 +426,6 @@ class InformationActivity : AppCompatActivity() {
                                         buyEmpNm = data.buyEmpNm!!,
                                         buyEmpMobileNo = data.buyEmpMobileNo!!
                                     )
-
                                     setInfo(detailInfoModel!!)
 
                                 }
@@ -320,7 +445,7 @@ class InformationActivity : AppCompatActivity() {
                                         registerImgYn = data.registerImgYn!!,
                                         imgUrl = data.imgUrl!!,
                                     )
-
+                                    mBinding.tvProductName.text = detailInfoModel?.itemNm
                                     setInfo(detailInfoModel!!)
 
                                 }

@@ -18,7 +18,7 @@ import kr.co.kimberly.wma.menu.collect.CollectApprovalActivity
 import kr.co.kimberly.wma.menu.collect.CollectManageActivity
 import kr.co.kimberly.wma.menu.main.MainActivity
 
-class PopupPrintDone(private val mContext: AppCompatActivity, private val mActivity: Activity) {
+class PopupPrintDone(private val mContext: AppCompatActivity) {
 
     private lateinit var mBinding: PopupPrintDoneBinding
     private val mDialog = Dialog(mContext)
@@ -27,7 +27,7 @@ class PopupPrintDone(private val mContext: AppCompatActivity, private val mActiv
     fun show() {
         mBinding = PopupPrintDoneBinding.inflate(mContext.layoutInflater)
 
-        mDialog.setCancelable(true)
+        mDialog.setCancelable(false)
         mDialog.setContentView(mBinding.root)
         // mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
 
@@ -42,7 +42,6 @@ class PopupPrintDone(private val mContext: AppCompatActivity, private val mActiv
             val intent =  Intent(mContext, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             mContext.startActivity(intent)
-            Utils.toast(mContext, "인쇄를 진행합니다.")
         }
 
         mDialog.show()

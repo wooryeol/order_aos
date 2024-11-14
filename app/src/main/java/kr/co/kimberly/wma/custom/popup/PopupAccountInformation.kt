@@ -41,7 +41,7 @@ class PopupAccountInformation(mContext: Context, private val accountList: ArrayL
     }
 
     private fun initViews() {
-        mLoginInfo = Utils.getLoginData()!!
+        mLoginInfo = Utils.getLoginData()
 
         // setCancelable(false) // 뒤로가기 버튼, 바깥 화면 터치시 닫히지 않게
 

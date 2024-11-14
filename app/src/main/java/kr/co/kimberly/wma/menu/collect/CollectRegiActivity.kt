@@ -35,6 +35,7 @@ import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
 import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
+import kr.co.kimberly.wma.network.model.SlipPrintModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
@@ -51,6 +52,7 @@ class CollectRegiActivity : AppCompatActivity() {
     private var cash = true
     private var note = false
     private var both = false
+
     private var customerCd: String? = ""
     private var customerNm: String? = ""
     private var balanceData: BalanceModel? = null
@@ -243,7 +245,7 @@ class CollectRegiActivity : AppCompatActivity() {
                     cash = false
                     note = false
                     both = true
-                    collectionCd = Define.NOTE
+                    collectionCd = Define.BOTH
                 }
             }
         }
@@ -275,7 +277,6 @@ class CollectRegiActivity : AppCompatActivity() {
             when {
                 cash -> {
                     if (mBinding.cashAmountText.text.isNullOrEmpty()) {
-                        Utils.log("222")
                         Utils.popupNotice(mContext, "비고를 제외한 나머지 입력란은 필수입니다.")
                         return false
                     }
@@ -299,7 +300,6 @@ class CollectRegiActivity : AppCompatActivity() {
                         || mBinding.publishByText.text.isNullOrEmpty()
                         || mBinding.publishDateText.text.isNullOrEmpty()
                         || mBinding.expireDateText.text.isNullOrEmpty()) {
-                        Utils.log("333")
                         Utils.popupNotice(mContext, "비고를 제외한 나머지 입력란은 필수입니다.")
                         return false
                     }
@@ -323,7 +323,6 @@ class CollectRegiActivity : AppCompatActivity() {
                         || mBinding.publishByText.text.isNullOrEmpty()
                         || mBinding.publishDateText.text.isNullOrEmpty()
                         || mBinding.expireDateText.text.isNullOrEmpty()) {
-                        Utils.log("444")
                         Utils.popupNotice(mContext, "비고를 제외한 나머지 입력란은 필수입니다.")
                         return false
                     }
@@ -454,9 +453,10 @@ class CollectRegiActivity : AppCompatActivity() {
                 addProperty("userId", userId)
                 addProperty("customerCd", customerCd)
                 addProperty("collectionDate", collectionDate)
-                addProperty("collectionAmount", collectionAmount)
+                addProperty("collectionAmount", cashAmount+billAmount)
                 addProperty("collectionCd", collectionCd)
                 addProperty("cashAmount", cashAmount)
+                addProperty("billAmount", billAmount)
                 addProperty("billType", billType)
                 addProperty("billNo", billNo)
                 addProperty("billIssuer", billIssuer)
@@ -471,10 +471,10 @@ class CollectRegiActivity : AppCompatActivity() {
         val call = service.slipAdd(body)
         Utils.log("slip request body ====> ${Gson().toJson(json)}")
 
-        call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<Unit>>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<SlipPrintModel>> {
             override fun onResponse(
-                call: Call<ResultModel<DataModel<Unit>>>,
-                response: Response<ResultModel<DataModel<Unit>>>
+                call: Call<ResultModel<SlipPrintModel>>,
+                response: Response<ResultModel<SlipPrintModel>>
             ) {
                 loading.hideDialog()
                 if (response.isSuccessful) {
@@ -492,13 +492,14 @@ class CollectRegiActivity : AppCompatActivity() {
                         val intent = Intent(mContext, PrinterOptionActivity::class.java).apply {
                             putExtra("moneySlipNo", moneySlipNo)
                             putExtra("title", mContext.getString(R.string.titleCollect))
+                            putExtra("type", collectionCd)
                         }
                         startActivity(intent)
                         finish()
                     } else {
                         Utils.log("return message ====> ${item?.returnMsg}")
                         Utils.log("return returnCd ====> ${item?.returnCd}")
-                        //Utils.popupNotice(mContext, item?.returnMsg)
+                        Utils.popupNotice(mContext, item?.returnMsg!!)
                     }
                 } else {
                     Utils.log("${response.code()} ====> ${response.message()}")
@@ -506,7 +507,7 @@ class CollectRegiActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<ResultModel<DataModel<Unit>>>, t: Throwable) {
+            override fun onFailure(call: Call<ResultModel<SlipPrintModel>>, t: Throwable) {
                 loading.hideDialog()
                 Utils.log("slip add failed ====> ${t.message}")
                 Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")

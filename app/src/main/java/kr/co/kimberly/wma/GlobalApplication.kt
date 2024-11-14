@@ -1,15 +1,15 @@
 package kr.co.kimberly.wma
 
 import android.content.Context
-import android.content.Intent
-import android.os.Build
+import android.support.multidex.MultiDexApplication
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import androidx.multidex.MultiDexApplication
-import java.io.Serializable
+import kr.co.kimberly.wma.common.Utils
 
 class GlobalApplication : MultiDexApplication() {
+    //SM-F711N
+    //private var scanner: KScan? = null
+
 
     companion object {
         var instance: GlobalApplication? = null
@@ -42,10 +42,23 @@ class GlobalApplication : MultiDexApplication() {
                 imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
             }, 100)
         }
+
     }
 
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        /*if(Utils.appDeviceName() == "SM-F711N") {
+            setPointMobileScanner()
+        }*/
     }
+
+    /*fun getPointMobileScanner(): KScan?{
+        return scanner
+    }
+
+    private fun setPointMobileScanner(){
+        scanner = KTSyncData.mKScan
+    }*/
 }

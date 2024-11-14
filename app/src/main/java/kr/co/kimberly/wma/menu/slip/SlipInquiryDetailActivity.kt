@@ -183,7 +183,7 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun setUi() {
         mBinding.header.headerTitle.text = getString(R.string.menu04)
-        mBinding.header.scanBtn.setImageResource(R.drawable.adf_scanner)
+        mBinding.header.scanBtn.visibility = View.GONE
         mBinding.bottom.bottomButton.text = getString(R.string.slipPrint)
 
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {

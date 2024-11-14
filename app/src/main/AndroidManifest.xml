@@ -23,6 +23,14 @@
         android:name="android.hardware.camera"
         android:required="true"/>
 
+    <!-- 스캐너 퍼미션 -->
+    <!--<permission
+        android:name="device.sdk.sample.scanner.permission.SCANNER_RESULT_RECEIVER"
+        android:protectionLevel="normal" />-->
+    <uses-permission android:name="device.sdk.sample.scanner.permission.SCANNER_RESULT_RECEIVER" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+
+    <!-- 블루투스 -->
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
@@ -50,6 +58,9 @@
         android:largeHeap="true"
         tools:ignore="DataExtractionRules"
         tools:targetApi="31">
+
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+
         <activity
             android:name=".menu.splash.SplashActivity"
             android:exported="true"
@@ -176,7 +187,7 @@
             android:exported="false"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
+            tools:ignore="LockedOrientationActivity"/>
 
         <!-- 매대관리 -->
         <activity
