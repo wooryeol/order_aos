@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">유한킴벌리</string>
+    <string name="app_name">WMA_Mobile</string>
 
     <!--환경설정-->
     <string name="settingTitle01">대리점</string>
@@ -217,6 +217,11 @@
 
     <!-- 스캐너 -->
     <string name="msg_scan_error">바코드를 다시 스캔해 주세요.</string>
-    <string name="msg_scan_connect_error">"환경설정에서 스캐너 사용 여부를 확인해 주세요."</string>
-    <string name="msg_print_connect_error">"환경설정에서 프린터 사용 여부를 확인해 주세요."</string>
+    <string name="msg_scan_connect_error">환경설정에서 스캐너 사용 여부를 확인해 주세요.</string>
+    <string name="msg_print_connect_error">환경설정에서 프린터 사용 여부를 확인해 주세요.</string>
+
+    <!-- 메제시 -->
+    <string name="msg_permission">권한을 허용해주세요.</string>
+    <string name="msg_permission_sub">[설정] > [앱 및 알림] > [고급] > [앱 권한]</string>
+    <string name="msg_finish">모바일 유한킴벌리를\n종료하시겠습니까?</string>
 </resources>

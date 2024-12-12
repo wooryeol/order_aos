@@ -190,7 +190,7 @@ class StoreManagementActivity : AppCompatActivity() {
 
                 }
             })
-            .setDeniedMessage("권한을 허용해주세요. [설정] > [앱 및 알림] > [고급] > [앱 권한]")
+            .setDeniedMessage("${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
             .setPermissions(Manifest.permission.CAMERA)
             .check()
     }
@@ -211,7 +211,7 @@ class StoreManagementActivity : AppCompatActivity() {
 
                 }
             })
-            .setDeniedMessage("권한을 허용해주세요. [설정] > [앱 및 알림] > [고급] > [앱 권한]")
+            .setDeniedMessage("${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
             .setPermissions(*permission)
             .check()
     }

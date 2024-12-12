@@ -565,7 +565,7 @@ class InformationActivity : AppCompatActivity() {
                 }
 
             })
-            .setDeniedMessage("권한을 허용해주세요.\n[설정] > [애플리케이션] > [앱 권한]")
+            .setDeniedMessage("${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
             .setPermissions(Manifest.permission.CALL_PHONE)
             .check()
     }

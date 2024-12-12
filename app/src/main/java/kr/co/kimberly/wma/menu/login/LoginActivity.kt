@@ -245,21 +245,18 @@ class LoginActivity : AppCompatActivity() {
                             mPhoneNumber = tm.line1Number
                             SharedData.setSharedData(mContext, "phoneNumber", tm.line1Number)
                         } else {
-                            //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")
                             Utils.popupNotice(mContext, "휴대폰 번호를 가져올 수 없습니다.")
                         }
                     } else {
-                        //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")
-                        Utils.popupNotice(mContext, "권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+                        Utils.popupNotice(mContext, "${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
                     }
                 }
 
                 override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
-                    //Utils.popupNotice(mContext, "환경설정에서 휴대폰 번호를 설정해주세요")
-                    Utils.popupNotice(mContext, "권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+                    Utils.popupNotice(mContext, "${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
                 }
             })
-            .setDeniedMessage("권한을 허용해주세요.\n[설정] > [앱 및 알림] > [고급] > [앱 권한]")
+            .setDeniedMessage("${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
             .setPermissions(mPermission)
             .check()
     }
@@ -276,7 +273,7 @@ class LoginActivity : AppCompatActivity() {
         val current = System.currentTimeMillis()
         if (supportFragmentManager.backStackEntryCount == 0) {
             if(current - clickTime >= 2000) {
-                PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null).show()
+                PopupSingleMessage(mContext, mContext.getString(R.string.msg_finish), null).show()
             } else {
                 finish()
             }

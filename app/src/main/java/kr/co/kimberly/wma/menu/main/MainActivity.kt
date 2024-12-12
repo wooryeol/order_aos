@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         mBinding.finish.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 // 실행종료
-                PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null).show()
+                PopupSingleMessage(mContext, mContext.getString(R.string.msg_finish), null).show()
             }
         })
     }
@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity() {
         val current = System.currentTimeMillis()
         if (supportFragmentManager.backStackEntryCount == 0) {
             if(current - clickTime >= 2000) {
-                PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null).show()
+                PopupSingleMessage(mContext, mContext.getString(R.string.msg_finish), null).show()
             } else {
                 finish()
             }

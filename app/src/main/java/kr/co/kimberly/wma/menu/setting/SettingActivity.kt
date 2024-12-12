@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.normal.TedPermission
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.PairedDevicesAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
@@ -214,7 +215,7 @@ class SettingActivity : AppCompatActivity() {
                 }
 
                 override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
-                    Toast.makeText(mContext, "권한을 허용해주세요.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(mContext, mContext.getString(R.string.msg_permission), Toast.LENGTH_LONG).show()
                     isGranted = false
                 }
             })
