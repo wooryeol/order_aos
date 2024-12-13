@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -14,39 +13,33 @@ import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import android.util.DisplayMetrics
+import android.os.Looper
+import android.os.Message
+import android.text.TextWatcher
 import android.util.TypedValue
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.core.content.FileProvider
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kr.co.kimberly.wma.GlobalApplication
+import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupNotice
+import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
+import kr.co.kimberly.wma.network.model.LoginResponseModel
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 object Utils {
-
-    /**
-     * @param context : 해당 액티비티 context
-     * @param activity : 이동하려는 액티비티명
-     * @param finish : 이동하고 난 후 이전 액티비티를 종료 시켜주고 싶을 때 사용
-     */
-    fun moveToPage(context: Context, activity: Activity, finish: Boolean? = null){
-        // 앱의 MainActivity로 넘어가기
-        val intent = Intent(context, activity::class.java)
-        context.startActivity(intent)
-
-        // 현재 액티비티 닫기
-
-        if(finish != null){
-            if (finish) {
-                (context as Activity).finish()
-            }
-        }
-    }
 
     /**
      * 다이얼로그 사이즈 변경
@@ -54,7 +47,7 @@ object Utils {
     fun dialogResize(context: Context, window: Window?) {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         val width = 1.0f
-        val height = 0.7f
+        val height = 0.5f
 
         if (Build.VERSION.SDK_INT < 30) {
             val display = windowManager.defaultDisplay
@@ -177,5 +170,88 @@ object Utils {
                 simpleDateFormat.format(calendar.time)
             }
         }
+    }
+
+    fun log(msg: String) {
+            android.util.Log.d("kimberly_aos", msg)
+    }
+
+    // 콤마를 제외한 정수 형식으로 변환하는 메서드
+    fun getIntValue(inputText: String): Int {
+        val stringWithoutCommas = inputText.replace(",", "")
+        return stringWithoutCommas.toInt()
+    }
+
+    // 내일 날짜
+    fun getNextDay(): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        return dateFormat.format(calendar.time)
+    }
+
+
+    // 로그인 정보 가져오기
+    fun getLoginData(): LoginResponseModel {
+        val json = SharedData.getSharedData(
+            GlobalApplication.applicationContext(),
+            SharedData.LOGIN_DATA,
+            ""
+        )
+
+        //return Gson().fromJson(json, LoginResponseModel::class.java)
+        val listType = object : TypeToken<List<LoginResponseModel>>() {}.type
+        val dataList: List<LoginResponseModel> = Gson().fromJson(json, listType)
+
+        return dataList.firstOrNull() ?: LoginResponseModel()
+    }
+
+    // 날짜 가져오기
+    fun getCurrentDateFormatted(): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val currentDate = Date()
+        return dateFormat.format(currentDate)
+    }
+
+    // 원단위
+    fun decimal(number: Int):String {
+        val decimal = DecimalFormat("#,###")
+        return decimal.format(number)
+    }
+
+    fun decimalLong(number: Long):String {
+        val decimal = DecimalFormat("#,###")
+        return decimal.format(number)
+    }
+
+    // 기본 경고 팝업
+    fun popupNotice(context: Context, msg: String, view: View? = null){
+        val popupNotice = PopupNotice(context, msg)
+        popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+            override fun onOkClick() {
+                if (view != null) {
+                    view.requestFocus()
+                    view.postDelayed({
+                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+                    }, 100)
+                }
+            }
+        }
+        popupNotice.show()
+    }
+
+    // 토스트 메세지
+    fun toast(context: Context, msg: String){
+        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * 단말기 모델 가져오기
+     * @param context
+     * @return 단말기 모델
+     */
+    fun appDeviceName(): String? {
+        return Build.MODEL
     }
 }

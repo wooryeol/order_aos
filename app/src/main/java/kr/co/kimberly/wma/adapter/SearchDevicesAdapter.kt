@@ -1,23 +1,23 @@
 package kr.co.kimberly.wma.adapter
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kr.co.kimberly.wma.R
+import kr.co.kimberly.wma.common.Define
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupPairingDevice
 import kr.co.kimberly.wma.databinding.CellSearchDevicesBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
-import java.util.ArrayList
 
-class SearchDevicesAdapter(context: Context, activity: Activity): RecyclerView.Adapter<SearchDevicesAdapter.ViewHolder>() {
-
-    var dataList: List<BluetoothDevice> = ArrayList()
+class SearchDevicesAdapter(context: Context, private val listener: SettingActivity.PopupListener): RecyclerView.Adapter<SearchDevicesAdapter.ViewHolder>() {
+    var dataList = ArrayList<BluetoothDevice>()
     var mContext = context
-    var mActivity = activity
+    var itemClickListener: ItemClickListener? = null
 
     inner class ViewHolder(val binding: CellSearchDevicesBinding): RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("NotifyDataSetChanged", "MissingPermission")
@@ -25,16 +25,20 @@ class SearchDevicesAdapter(context: Context, activity: Activity): RecyclerView.A
             binding.deviceName.text = itemModel.name
             binding.deviceAddress.text = itemModel.address
 
-            if (SettingActivity.isRadioChecked == 1) {
+            if (itemModel.name.startsWith(Define.SCANNER_NAME)) {
                 binding.deviceIcon.setImageResource(R.drawable.adf_scanner)
             } else {
                 binding.deviceIcon.setImageResource(R.drawable.print)
             }
 
-            itemView.setOnClickListener {
-                val paringDialog = PopupPairingDevice(mContext, mActivity)
-                paringDialog.show(itemModel.name, itemModel.address)
-            }
+
+            itemView.setOnClickListener(object: OnSingleClickListener(){
+                override fun onSingleClick(v: View) {
+                    val paringDialog = PopupPairingDevice(mContext, listener)
+                    paringDialog.show(itemModel)
+                    itemClickListener?.onItemClick()
+                }
+            })
         }
     }
 
@@ -50,5 +54,9 @@ class SearchDevicesAdapter(context: Context, activity: Activity): RecyclerView.A
 
     override fun onBindViewHolder(holder: SearchDevicesAdapter.ViewHolder, position: Int) {
         holder.bind(dataList[position])
+    }
+
+    interface ItemClickListener {
+        fun onItemClick()
     }
 }

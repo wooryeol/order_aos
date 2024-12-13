@@ -45,7 +45,7 @@
                     android:layout_marginStart="12dp"
                     android:clickable="false"
                     android:hint="@string/monthHint"
-                    android:textSize="16dp"
+                    android:textSize="14dp"
                     android:textColor="@color/color_1A1A1A"
                     tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -78,17 +78,37 @@
                 android:layout_weight="1"
                 android:background="@drawable/et_round_c9cbd0"
                 android:layout_gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/etAccount"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@color/trans"
+                    android:hint="@string/accountHint"
+                    android:imeOptions="actionDone"
+                    android:singleLine="true"
+                    android:inputType="text"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="10dp"
+                    android:textSize="14dp"
+                    tools:ignore="Autofill,NestedWeights,SpUsage,TextFields" />
+
                 <TextView
-                    android:id="@+id/accountName"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:background="@drawable/et_round_c9cbd0"
+                    android:visibility="gone"
+                    android:id="@+id/tvAccountName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="14dp"
+                    android:background="@color/trans"
+                    android:textColor="@color/black"
                     android:paddingVertical="10dp"
                     android:paddingHorizontal="12dp"
-                    android:hint="@string/accountHint"
-                    android:textSize="16dp"
-                    android:gravity="center_vertical"
-                    tools:ignore="Autofill,SpUsage,TextFields" />
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:singleLine="true"
+                    tools:ignore="SpUsage" />
 
                 <ImageButton
                     android:id="@+id/btEmpty"
@@ -107,7 +127,7 @@
                 android:text="@string/search"
                 android:textColor="@color/white"
                 android:textStyle="bold"
-                android:textSize="16dp"
+                android:textSize="16sp"
                 android:background="@drawable/bt_round_103c7e"
                 style="?android:attr/borderlessButtonStyle"/>
 
@@ -164,7 +184,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="150dp"
             tools:ignore="UseCompoundDrawables">
 
             <ImageView
@@ -177,7 +197,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/searchNothing"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
         </LinearLayout>
@@ -224,9 +244,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:gravity="end"
                     android:text="0"
-                    android:textColor="@color/color_1A1A1A"
-                    android:gravity="end" />
+                    android:textColor="@color/color_1A1A1A" />
 
                 <TextView
                     android:layout_width="wrap_content"

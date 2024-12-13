@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.databinding.PopupNoticeBinding
 import kr.co.kimberly.wma.databinding.PopupNotificationBinding
 
 class PopupNotification(mContext: Context, val msg:String): Dialog(mContext) {

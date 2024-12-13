@@ -2,16 +2,23 @@ package kr.co.kimberly.wma.custom.popup
 
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.widget.LinearLayout
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupNoticeBinding
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 
-class PopupNotice(mContext: Context, val msg:String): Dialog(mContext) {
+class PopupNotice(mContext: Context, private val msg:String, private val isBluetooth: Boolean? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupNoticeBinding
+    private val context = mContext
+    var itemClickListener: ItemClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,9 +36,14 @@ class PopupNotice(mContext: Context, val msg:String): Dialog(mContext) {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
+        /*if (mBinding.btConfirm.text == context.getString(R.string.confirm)) {
+            mBinding.ok.visibility = View.GONE
+        }*/
+
         mBinding.tvMsg.text = msg
         mBinding.btConfirm.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
+                itemClickListener?.onOkClick()
                 hideDialog()
             }
         })
@@ -39,7 +51,25 @@ class PopupNotice(mContext: Context, val msg:String): Dialog(mContext) {
 
     fun hideDialog() {
         if (isShowing) {
-            dismiss()
+            when (isBluetooth) {
+                false -> {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:${context.packageName}"))
+                    context.startActivity(intent)
+                    dismiss()
+                }
+                true -> {
+                    val intent = Intent(context, SettingActivity::class.java)
+                    context.startActivity(intent)
+                    dismiss()
+                }
+                else -> {
+                    dismiss()
+                }
+            }
         }
+    }
+
+    interface ItemClickListener {
+        fun onOkClick()
     }
 }

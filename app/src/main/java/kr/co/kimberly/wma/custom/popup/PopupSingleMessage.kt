@@ -2,18 +2,23 @@ package kr.co.kimberly.wma.custom.popup
 
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.provider.Settings
 import android.view.View
 import android.widget.LinearLayout
+import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSingleMessageBinding
+import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kotlin.system.exitProcess
 
-class PopupSingleMessage(mContext: Context, private var title: String, private var msg: String? = null): Dialog(mContext) {
+class PopupSingleMessage(mContext: Context, private var title: String? = null, private var msg: String? = null, val mHandler: Handler? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupSingleMessageBinding
-
     private var context = mContext
 
     var itemClickListener: ItemClickListener? = null
@@ -37,9 +42,19 @@ class PopupSingleMessage(mContext: Context, private var title: String, private v
         mBinding.title.text = title
         mBinding.tvMsg.text = msg
 
+        if (title.isNullOrEmpty()) {
+            mBinding.title.visibility = View.GONE
+        }
+
+        if (msg.isNullOrEmpty()) {
+            mBinding.tvMsg.visibility = View.GONE
+            mBinding.title.textSize = 18F
+        }
+
         mBinding.cancel.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 itemClickListener?.onCancelClick()
+                mHandler?.sendEmptyMessage(Define.EVENT_CANCEL)
                 hideDialog()
             }
         })
@@ -47,17 +62,13 @@ class PopupSingleMessage(mContext: Context, private var title: String, private v
         mBinding.ok.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 itemClickListener?.onOkClick()
+                mHandler?.sendEmptyMessage(Define.EVENT_OK)
                 hideDialog()
                 if (msg.isNullOrEmpty()) {
                     exitProcess(0)
                 }
             }
         })
-
-        if (msg.isNullOrEmpty()) {
-            mBinding.tvMsg.visibility = View.GONE
-            mBinding.title.textSize = 18F
-        }
     }
 
     fun hideDialog() {

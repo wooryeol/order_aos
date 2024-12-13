@@ -2,26 +2,28 @@ package kr.co.kimberly.wma.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.CellAccountSearchBinding
-import kr.co.kimberly.wma.model.AccountSearchModel
+import kr.co.kimberly.wma.network.model.CustomerModel
 import java.util.ArrayList
 
 class AccountSearchAdapter(context: Context): RecyclerView.Adapter<AccountSearchAdapter.ViewHolder>() {
-    var dataList: List<AccountSearchModel> = ArrayList()
+    var dataList: List<CustomerModel> = ArrayList()
     var itemClickListener: ItemClickListener? = null
     var mContext = context
 
     inner class ViewHolder(val binding: CellAccountSearchBinding): RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(itemModel: AccountSearchModel) {
-            binding.accountSearchName.text = itemModel.name
+        @SuppressLint("SetTextI18n")
+        fun bind(itemModel: CustomerModel) {
+            binding.accountSearchName.text = "(${itemModel.custCd}) ${itemModel.custNm} [${itemModel.remainAmt}원]"
 
             itemView.setOnClickListener {
+                Utils.log("selected account ====> (${itemModel.custCd}) ${itemModel.custNm} [${itemModel.remainAmt}원]")
                 itemClickListener?.onItemClick(itemModel)
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
                 intent.putExtra(Define.UNIQUE, itemModel.name)
@@ -61,6 +63,6 @@ class AccountSearchAdapter(context: Context): RecyclerView.Adapter<AccountSearch
     }
 
     interface ItemClickListener {
-        fun onItemClick(item: AccountSearchModel)
+        fun onItemClick(item: CustomerModel)
     }
 }

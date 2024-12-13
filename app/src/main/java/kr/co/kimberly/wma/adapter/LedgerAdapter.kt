@@ -3,19 +3,18 @@ package kr.co.kimberly.wma.adapter
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.os.Handler
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.CellLedgerBinding
-import kr.co.kimberly.wma.databinding.CellStorageBinding
-import kr.co.kimberly.wma.model.LedgerModel
+import kr.co.kimberly.wma.network.model.LedgerModel
+import java.text.DecimalFormat
 import java.util.ArrayList
 
 class LedgerAdapter(context: Context, activity: Activity): RecyclerView.Adapter<LedgerAdapter.ViewHolder>() {
 
-    var dataList: List<LedgerModel> = ArrayList()
+    var dataList: ArrayList<LedgerModel> = ArrayList()
     var mContext = context
     var mActivity = activity
 
@@ -24,10 +23,9 @@ class LedgerAdapter(context: Context, activity: Activity): RecyclerView.Adapter<
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: LedgerModel) {
 
-            binding.date.text = itemModel.date
-            binding.saleAmount.text = itemModel.saleAmount
-            binding.collectAmount.text = itemModel.collectAmount
-
+            binding.date.text = itemModel.transDate
+            binding.saleAmount.text = "${Utils.decimal(itemModel.salePrice!!)}원"
+            binding.collectAmount.text = "${Utils.decimal(itemModel.collectionPrice!!)}원"
         }
     }
 

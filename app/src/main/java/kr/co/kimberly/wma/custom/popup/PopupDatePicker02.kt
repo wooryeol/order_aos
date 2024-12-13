@@ -8,10 +8,8 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
-import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.databinding.PopupDatePickerBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -147,13 +145,15 @@ class PopupDatePicker02(val mContext: Context, private val isDate: Boolean, priv
 
         return if (selectedDate < aMonthBefore) {
             showNoticePopup("오늘 기준으로 최대 한달 전의 전표만 조회가 가능합니다.")
+            hideDialog()
             calendar.add(Calendar.DAY_OF_YEAR, +1)
             calendar.time
         } else if (selectedDate > comparedDate) {
             showNoticePopup("오늘 기준으로 이전의 날짜의 전표만 조회가 가능합니다.")
+            hideDialog()
             comparedDate
         } else {
-            dismiss()
+            hideDialog()
             selectedDate
         }
     }
@@ -278,5 +278,11 @@ class PopupDatePicker02(val mContext: Context, private val isDate: Boolean, priv
         calendar.set(Calendar.YEAR, year)
         calendar.set(Calendar.MONTH, currentMonth - 1)
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+    }
+
+    fun hideDialog() {
+        if (isShowing) {
+            dismiss()
+        }
     }
 }

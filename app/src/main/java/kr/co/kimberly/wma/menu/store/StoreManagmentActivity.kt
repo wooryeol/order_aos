@@ -88,7 +88,7 @@ class StoreManagementActivity : AppCompatActivity() {
             override fun onSingleClick(v: View) {
                 val popupAccountSearch = PopupAccountSearch(mContext)
                 popupAccountSearch.onItemSelect = {
-                    mBinding.accountName.text = it.name
+                    mBinding.accountName.text = it.custNm
                 }
                 popupAccountSearch.show()
             }
@@ -135,21 +135,20 @@ class StoreManagementActivity : AppCompatActivity() {
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 val popupSingleMessage = PopupSingleMessage(mContext, getString(R.string.storeManagementSend), getString(R.string.storeManagementSendMsg))
-
                 if (mBinding.accountName.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "거래처를 검색해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "거래처를 검색해주세요")
                 } else if(mBinding.title.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "제목을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "제목을 입력해주세요")
                 } else if(mBinding.creator.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "생성자를 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "생성자를 입력해주세요")
                 } else if(mBinding.before.text.isNullOrEmpty() || mBinding.after.text.isNullOrEmpty()) {
-                    Toast.makeText(mContext, "내용을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "내용을 입력해주세요")
                 } else if (mBinding.beforeImg.visibility == View.GONE || mBinding.afterImg.visibility == View.GONE) {
-                    Toast.makeText(mContext, "사진을 등록 해주세요", Toast.LENGTH_SHORT).show()
+                    Utils.popupNotice(mContext, "사진을 등록 해주세요")
                 } else {
                     popupSingleMessage.itemClickListener = object: PopupSingleMessage.ItemClickListener {
                         override fun onCancelClick() {
-                            Log.d("tttt", "취소 클릭함")
+                            Utils.log("취소 클릭함")
                         }
 
                         @SuppressLint("UseCompatLoadingForDrawables")
@@ -191,7 +190,7 @@ class StoreManagementActivity : AppCompatActivity() {
 
                 }
             })
-            .setDeniedMessage("권한을 허용해주세요. [설정] > [앱 및 알림] > [고급] > [앱 권한]")
+            .setDeniedMessage("${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
             .setPermissions(Manifest.permission.CAMERA)
             .check()
     }
@@ -212,7 +211,7 @@ class StoreManagementActivity : AppCompatActivity() {
 
                 }
             })
-            .setDeniedMessage("권한을 허용해주세요. [설정] > [앱 및 알림] > [고급] > [앱 권한]")
+            .setDeniedMessage("${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
             .setPermissions(*permission)
             .check()
     }
@@ -269,7 +268,7 @@ class StoreManagementActivity : AppCompatActivity() {
     private fun addImageView(uri: Uri) {
         val exifInterface = Utils.getOrientationOfImage(mContext, uri)
         val bitmap = Utils.getRotatedBitmap(Utils.uriToBitmap(mActivity, uri), exifInterface.toFloat())
-        Log.d("testtest", "bitmap ===> $bitmap")
+        Utils.log("bitmap ====> $bitmap")
 
         if (bitmap != null) {
             if (isAddImgSw == 0) {

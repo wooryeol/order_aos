@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 
 object SharedData {
     private const val SHARED_NAME = "BluetoothScanner"
@@ -11,6 +13,15 @@ object SharedData {
     //검색어 저장
     private const val SHARED_SHEARCH_HISTORY = "shared_search_history"
     private const val KEY_SEARCH_HISTORY = "key_search_history"
+
+    const val PRINTER_NAME = ""
+    const val PRINTER_ADDR = ""
+
+    const val SCANNER_NAME = "printer_name"
+    const val SCANNER_ADDR = "printer_addr"
+
+    const val WRH_NM = "wrh_nm"
+    const val LOGIN_DATA = "login_data"
 
     fun setSharedData(context: Context, strKey: String, objData: Any): Boolean {
         val prefs = context.getSharedPreferences(SHARED_NAME, Activity.MODE_PRIVATE)
@@ -36,11 +47,46 @@ object SharedData {
                 ed.putString(strKey, objData as String)
             }
             else -> {
-                /*Utils.Log("저장 실패!")*/
+                /*Utils.log("저장 실패!")*/
                 return false
             }
         }
         return ed.commit()
+    }
+
+    fun<T> setSharedDataArray(context: Context, strKey: String, list: ArrayList<T>):Boolean {
+        val prefs = context.getSharedPreferences(SHARED_NAME, Activity.MODE_PRIVATE)
+        if (prefs == null || strKey == null || list == null) {
+            return false
+        }
+
+        val ed = prefs.edit()
+        val json = Gson().toJson(list)
+        ed.putString(strKey, json)
+
+        return ed.commit()
+    }
+
+    fun <T> getSharedDataArray(context: Context, strKey: String, clazz: Class<T>): ArrayList<T> {
+        val prefs = context.getSharedPreferences(SHARED_NAME, Activity.MODE_PRIVATE)
+        val json = prefs.getString(strKey, null) ?: return ArrayList()
+
+        val typeToken = TypeToken.getParameterized(ArrayList::class.java, clazz).type
+        return Gson().fromJson(json, typeToken)
+    }
+
+    fun <T> setSharedDataModel(context: Context, key: String, model: T) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val json = Gson().toJson(model)
+        editor.putString(key, json)
+        editor.apply()
+    }
+
+    fun <T> getSharedDataModel(context: Context, key: String, clazz: Class<T>): T? {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences(SHARED_NAME, Context.MODE_PRIVATE)
+        val json = sharedPreferences.getString(key, null) ?: return null
+        return Gson().fromJson(json, clazz)
     }
 
     fun getSharedData(context: Context, strKey: String, objData: Boolean): Boolean {
