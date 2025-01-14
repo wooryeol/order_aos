@@ -22,7 +22,7 @@ class SearchResultAdapter(context: Context): RecyclerView.Adapter<SearchResultAd
             binding.accountSearchName.text = "(${itemModel.itemCd}) ${itemModel.itemNm} [${itemModel.whStock}]"
 
             itemView.setOnClickListener {
-                Utils.Log("clicked item ====> ${Gson().toJson(itemModel)}")
+                Utils.log("clicked item ====> ${Gson().toJson(itemModel)}")
                 // 본사 발주 가능일 때
                 /*if(itemModel.enableOrderYn == "N") {
                     itemClickListener?.onItemClick(itemModel)

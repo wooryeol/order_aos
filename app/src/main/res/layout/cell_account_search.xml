@@ -16,7 +16,7 @@
             android:scrollbars="vertical"
             android:text="(000018) 신림마트 [0원]"
             android:textColor="@color/black"
-            android:textSize="18dp"/>
+            android:textSize="16dp"/>
     </LinearLayout>
 
     <View

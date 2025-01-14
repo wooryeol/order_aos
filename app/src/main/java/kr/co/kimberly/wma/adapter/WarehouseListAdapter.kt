@@ -24,7 +24,7 @@ class WarehouseListAdapter(context: Context): RecyclerView.Adapter<WarehouseList
             binding.accountSearchName.text = "(${itemModel.warehouseCd}) ${itemModel.warehouseNm}"
 
             itemView.setOnClickListener {
-                Utils.Log("selected warehouse ====> (${itemModel.warehouseCd}) ${itemModel.warehouseNm}")
+                Utils.log("selected warehouse ====> (${itemModel.warehouseCd}) ${itemModel.warehouseNm}")
                 itemClickListener?.onItemClick(itemModel)
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
                 intent.putExtra(Define.UNIQUE, itemModel.name)

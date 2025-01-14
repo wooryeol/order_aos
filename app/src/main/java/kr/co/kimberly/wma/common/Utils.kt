@@ -15,13 +15,18 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.text.TextWatcher
 import android.util.TypedValue
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kr.co.kimberly.wma.GlobalApplication
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.custom.popup.PopupNotice
 import kr.co.kimberly.wma.custom.popup.PopupNoticeV2
 import kr.co.kimberly.wma.network.model.LoginResponseModel
@@ -35,25 +40,6 @@ import java.util.Date
 import java.util.Locale
 
 object Utils {
-
-    /**
-     * @param context : 해당 액티비티 context
-     * @param activity : 이동하려는 액티비티명
-     * @param finish : 이동하고 난 후 이전 액티비티를 종료 시켜주고 싶을 때 사용
-     */
-    fun moveToPage(context: Context, activity: Activity, finish: Boolean? = null){
-        // 앱의 MainActivity로 넘어가기
-        val intent = Intent(context, activity::class.java)
-        context.startActivity(intent)
-
-        // 현재 액티비티 닫기
-
-        if(finish != null){
-            if (finish) {
-                (context as Activity).finish()
-            }
-        }
-    }
 
     /**
      * 다이얼로그 사이즈 변경
@@ -186,7 +172,7 @@ object Utils {
         }
     }
 
-    fun Log(msg: String) {
+    fun log(msg: String) {
             android.util.Log.d("kimberly_aos", msg)
     }
 
@@ -196,15 +182,30 @@ object Utils {
         return stringWithoutCommas.toInt()
     }
 
+    // 내일 날짜
+    fun getNextDay(): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, 1)
+        return dateFormat.format(calendar.time)
+    }
+
+
     // 로그인 정보 가져오기
-    fun getLoginData(): LoginResponseModel? {
+    fun getLoginData(): LoginResponseModel {
         val json = SharedData.getSharedData(
             GlobalApplication.applicationContext(),
             SharedData.LOGIN_DATA,
             ""
         )
 
-        return Gson().fromJson(json, LoginResponseModel::class.java)
+        //return Gson().fromJson(json, LoginResponseModel::class.java)
+        val listType = object : TypeToken<LoginResponseModel>() {}.type
+        //val dataList: List<LoginResponseModel> = Gson().fromJson(json, listType)
+        val dataList: LoginResponseModel = Gson().fromJson(json, listType)
+
+        // return dataList.firstOrNull() ?: LoginResponseModel()
+        return dataList ?: LoginResponseModel()
     }
 
     // 날짜 가져오기
@@ -220,33 +221,39 @@ object Utils {
         return decimal.format(number)
     }
 
-    // 기본 경고 팝업
-    fun popupNotice(context: Context, msg: String){
-        val popupNotice = PopupNotice(context, msg)
-        popupNotice.show()
+    fun decimalLong(number: Long):String {
+        val decimal = DecimalFormat("#,###")
+        return decimal.format(number)
     }
 
-    // 주문 완료 하지 않고 뒤로 가기 눌렀을 때
-    fun backBtnPopup(context: Context, activity: Activity, list: ArrayList<*>,){
-        if (list.isEmpty()) {
-            activity.finish()
-        } else {
-            PopupNoticeV2(context, "기존 주문이 완료되지 않았습니다.\n이전 화면으로 이동하시겠습니까??",
-                object : Handler(Looper.getMainLooper()) {
-                    @SuppressLint("NotifyDataSetChanged")
-                    override fun handleMessage(msg: Message) {
-                        when (msg.what) {
-                            Define.OK -> {
-                                activity.finish()
-                            }
-                        }
-                    }
-                }).show()
+    // 기본 경고 팝업
+    fun popupNotice(context: Context, msg: String, view: View? = null){
+        val popupNotice = PopupNotice(context, msg)
+        popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+            override fun onOkClick() {
+                if (view != null) {
+                    view.requestFocus()
+                    view.postDelayed({
+                        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+                    }, 100)
+                }
+            }
         }
+        popupNotice.show()
     }
 
     // 토스트 메세지
     fun toast(context: Context, msg: String){
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * 단말기 모델 가져오기
+     * @param context
+     * @return 단말기 모델
+     */
+    fun appDeviceName(): String? {
+        return Build.MODEL
     }
 }

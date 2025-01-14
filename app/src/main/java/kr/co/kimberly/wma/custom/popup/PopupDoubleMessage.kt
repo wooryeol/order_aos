@@ -14,7 +14,6 @@ import kr.co.kimberly.wma.databinding.PopupDoubleMessageBinding
 class PopupDoubleMessage(mContext: Context, private var title: String, private var msg01: String, private var msg02: String? = null, private val purchase: Boolean? = null): Dialog(mContext) {
     private lateinit var mBinding: PopupDoubleMessageBinding
 
-    private var context = mContext
 
     var itemClickListener: ItemClickListener? = null
 
@@ -37,6 +36,10 @@ class PopupDoubleMessage(mContext: Context, private var title: String, private v
         mBinding.title.text = title
         mBinding.tvMsg01.text = msg01
         mBinding.tvMsg02.text = msg02
+
+        if (msg02.isNullOrEmpty()) {
+            mBinding.tvMsg02.visibility = View.GONE
+        }
 
         if (purchase != null) {
             if (purchase) {

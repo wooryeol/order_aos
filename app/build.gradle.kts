@@ -11,7 +11,7 @@ android {
         applicationId = "kr.co.kimberly.wma"
         minSdk = 28
         targetSdk = 34
-        versionCode = 24071201
+        versionCode = 250114
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -19,9 +19,8 @@ android {
     }
 
     buildTypes {
-
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -35,7 +34,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
     }
 }
@@ -60,6 +59,9 @@ dependencies {
 
     // TSC 프린터
     implementation(files("libs/bluetooth.jar"))
+    // SM-F711N 모델 스캔 라이브러리
+    implementation(files("libs/device.sdk.jar"))
+    implementation(files("libs/kdclib.jar"))
 
     //lottie 라이브러리
     implementation ("com.airbnb.android:lottie:3.7.0")
@@ -84,4 +86,9 @@ dependencies {
 
     //이미지 로딩
     implementation ("com.github.bumptech.glide:glide:4.12.0")
+
+    // ViewModel and LiveData
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
+    implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
+    implementation ("androidx.activity:activity-ktx:1.9.3")
 }

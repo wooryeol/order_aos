@@ -14,7 +14,6 @@ import kr.co.kimberly.wma.databinding.PopupNoticeV2Binding
 
 class PopupNoticeV2(mContext: Context, private val msg:String, val mHandler: Handler): Dialog(mContext) {
     private lateinit var mBinding: PopupNoticeV2Binding
-    private val context = mContext
     var itemClickListener: ItemClickListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,13 +36,14 @@ class PopupNoticeV2(mContext: Context, private val msg:String, val mHandler: Han
 
         mBinding.ok.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                mHandler.sendEmptyMessage(Define.OK)
+                mHandler.sendEmptyMessage(Define.EVENT_OK)
                 hideDialog()
             }
         })
 
         mBinding.cancel.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
+                mHandler.sendEmptyMessage(Define.EVENT_CANCEL)
                 hideDialog()
             }
         })

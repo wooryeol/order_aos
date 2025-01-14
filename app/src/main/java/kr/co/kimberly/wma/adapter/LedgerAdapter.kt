@@ -23,9 +23,9 @@ class LedgerAdapter(context: Context, activity: Activity): RecyclerView.Adapter<
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: LedgerModel) {
 
-            binding.date.text = itemModel.date
-            binding.saleAmount.text = "${Utils.decimal(itemModel.saleAmount)}원"
-            binding.collectAmount.text = "${Utils.decimal(itemModel.collectAmount)}원"
+            binding.date.text = itemModel.transDate
+            binding.saleAmount.text = "${Utils.decimal(itemModel.salePrice!!)}원"
+            binding.collectAmount.text = "${Utils.decimal(itemModel.collectionPrice!!)}원"
         }
     }
 

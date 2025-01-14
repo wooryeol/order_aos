@@ -19,17 +19,18 @@ import kr.co.kimberly.wma.menu.slip.SlipInquiryActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.CustomerModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import kr.co.kimberly.wma.network.model.SlipOrderListModel
 import retrofit2.Call
 import retrofit2.Response
 
 @SuppressLint("NotifyDataSetChanged")
-class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<CustomerModel>, private val searchFromDate: String? = null, private val searchToDate: String? = null, val order: Boolean? = null ): Dialog(mContext) {
+class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<CustomerModel>): Dialog(mContext) {
     private lateinit var mBinding: PopupSearchResultBinding
     private var mLoginInfo: LoginResponseModel? = null // 로그인 정보
     private var context = mContext
-    var onItemSelect: ((ArrayList<SlipOrderListModel>) -> Unit)? = null
+    var onOrderItemSelect: ((ArrayList<SlipOrderListModel>) -> Unit)? = null
+    var onReturnItemSelect: ((ArrayList<SlipOrderListModel>) -> Unit)? = null
     var onTitleSelect: ((CustomerModel) -> Unit)? = null
     var adapter: AccountSearchAdapter? = null
 
@@ -63,7 +64,6 @@ class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<Customer
         adapter?.itemClickListener = object: AccountSearchAdapter.ItemClickListener {
             override fun onItemClick(item: CustomerModel) {
                 onTitleSelect?.invoke(item)
-                searchOrderSlipList(item.custCd)
                 hideDialog()
             }
         }
@@ -79,40 +79,5 @@ class PopupAccountSlipSearch(mContext: Context, val dataList: ArrayList<Customer
         if (isShowing) {
             dismiss()
         }
-    }
-
-    private fun searchOrderSlipList(customerCd: String){
-        val agencyCd = mLoginInfo?.agencyCd!!
-        val userId = mLoginInfo?.userId!!
-        val slipType = if (order!!) Define.ORDER else Define.RETURN
-
-        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
-        val call = service.orderSlipList(agencyCd, userId, searchFromDate?.replace("/","-"), searchToDate?.replace("/","-"), customerCd, slipType)
-        //test
-        //val call = service.orderSlipList("C000028", "mb2004", "2024-06-01", "2024-06-27", "000001", "NN")
-        call.enqueue(object : retrofit2.Callback<ListResultModel<SlipOrderListModel>> {
-            override fun onResponse(
-                call: Call<ListResultModel<SlipOrderListModel>>,
-                response: Response<ListResultModel<SlipOrderListModel>>
-            ) {
-                if (response.isSuccessful) {
-                    val data = response.body()
-                    if (data?.returnCd == Define.RETURN_CD_00 || data?.returnCd == Define.RETURN_CD_90 || data?.returnCd == Define.RETURN_CD_91) {
-                        Utils.Log("OrderSlipList search success ====> ${Gson().toJson(data)}")
-                        onItemSelect?.invoke(data.data as ArrayList<SlipOrderListModel>)
-                        SlipInquiryActivity().slipAdapter?.notifyDataSetChanged()
-                    } else {
-                        Utils.popupNotice(context, data?.returnMsg!!)
-                    }
-                } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<ListResultModel<SlipOrderListModel>>, t: Throwable) {
-                Utils.Log("search failed ====> ${t.message}")
-            }
-
-        })
     }
 }

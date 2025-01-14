@@ -7,8 +7,10 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.gson.Gson
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.MainMenuAdapter
 import kr.co.kimberly.wma.common.Define
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         mActivity = this
 
         mLoginInfo = Utils.getLoginData()
-        Utils.Log("mainActivity mLoginInfo =====> $mLoginInfo")
+        Utils.log("mainActivity mLoginInfo =====> ${Gson().toJson(mLoginInfo)}")
 
         // 앱 버전 체크
         if (isVersionCheck) {
@@ -54,8 +56,11 @@ class MainActivity : AppCompatActivity() {
         list.add(MainMenuModel(R.drawable.menu04, getString(R.string.menu04), Define.MENU04))
         list.add(MainMenuModel(R.drawable.menu05, getString(R.string.menu05), Define.MENU05))
         list.add(MainMenuModel(R.drawable.menu06, getString(R.string.menu06), Define.MENU06))
-        list.add(MainMenuModel(R.drawable.menu07, getString(R.string.menu07), Define.MENU07))
-        list.add(MainMenuModel(R.drawable.menu08, getString(R.string.menu08), Define.MENU08))
+        //list.add(MainMenuModel(R.drawable.menu07, getString(R.string.menu07), Define.MENU07))
+        // 로그인 시 authorityBuy 값이 Y일 경우에면 구매요청 보이도록
+        if (mLoginInfo?.authorityBuy == "Y"){
+            list.add(MainMenuModel(R.drawable.menu08, getString(R.string.menu08), Define.MENU08))
+        }
         list.add(MainMenuModel(R.drawable.menu09, getString(R.string.menu09), Define.MENU09))
 
         val adapter = MainMenuAdapter(mContext, mActivity)
@@ -89,11 +94,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // 실행종료
-        val popupSingleMessage = PopupSingleMessage(mContext, "모바일 유한킴벌리를\n종료하시겠습니까?", null)
         mBinding.finish.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                popupSingleMessage.show()
+                // 실행종료
+                PopupSingleMessage(mContext, mContext.getString(R.string.msg_finish), null).show()
             }
         })
     }
@@ -119,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                 popupNotice.show()
             }
         } catch (error: Error) {
-            Utils.Log("error ====> $error")
+            Utils.log("error ====> $error")
         }
     }
 
@@ -128,13 +132,13 @@ class MainActivity : AppCompatActivity() {
         //val deviceVersion = BuildConfig.VERSION_NAME
         val deviceVersion = "1.0.2"
 
-        Utils.Log("storeVersion ====> $storeVersion")
-        Utils.Log("deviceVersion ====> $deviceVersion")
+        Utils.log("storeVersion ====> $storeVersion")
+        Utils.log("deviceVersion ====> $deviceVersion")
 
         return try {
             storeVersion!! > deviceVersion
         } catch (error: Error) {
-            Utils.Log("error ====> $error")
+            Utils.log("error ====> $error")
             false
         }
     }
@@ -144,6 +148,21 @@ class MainActivity : AppCompatActivity() {
 
         if (isVersionCheck) {
             appVersionCheck()
+        }
+    }
+
+    private var clickTime: Long = 0
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        val current = System.currentTimeMillis()
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            if(current - clickTime >= 2000) {
+                PopupSingleMessage(mContext, mContext.getString(R.string.msg_finish), null).show()
+            } else {
+                finish()
+            }
+        } else {
+            super.onBackPressed()
         }
     }
 }

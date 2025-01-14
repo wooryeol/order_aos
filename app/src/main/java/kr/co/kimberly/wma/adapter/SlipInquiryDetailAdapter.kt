@@ -24,7 +24,7 @@ class SlipInquiryDetailAdapter(context: Context, private val updateData: ((Array
             if (itemModel.netPrice == null){
                 binding.tvPrice.text = "${Utils.decimal(itemModel.orderPrice!!)}원"
             } else {
-                binding.tvPrice.text = "${Utils.decimal(itemModel.netPrice)}원"
+                binding.tvPrice.text = "${Utils.decimal(itemModel.netPrice!!)}원"
             }
             binding.tvTotal.text = Utils.decimal(itemModel.saleQty!!)
             binding.tvTotalAmount.text = "${Utils.decimal(itemModel.amount!!)}원"

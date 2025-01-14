@@ -29,7 +29,7 @@
                 android:scrollbars="vertical"
                 android:text="@string/purchaseSlip"
                 android:textColor="@color/color_7E828B"
-                android:textSize="16dp"/>
+                android:textSize="14dp"/>
 
             <View
                 android:layout_width="0dp"
@@ -43,7 +43,7 @@
                 android:scrollbars="vertical"
                 android:text="20240100012"
                 android:textColor="@color/black"
-                android:textSize="16dp"/>
+                android:textSize="14dp"/>
 
         </LinearLayout>
 
@@ -60,7 +60,7 @@
                 android:scrollbars="vertical"
                 android:text="@string/distributorCode"
                 android:textColor="@color/color_7E828B"
-                android:textSize="16dp"/>
+                android:textSize="14dp"/>
 
             <View
                 android:layout_width="0dp"
@@ -75,7 +75,7 @@
                 android:scrollbars="vertical"
                 android:text="(30900785) (주)명보유통"
                 android:textColor="@color/black"
-                android:textSize="16dp"/>
+                android:textSize="14dp"/>
 
         </LinearLayout>
 
@@ -93,7 +93,7 @@
                 android:scrollbars="vertical"
                 android:text="@string/purchaseAddress"
                 android:textColor="@color/color_7E828B"
-                android:textSize="16dp"/>
+                android:textSize="14dp"/>
 
             <View
                 android:layout_width="0dp"
@@ -108,7 +108,7 @@
                 android:scrollbars="vertical"
                 android:text="(09087754) 테스트1"
                 android:textColor="@color/black"
-                android:textSize="16dp"/>
+                android:textSize="14dp"/>
 
         </LinearLayout>
     </LinearLayout>
@@ -140,7 +140,7 @@
             android:layout_gravity="center"
             android:layout_marginStart="16dp"
             android:text="총금액 :"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:textStyle="normal"
             android:textColor="@color/color_1A1A1A" />
 
@@ -151,7 +151,7 @@
             android:layout_gravity="center"
             android:layout_marginEnd="16dp"
             android:text="0원"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:textStyle="normal"
             android:textColor="@color/color_1D6DE5"/>
 

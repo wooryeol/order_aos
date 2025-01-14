@@ -1,7 +1,6 @@
 package kr.co.kimberly.wma.network.model
 
-class DevicesModel(
+class DeviceModel(
     var deviceName: String,
     var deviceAddress: String,
-    var isConnected : Boolean = false
 )

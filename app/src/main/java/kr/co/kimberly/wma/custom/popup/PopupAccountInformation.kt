@@ -35,13 +35,13 @@ class PopupAccountInformation(mContext: Context, private val accountList: ArrayL
         mBinding = PopupSearchResultBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
-        Utils.Log("accountList ====> ${Gson().toJson(accountList)}")
-        Utils.Log("itemList ====> ${Gson().toJson(itemList)}")
+        Utils.log("accountList ====> ${Gson().toJson(accountList)}")
+        Utils.log("itemList ====> ${Gson().toJson(itemList)}")
         initViews()
     }
 
     private fun initViews() {
-        mLoginInfo = Utils.getLoginData()!!
+        mLoginInfo = Utils.getLoginData()
 
         // setCancelable(false) // 뒤로가기 버튼, 바깥 화면 터치시 닫히지 않게
 

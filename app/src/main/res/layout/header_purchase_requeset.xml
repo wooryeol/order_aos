@@ -38,9 +38,9 @@
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="10dp"
                 android:singleLine="true"
-                android:text="@string/purchaseAccountHint"
-                android:textColor="@color/black"
-                android:textSize="16dp"
+                android:hint="@string/purchaseAccountHint"
+                android:textColor="@color/color_1A1A1A"
+                android:textSize="14dp"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
         </RelativeLayout>
@@ -79,8 +79,9 @@
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:singleLine="true"
-                android:textSize="16dp"
-                android:text="@string/purchaseAddressHint"
+                android:textSize="14dp"
+                android:hint="@string/purchaseAddressHint"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
         </RelativeLayout>
@@ -111,12 +112,13 @@
             android:layout_marginEnd="8dp"
             android:background="@drawable/et_round_c9cbd0"
             android:layout_gravity="center_vertical">
-            <EditText
+
+            <AutoCompleteTextView
                 android:id="@+id/etProductName"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="40dp"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:background="@color/trans"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
@@ -124,7 +126,7 @@
                 android:singleLine="true"
                 android:inputType="text"
                 android:hint="@string/productNameHint"
-                tools:ignore="Autofill,SpUsage,TextFields" />
+                tools:ignore="Autofill,NestedWeights,SpUsage,TextFields" />
 
             <TextView
                 android:visibility="gone"
@@ -132,13 +134,14 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="40dp"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:background="@color/trans"
                 android:paddingVertical="10dp"
                 android:paddingHorizontal="12dp"
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:singleLine="true"
+                android:textColor="@color/color_1A1A1A"
                 tools:ignore="SpUsage" />
 
             <ImageButton
@@ -157,7 +160,7 @@
             android:text="@string/search"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:background="@drawable/bt_round_103c7e"
             style="?android:attr/borderlessButtonStyle"/>
     </LinearLayout>
@@ -200,7 +203,7 @@
             android:layout_height="40dp"
             android:layout_weight="1"
             android:layout_marginEnd="10dp"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:text="0"
             android:gravity="end"
             android:background="@drawable/et_round_c9cbd0"
@@ -224,7 +227,7 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:text="0"
             android:gravity="end"
             android:background="@drawable/ll_round_f2f2f2"
@@ -243,7 +246,7 @@
         android:text="@string/addOrder"
         android:textColor="@color/white"
         android:textStyle="bold"
-        android:textSize="16dp"
+        android:textSize="14dp"
         android:background="@drawable/bt_round_103c7e"
         style="?android:attr/borderlessButtonStyle"/>
 

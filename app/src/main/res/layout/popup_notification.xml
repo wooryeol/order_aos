@@ -28,7 +28,7 @@
             android:text="@string/notification"
             android:textStyle="bold"
             android:textColor="@color/black"
-            android:textSize="16dp"/>
+            android:textSize="14dp"/>
 
         <TextView
             android:id="@+id/tvMsg"
@@ -41,7 +41,7 @@
             android:lineSpacingExtra="2dp"
             android:scrollbars="vertical"
             android:textColor="@color/black"
-            android:textSize="16dp"/>
+            android:textSize="14dp"/>
 
         <Button
             android:id="@+id/btConfirm"
@@ -52,7 +52,7 @@
             android:background="@drawable/et_round_c9cbd0"
             android:text="확인"
             android:textColor="@color/black"
-            android:textSize="16dp" />
+            android:textSize="14dp" />
     </LinearLayout>
 
 </LinearLayout>

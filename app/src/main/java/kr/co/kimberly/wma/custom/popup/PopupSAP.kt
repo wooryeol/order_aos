@@ -9,23 +9,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.gson.Gson
-import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.adapter.SapListAdapter
-import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
+import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupSearchResultBinding
-import kr.co.kimberly.wma.menu.slip.SlipInquiryActivity
-import kr.co.kimberly.wma.network.ApiClientService
-import kr.co.kimberly.wma.network.model.CustomerModel
-import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
 import kr.co.kimberly.wma.network.model.SapModel
-import kr.co.kimberly.wma.network.model.SearchItemModel
-import kr.co.kimberly.wma.network.model.SlipOrderListModel
-import retrofit2.Call
-import retrofit2.Response
 
 @SuppressLint("NotifyDataSetChanged")
 class PopupSAP(mContext: Context, val dataList: ArrayList<SapModel>, private val returnCd: String): Dialog(mContext) {
@@ -68,6 +57,13 @@ class PopupSAP(mContext: Context, val dataList: ArrayList<SapModel>, private val
                 hideDialog()
             }
         }
+
+        mBinding.btnClose.setOnClickListener(object : OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                hideDialog()
+            }
+
+        })
     }
 
     fun hideDialog() {

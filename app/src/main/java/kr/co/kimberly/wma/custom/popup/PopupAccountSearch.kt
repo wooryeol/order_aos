@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
@@ -24,7 +25,7 @@ import kr.co.kimberly.wma.databinding.PopupAccountSearchBinding
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.CustomerModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ListResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import retrofit2.Call
 import retrofit2.Response
 
@@ -88,6 +89,7 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
                 mBinding.noSearch.visibility = View.GONE
                 mBinding.recyclerview.visibility = View.VISIBLE
                 adapter?.notifyDataSetChanged()
+                GlobalApplication.showKeyboard(context, mBinding.etAccount)
             }
         })
 
@@ -119,56 +121,48 @@ class PopupAccountSearch(mContext: Context): Dialog(mContext) {
             dismiss()
         }
     }
-    fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
-        if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-            val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager?
-            imm!!.hideSoftInputFromWindow(mBinding.btLogin.windowToken, 0) //hide keyboard
-            return true
-        }
-        return false
-    }
 
     private fun searchCustomer() {
+        val loading = PopupLoading(context)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val searchCondition = mBinding.etAccount.text.toString()
         val call = service.client(mLoginInfo?.agencyCd!!, mLoginInfo?.userId!!, searchCondition)
 
-        call.enqueue(object : retrofit2.Callback<ListResultModel<CustomerModel>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<List<CustomerModel>>> {
             override fun onResponse(
-                call: Call<ListResultModel<CustomerModel>>,
-                response: Response<ListResultModel<CustomerModel>>
+                call: Call<ResultModel<List<CustomerModel>>>,
+                response: Response<ResultModel<List<CustomerModel>>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
-                        Utils.Log("account search success ====> ${Gson().toJson(item)}")
+                        //Utils.log("account search success ====> ${Gson().toJson(item)}")
+                        list = item.data as ArrayList<CustomerModel>
+                        adapter?.dataList = list!!
+                        adapter?.notifyDataSetChanged()
 
-                        if (item.data.isNullOrEmpty()) {
-                            Utils.popupNotice(context, "조회 결과가 없습니다.\n다시 검색해주세요.")
+                        if (list.isNullOrEmpty()) {
+                            mBinding.recyclerview.visibility = View.GONE
+                            mBinding.noSearch.visibility = View.VISIBLE
                         } else {
-                            list = item.data
-                            adapter?.dataList = list!!
-                            adapter?.notifyDataSetChanged()
-
-                            if (list.isNullOrEmpty()) {
-                                mBinding.recyclerview.visibility = View.GONE
-                                mBinding.noSearch.visibility = View.VISIBLE
-                            } else {
-                                mBinding.recyclerview.visibility = View.VISIBLE
-                                mBinding.noSearch.visibility = View.GONE
-                            }
+                            mBinding.recyclerview.visibility = View.VISIBLE
+                            mBinding.noSearch.visibility = View.GONE
                         }
                     } else {
-                        Utils.popupNotice(context, item?.returnMsg!!)
+                        Utils.popupNotice(context, item?.returnMsg!!, mBinding.etAccount)
                     }
                 } else {
-
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ListResultModel<CustomerModel>>, t: Throwable) {
-                Utils.Log("search failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<List<CustomerModel>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("search failed ====> ${t.message}")
+                Utils.popupNotice(context, "잠시 후 다시 시도해주세요")
             }
 
         })

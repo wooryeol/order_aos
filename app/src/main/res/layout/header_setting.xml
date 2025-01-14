@@ -7,19 +7,12 @@
     android:layout_height="wrap_content"
     tools:ignore="MissingDefaultResource">
 
-    <View
-        android:id="@+id/headerDivideLine"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/color_DBDCDF"
-        android:layout_marginVertical="20dp"
-        android:orientation="horizontal" />
-
     <LinearLayout
         android:id="@+id/scannerBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_marginTop="20dp"
         android:paddingHorizontal="16dp">
 
         <TextView
@@ -50,10 +43,10 @@
                 android:id="@+id/scanerName"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
                 android:hint="@string/settingTitleHint02"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -77,10 +70,10 @@
                 android:id="@+id/scanerAddress"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
                 android:hint="@string/settingTitleHint02"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -125,10 +118,10 @@
                 android:id="@+id/printName"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
                 android:hint="@string/settingTitleHint02"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 
@@ -152,10 +145,10 @@
                 android:id="@+id/printAddress"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:textSize="16dp"
+                android:textSize="14dp"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
                 android:background="@drawable/et_round_c9cbd0"
-                android:paddingVertical="10dp"
-                android:paddingHorizontal="12dp"
                 android:hint="@string/settingTitleHint02"
                 tools:ignore="Autofill,SpUsage,TextFields" />
 

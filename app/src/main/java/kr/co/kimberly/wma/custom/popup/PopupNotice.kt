@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.View
 import android.widget.LinearLayout
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.PopupNoticeBinding
 import kr.co.kimberly.wma.menu.setting.SettingActivity
@@ -34,6 +35,10 @@ class PopupNotice(mContext: Context, private val msg:String, private val isBluet
         // corner radius 가 보이지 않음
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+        /*if (mBinding.btConfirm.text == context.getString(R.string.confirm)) {
+            mBinding.ok.visibility = View.GONE
+        }*/
 
         mBinding.tvMsg.text = msg
         mBinding.btConfirm.setOnClickListener(object : OnSingleClickListener() {

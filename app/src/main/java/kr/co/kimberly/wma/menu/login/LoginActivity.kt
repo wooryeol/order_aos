@@ -1,29 +1,38 @@
 package kr.co.kimberly.wma.menu.login
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.telephony.TelephonyManager
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.github.chrisbanes.photoview.BuildConfig
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.gun0912.tedpermission.PermissionListener
+import com.gun0912.tedpermission.normal.TedPermission
 import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.SharedData
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
+import kr.co.kimberly.wma.custom.popup.PopupLoading
+import kr.co.kimberly.wma.custom.popup.PopupSingleMessage
 import kr.co.kimberly.wma.databinding.ActLoginBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
 import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.LoginResponseModel
-import kr.co.kimberly.wma.network.model.ObjectResultModel
+import kr.co.kimberly.wma.network.model.ResultModel
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
@@ -37,6 +46,13 @@ class LoginActivity : AppCompatActivity() {
     private var mAgencyCode: String? = null // 대리점 코드
     private var mPhoneNumber : String? = null // 연락처
 
+    private val mPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        Manifest.permission.READ_PHONE_NUMBERS
+    } else {
+        Manifest.permission.READ_PRECISE_PHONE_STATE
+    }
+
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +65,11 @@ class LoginActivity : AppCompatActivity() {
         // 대리점 코드와 휴대폰 번호
         mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
+
+        // 저장되어 있는 전화번호가 없으면 가져올 수 있게 세팅
+        if (mPhoneNumber == "") {
+            requestPhoneNumPermission()
+        }
 
         mBinding.btLogin.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
@@ -150,6 +171,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun login() {
+        val loading = PopupLoading(mContext)
+        loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val userId = mBinding.etId.text.toString()
         val userPw = mBinding.etPw.text.toString()
@@ -163,33 +186,41 @@ class LoginActivity : AppCompatActivity() {
 
         val obj = json.toString()
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
-        Utils.Log("body ====> ${Gson().toJson(json)}")
-        val call = service.postLogin(body)
 
-        call.enqueue(object : retrofit2.Callback<ObjectResultModel<LoginResponseModel>> {
+        val call = service.postLogin(body)
+        call.enqueue(object : retrofit2.Callback<ResultModel<LoginResponseModel>> {
             override fun onResponse(
-                call: Call<ObjectResultModel<LoginResponseModel>>,
-                response: Response<ObjectResultModel<LoginResponseModel>>
+                call: Call<ResultModel<LoginResponseModel>>,
+                response: Response<ResultModel<LoginResponseModel>>
             ) {
+                loading.hideDialog()
                 if (response.isSuccessful) {
                     val item = response.body()
-                    if (item?.returnCd == Define.RETURN_CD_00) {
-                        Utils.Log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
-                        SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, Gson().toJson(item.data))
-                        val intent = Intent(mContext,  MainActivity::class.java)
-                        startActivity(intent)
-                        finish()
-                    } else {
-                        Utils.popupNotice(mContext, item?.returnMsg!!)
+                    when (item?.returnCd) {
+                        Define.RETURN_CD_00 -> {
+                            Utils.log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
+                            SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, Gson().toJson(item.data))
+                            val intent = Intent(mContext,  MainActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
+                        "01" -> {
+                            Utils.popupNotice(mContext, "아이디, 비밀번호, 대리점코드 또는 전화번호를 다시 확인해주세요")
+
+                        }
+                        else -> {
+                            Utils.popupNotice(mContext, item?.returnMsg!!)
+                        }
                     }
                 } else {
-                    Utils.Log("${response.code()} ====> ${response.message()}")
+                    Utils.log("${response.code()} ====> ${response.message()}")
                     Utils.popupNotice(mContext, "로그인 정보를 확인해주세요")
                 }
             }
 
-            override fun onFailure(call: Call<ObjectResultModel<LoginResponseModel>>, t: Throwable) {
-                Utils.Log("login failed ====> ${t.message}")
+            override fun onFailure(call: Call<ResultModel<LoginResponseModel>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("login failed ====> ${t.message}")
                 Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
 
@@ -200,5 +231,54 @@ class LoginActivity : AppCompatActivity() {
         super.onResume()
         mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
+    }
+
+    private fun checkPhoneNumPermission() {
+        TedPermission.create()
+            .setPermissionListener(object : PermissionListener {
+                @SuppressLint("HardwareIds", "MissingPermission")
+                override fun onPermissionGranted() {
+                    val tm = getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
+                    if (tm != null) {
+                        val phoneNum = tm.line1Number
+                        if (phoneNum != null) {
+                            mPhoneNumber = tm.line1Number
+                            SharedData.setSharedData(mContext, "phoneNumber", tm.line1Number)
+                        } else {
+                            Utils.popupNotice(mContext, "휴대폰 번호를 가져올 수 없습니다.")
+                        }
+                    } else {
+                        Utils.popupNotice(mContext, "${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
+                    }
+                }
+
+                override fun onPermissionDenied(deniedPermissions: MutableList<String>?) {
+                    Utils.popupNotice(mContext, "${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
+                }
+            })
+            .setDeniedMessage("${mContext.getString(R.string.msg_permission)}\n${mContext.getString(R.string.msg_permission_sub)}")
+            .setPermissions(mPermission)
+            .check()
+    }
+
+    private fun requestPhoneNumPermission(){
+        if (ActivityCompat.checkSelfPermission(mContext, mPermission) != PackageManager.PERMISSION_GRANTED) {
+            checkPhoneNumPermission()
+        }
+    }
+
+    private var clickTime: Long = 0
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        val current = System.currentTimeMillis()
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            if(current - clickTime >= 2000) {
+                PopupSingleMessage(mContext, mContext.getString(R.string.msg_finish), null).show()
+            } else {
+                finish()
+            }
+        } else {
+            super.onBackPressed()
+        }
     }
 }

@@ -1,26 +1,33 @@
 package kr.co.kimberly.wma.menu.ledger
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.DatePickerDialog
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.view.Gravity
 import android.view.View
-import android.widget.Toast
+import android.view.inputmethod.EditorInfo
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
+import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.adapter.CollectListAdapter
 import kr.co.kimberly.wma.adapter.LedgerAdapter
+import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
-import kr.co.kimberly.wma.custom.popup.PopupAccountSearch
-import kr.co.kimberly.wma.custom.popup.PopupDatePicker
+import kr.co.kimberly.wma.custom.popup.PopupAccountListSearch
 import kr.co.kimberly.wma.custom.popup.PopupDatePicker02
+import kr.co.kimberly.wma.custom.popup.PopupLoading
 import kr.co.kimberly.wma.databinding.ActLedgerBinding
-import kr.co.kimberly.wma.network.model.AccountModel
+import kr.co.kimberly.wma.network.ApiClientService
+import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LedgerModel
-import java.text.DecimalFormat
+import kr.co.kimberly.wma.network.model.LoginResponseModel
+import kr.co.kimberly.wma.network.model.ResultModel
+import retrofit2.Call
+import retrofit2.Response
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -29,8 +36,10 @@ class LedgerActivity : AppCompatActivity() {
     private lateinit var mBinding: ActLedgerBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
+    private lateinit var mLoginInfo: LoginResponseModel
 
-    private val ledgerList = ArrayList<LedgerModel>()
+    private var searchMonth : String? = null
+    private var custCd: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +48,12 @@ class LedgerActivity : AppCompatActivity() {
 
         mContext = this
         mActivity = this
+        mLoginInfo = Utils.getLoginData()
 
         // 헤더 설정
         mBinding.header.headerTitle.text = getString(R.string.menu05)
+        mBinding.header.scanBtn.visibility = View.GONE
+
         mBinding.header.backBtn.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 finish()
@@ -51,59 +63,79 @@ class LedgerActivity : AppCompatActivity() {
 
         // 날짜 선택
         mBinding.dateArea.setOnClickListener {
-            /*val date = if(mBinding.tvDate.text.toString() == getString(R.string.monthHint)) {
-                null
-            } else {
-                mBinding.tvDate.text.toString()
-            }
-            val popupDatePicker = PopupDatePicker(mContext, true, date)
-            popupDatePicker.onDateSelect = {
-                mBinding.tvDate.text = it
-            }
-            popupDatePicker.show()*/
-
             val popupDatePicker = PopupDatePicker02(mContext, isDate = true, isStartDate = false)
             popupDatePicker.onSelectedDate = {
                 mBinding.tvDate.text = it
+                searchMonth = it
+
+                custCd?.let { getLedgerList(it) }
             }
             popupDatePicker.show()
         }
 
-        // 거래처 선택
-        mBinding.accountArea.setOnClickListener(object: OnSingleClickListener() {
-            override fun onSingleClick(v: View) {
-                val popupAccountSearch = PopupAccountSearch(mContext)
-                popupAccountSearch.onItemSelect = {
-                    mBinding.btEmpty.visibility = View.VISIBLE
-                    mBinding.accountName.text = it.custNm
-                }
-                popupAccountSearch.show()
-            }
-        })
-
         mBinding.btSearch.setOnClickListener(object: OnSingleClickListener() {
+            @SuppressLint("SetTextI18n")
             override fun onSingleClick(v: View) {
                 if (mBinding.tvDate.text.isNullOrEmpty()) {
-                    Utils.popupNotice(mContext, "날짜를 선택해주세요")
-                } else if (mBinding.accountName.text.isNullOrEmpty()) {
-                    Utils.popupNotice(mContext, "거래처를 입력해주세요")
+                    Utils.popupNotice(mContext, "조회하실 날짜를 먼저 선택해주세요")
+                } else if (mBinding.etAccount.text.isNullOrEmpty()) {
+                    Utils.popupNotice(mContext, "거래처를 검색해주세요")
                 } else {
-                    showCollectList()
+                    val popupAccountSearch = PopupAccountListSearch(mContext, mBinding.etAccount.text.toString(), mBinding.etAccount)
+                    popupAccountSearch.onItemSelect = {
+                        mBinding.btEmpty.visibility = View.VISIBLE
+                        mBinding.etAccount.visibility = View.GONE
+                        mBinding.tvAccountName.visibility = View.VISIBLE
+                        mBinding.tvAccountName.text = ("(${it.custCd}) ${it.custNm}")
+                        mBinding.etAccount.setText(it.custNm)
+                        mBinding.tvAccountName.isSelected = true
+                        custCd = it.custCd
+                        getLedgerList(it.custCd)
+                    }
+                    popupAccountSearch.show()
                 }
             }
         })
+
+        mBinding.etAccount.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                mBinding.btSearch.performClick()
+                true
+            } else {
+                false
+            }
+        }
+
+        // 지우기 버튼
+        mBinding.btEmpty.setOnClickListener(object: OnSingleClickListener() {
+            override fun onSingleClick(v: View) {
+                mBinding.etAccount.text = null
+                mBinding.etAccount.hint = mContext.getString(R.string.accountHint)
+                mBinding.btEmpty.visibility = View.GONE
+                mBinding.tvAccountName.visibility = View.GONE
+                mBinding.etAccount.visibility = View.VISIBLE
+                custCd = null
+                GlobalApplication.showKeyboard(mContext, mBinding.etAccount)
+            }
+        })
+
+        mBinding.etAccount.addTextChangedListener {
+            if (mBinding.etAccount.text.isNullOrEmpty()) {
+                mBinding.btEmpty.visibility = View.GONE
+            } else {
+                mBinding.btEmpty.visibility = View.VISIBLE
+            }
+        }
     }
 
-    // 검색을 눌렀을 때
-    private fun showCollectList() {
-        showSummary()
-
+    // 어댑터 설정
+    private fun showCollectList(list: ArrayList<LedgerModel>) {
         val adapter = LedgerAdapter(mContext, mActivity)
-        adapter.dataList = ledgerList
+        adapter.dataList = list
         mBinding.recyclerview.adapter = adapter
         mBinding.recyclerview.layoutManager = LinearLayoutManager(mContext)
 
-        if (ledgerList.isNotEmpty()){
+        if (list.isNotEmpty()){
             mBinding.noSearch.visibility = View.GONE
             mBinding.recyclerview.visibility = View.VISIBLE
         } else {
@@ -112,76 +144,48 @@ class LedgerActivity : AppCompatActivity() {
         }
     }
 
-    // 합계 나타내기
-    private fun showSummary() {
-        val list = arrayListOf(
-            LedgerModel("2023-12-07", 924000, 0),
-            LedgerModel("2023-12-14", 0, 510000),
-            LedgerModel("2023-12-21", 1047800, 0),
-            LedgerModel("2023-12-28", 0, 478000),
+    private fun getLedgerList(customerCd: String) {
+        val loading = PopupLoading(mContext)
+        loading.show()
+        val service = ApiClientService.retrofit.create(ApiClientService::class.java)
+        val call = service.getLedgerList(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, customerCd, searchMonth!!)
+        //test
+        //val call = service.getLedgerList("C000028", "mb2004", "002138", "2024-03")
 
-            LedgerModel("2024-01-01", 924000, 0),
-            LedgerModel("2024-01-08", 0, 510000),
-            LedgerModel("2024-01-15", 1047800, 0),
-            LedgerModel("2024-01-22", 0, 478000),
-            LedgerModel("2024-01-29", 670000, 0),
+        call.enqueue(object : retrofit2.Callback<ResultModel<DataModel<LedgerModel>>> {
+            override fun onResponse(
+                call: Call<ResultModel<DataModel<LedgerModel>>>,
+                response: Response<ResultModel<DataModel<LedgerModel>>>
+            ) {
+                loading.hideDialog()
+                if (response.isSuccessful) {
+                    val item = response.body()
+                    if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
+                        Utils.log("ledger search success ====> ${Gson().toJson(item.data)}")
+                        val data = item.data
+                        if (data.ledgerInfo != null) {
+                            showCollectList(data.ledgerInfo as ArrayList<LedgerModel>)
+                        }
+                        mBinding.saleSum.text = Utils.decimal(data.saleTotalPrice!!)
+                        mBinding.performance.text =Utils.decimal(data.collectionTotalPrice!!)
+                        mBinding.lastMonth.text = Utils.decimal(data.lastMonthBond!!)
+                        mBinding.balance.text = Utils.decimal(data.bondBalance!!)
 
-            LedgerModel("2024-02-05", 0, 850000),
-            LedgerModel("2024-02-12", 1234000, 0),
-            LedgerModel("2024-02-19", 0, 690000),
-            LedgerModel("2024-02-26", 780000, 0),
-
-            LedgerModel("2024-03-04", 0, 920000),
-            LedgerModel("2024-03-11", 1420000, 0),
-            LedgerModel("2024-03-18", 0, 760000),
-            LedgerModel("2024-03-25", 890000, 0)
-        )
-
-        val selectedDate = "${mBinding.tvDate.text}-01"
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val formatSelectedDate = LocalDate.parse(selectedDate, formatter)
-
-        val previousBalance = sumAmount(formatSelectedDate, 2, list, false)
-        val sumSalesAmount = sumAmount(formatSelectedDate, 1, list, true)
-        val sumCollectAmount = sumAmount(formatSelectedDate, 1, list, false)
-
-        mBinding.saleSum.text = Utils.decimal(sumSalesAmount)
-        mBinding.performance.text =Utils.decimal(sumCollectAmount)
-        mBinding.lastMonth.text = Utils.decimal(previousBalance)
-        mBinding.balance.text = Utils.decimal(previousBalance+sumSalesAmount-sumCollectAmount)
-    }
-    private fun sumAmount(selectedDate: LocalDate, minusMonth: Long, list: List<LedgerModel>, sales: Boolean): Int {
-        ledgerList.clear()
-        var sumSalesAmount = 0 // 매출 합계
-        var sumCollectAmount = 0 // 수금 실적
-        var previousBalance = 0 // 전월 미수
-
-        val previousMonth = selectedDate.minusMonths(minusMonth).monthValue
-        val previousYear = if (previousMonth == 12) selectedDate.year - 1 else selectedDate.year
-
-        for (item in list) {
-            val ledgerDate = LocalDate.parse(item.date)
-            val ledgerYear = ledgerDate.year
-            val ledgerMonth = ledgerDate.monthValue
-
-            if (ledgerYear == previousYear && ledgerMonth == previousMonth) {
-                if (minusMonth == 1.toLong()) {
-                    ledgerList.add(item)
-                    sumSalesAmount += item.saleAmount
-                    sumCollectAmount += item.collectAmount
+                    } else {
+                        Utils.popupNotice(mContext, item?.returnMsg!!, mBinding.etAccount)
+                    }
                 } else {
-                    previousBalance += item.saleAmount - item.collectAmount
+                    Utils.log("${response.code()} ====> ${response.message()}")
+                    Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요", mBinding.etAccount)
                 }
             }
-        }
-        return if (minusMonth == 1.toLong()) {
-            if (sales) {
-                sumSalesAmount
-            } else {
-                sumCollectAmount
+
+            override fun onFailure(call: Call<ResultModel<DataModel<LedgerModel>>>, t: Throwable) {
+                loading.hideDialog()
+                Utils.log("ledger search failed ====> ${t.message}")
+                Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
             }
-        } else {
-            previousBalance
-        }
+
+        })
     }
 }

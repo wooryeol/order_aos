@@ -5,7 +5,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,10 +15,8 @@ import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.databinding.ActPurchaseApprovalBinding
 import kr.co.kimberly.wma.menu.main.MainActivity
-import kr.co.kimberly.wma.network.model.OrderRegModel
 import kr.co.kimberly.wma.network.model.SapModel
 import kr.co.kimberly.wma.network.model.SearchItemModel
-import java.text.DecimalFormat
 
 class PurchaseApprovalActivity: AppCompatActivity() {
     private lateinit var mBinding: ActPurchaseApprovalBinding
@@ -40,9 +37,9 @@ class PurchaseApprovalActivity: AppCompatActivity() {
         sapModel = intent.getSerializableExtra("sapModel") as SapModel
         purchaseList = intent.getSerializableExtra("purchaseList") as ArrayList<SearchItemModel>
 
-        Utils.Log("slipNo ====> ${Gson().toJson(slipNo)}")
-        Utils.Log("sapModel ====> ${Gson().toJson(sapModel)}")
-        Utils.Log("purchaseList ====> ${Gson().toJson(purchaseList)}")
+        Utils.log("slipNo ====> ${Gson().toJson(slipNo)}")
+        Utils.log("sapModel ====> ${Gson().toJson(sapModel)}")
+        Utils.log("purchaseList ====> ${Gson().toJson(purchaseList)}")
 
         mContext = this
         mActivity = this

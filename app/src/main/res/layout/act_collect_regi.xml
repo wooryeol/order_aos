@@ -65,7 +65,7 @@
                             android:inputType="text"
                             android:paddingHorizontal="12dp"
                             android:paddingVertical="10dp"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             tools:ignore="Autofill,NestedWeights,SpUsage,TextFields" />
 
                         <TextView
@@ -74,13 +74,14 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             android:background="@color/trans"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
                             android:ellipsize="marquee"
                             android:focusable="true"
                             android:singleLine="true"
+                            android:textColor="@color/color_1A1A1A"
                             tools:ignore="SpUsage" />
 
                         <ImageButton
@@ -99,7 +100,7 @@
                         android:layout_height="40dp"
                         android:text="@string/search"
                         android:textColor="@color/white"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:textStyle="bold"
                         android:background="@drawable/bt_round_103c7e"
                         tools:ignore="SpUsage" />
@@ -117,7 +118,7 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:text="@string/uncollected"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:textColor="@color/color_7E828B"
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
@@ -128,7 +129,8 @@
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_1A1A1A"
                         android:background="@drawable/et_round_c9cbd0"
                         android:paddingHorizontal="12dp"
                         android:hint="@string/accountHint"
@@ -148,7 +150,7 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:text="@string/collectedDate"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:textColor="@color/color_7E828B"
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
@@ -160,7 +162,8 @@
                         android:layout_weight="1"
                         android:background="@drawable/et_round_c9cbd0"
                         android:paddingHorizontal="12dp"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_1A1A1A"
                         android:hint="@string/accountHint"
                         android:gravity="center_vertical"
                         tools:ignore="Autofill,SpUsage,TextFields" />
@@ -178,7 +181,7 @@
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:text="@string/totalAmount"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:textColor="@color/color_7E828B"
                         android:layout_marginEnd="12dp"
                         tools:ignore="SpUsage" />
@@ -189,7 +192,8 @@
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
+                        android:textColor="@color/color_1A1A1A"
                         android:hint="@string/accountHint"
                         android:gravity="center_vertical"
                         android:background="@drawable/et_round_c9cbd0"
@@ -270,7 +274,7 @@
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:background="@drawable/et_round_c9cbd0"
                         android:paddingVertical="10dp"
                         android:paddingHorizontal="12dp"
@@ -309,7 +313,7 @@
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             android:background="@drawable/et_round_c9cbd0"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
@@ -336,13 +340,13 @@
                             android:layout_marginEnd="12dp"
                             tools:ignore="SpUsage" />
 
-                        <EditText
+                        <kr.co.kimberly.wma.custom.IntComma
                             android:singleLine="true"
                             android:id="@+id/noteAmountText"
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             android:background="@drawable/et_round_c9cbd0"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
@@ -375,7 +379,7 @@
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             android:background="@drawable/et_round_c9cbd0"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
@@ -406,7 +410,7 @@
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             android:background="@drawable/et_round_c9cbd0"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
@@ -431,17 +435,17 @@
                             android:layout_marginEnd="12dp"
                             tools:ignore="SpUsage" />
 
-                        <EditText
+                        <kr.co.kimberly.wma.custom.DateFormat
                             android:singleLine="true"
                             android:id="@+id/publishDateText"
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             android:background="@drawable/et_round_c9cbd0"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
-                            android:inputType="date"
+                            android:inputType="number"
                             tools:ignore="Autofill,SpUsage,TextFields" />
 
                     </LinearLayout>
@@ -463,17 +467,17 @@
                             android:layout_marginEnd="12dp"
                             tools:ignore="SpUsage" />
 
-                        <EditText
+                        <kr.co.kimberly.wma.custom.DateFormat
                             android:singleLine="true"
                             android:id="@+id/expireDateText"
                             android:layout_width="0dp"
                             android:layout_height="40dp"
                             android:layout_weight="1"
-                            android:textSize="16dp"
+                            android:textSize="14dp"
                             android:background="@drawable/et_round_c9cbd0"
                             android:paddingVertical="10dp"
                             android:paddingHorizontal="12dp"
-                            android:inputType="date"
+                            android:inputType="number"
                             tools:ignore="Autofill,SpUsage,TextFields" />
 
                     </LinearLayout>
@@ -502,7 +506,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:background="@drawable/et_round_c9cbd0"
                         android:paddingVertical="10dp"
                         android:paddingHorizontal="12dp"

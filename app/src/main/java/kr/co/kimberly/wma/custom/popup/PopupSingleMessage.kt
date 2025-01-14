@@ -42,9 +42,19 @@ class PopupSingleMessage(mContext: Context, private var title: String? = null, p
         mBinding.title.text = title
         mBinding.tvMsg.text = msg
 
+        if (title.isNullOrEmpty()) {
+            mBinding.title.visibility = View.GONE
+        }
+
+        if (msg.isNullOrEmpty()) {
+            mBinding.tvMsg.visibility = View.GONE
+            mBinding.title.textSize = 18F
+        }
+
         mBinding.cancel.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 itemClickListener?.onCancelClick()
+                mHandler?.sendEmptyMessage(Define.EVENT_CANCEL)
                 hideDialog()
             }
         })
@@ -52,19 +62,13 @@ class PopupSingleMessage(mContext: Context, private var title: String? = null, p
         mBinding.ok.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
                 itemClickListener?.onOkClick()
+                mHandler?.sendEmptyMessage(Define.EVENT_OK)
                 hideDialog()
                 if (msg.isNullOrEmpty()) {
                     exitProcess(0)
                 }
-
-                mHandler?.sendEmptyMessage(Define.EVENT_OK)
             }
         })
-
-        if (msg.isNullOrEmpty()) {
-            mBinding.tvMsg.visibility = View.GONE
-            mBinding.title.textSize = 18F
-        }
     }
 
     fun hideDialog() {

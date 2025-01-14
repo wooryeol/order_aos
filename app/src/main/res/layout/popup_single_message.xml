@@ -15,10 +15,10 @@
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="24dp"
+            android:paddingTop="24dp"
             android:gravity="center"
             android:text="제품 삭제"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:textStyle="bold"
             android:textColor="@color/color_1A1A1A"
             tools:ignore="SpUsage" />
@@ -27,15 +27,16 @@
             android:id="@+id/tvMsg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:paddingTop="24dp"
             android:text="위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?"
-            android:textSize="16dp"
+            android:textSize="14dp"
             android:gravity="center"
             tools:ignore="HardcodedText,SpUsage" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
             android:layout_marginBottom="16dp"
             android:orientation="horizontal">
             <Button
@@ -45,7 +46,7 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="5dp"
                 android:text="@string/no"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:textStyle="bold"
                 android:textColor="@color/color_4C4F54"
                 android:background="@drawable/bt_round_b1b4bb"
@@ -58,7 +59,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="5dp"
                 android:text="@string/yes"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 android:textStyle="bold"
                 android:textColor="@color/white"
                 android:background="@drawable/bt_round_1d6de5"

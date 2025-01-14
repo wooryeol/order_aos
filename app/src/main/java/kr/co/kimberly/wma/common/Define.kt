@@ -12,14 +12,20 @@ object Define {
     const val MENU08 = "menu08"
     const val MENU09 = "menu09"
 
+    const val EVENT_OK = 10000
+    const val EVENT_CANCEL = 10001
+    const val REQUEST_CODE = 1
+
+    // 블루투스
+    const val SCANNER_NAME = "KDC"
+    const val PRINTER_NAME = "Alpha"
+    const val EVENT_RETRY = 888
+
     // 테스트
-    const val IS_TEST = true
+    const val IS_TEST = false
 
     // provider
     const val fileProvider = "kr.co.kimberly.wma.fileprovider"
-
-    // 권한
-    const val REQUEST_ENABLE_BT = 100
 
     // 날짜
     const val YEAR = "year"
@@ -27,25 +33,13 @@ object Define {
     const val DAY = "day"
     const val TODAY = "today"
 
-    const val EVENT_OK = 10000
-    const val EVENT_CANCEL = 10001
+    // 주소
+    private const val DEV_URL = "https://m2.ykwma.co.kr" /*개발*/
+    private const val PRO_URL = "https://m.ykwma.co.kr" /*운영*/
 
-    //통신
-    const val SUCCESS = "SUCCESS"
+    const val URL = PRO_URL
 
-    const val REQUEST_CODE = 1
-
-    // 로컬 주소
-    //const val DEV_URL = "http://192.168.0.50"
-    const val DEV_PORT = "80"
-
-    // 개발 주소
-    const val DEV_URL = "http://58.229.132.250"
-
-    const val URL = DEV_URL
-    const val URL_PORT = DEV_PORT
-
-    // 블루투스 유형
+    // 품목 검색 유형
     const val SEARCH = "T"
     const val BARCODE = "B"
 
@@ -62,8 +56,21 @@ object Define {
     const val TYPE_CUSTOMER = "C"
     const val TYPE_ITEM = "I"
 
-    //return Code
+    // 통신 return Code
     const val RETURN_CD_00 = "00"
     const val RETURN_CD_90 = "90"
     const val RETURN_CD_91 = "91"
+
+    // 수금코드
+    const val CASH = "CC"
+    const val NOTE = "BB"
+    const val BOTH = "CB"
+
+    // 스캐너
+    const val UUID = "00001101-0000-1000-8000-00805f9b34fb"
+    const val PRINTER_UUID = "00000000-deca-fade-deca-deafdecacaff"
+
+    // 프린트 유형
+    const val TYPE_MENU = "M"
+    const val TYPE_COMBINE = "U"
 }

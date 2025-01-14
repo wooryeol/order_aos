@@ -47,7 +47,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/msg01"
-                    android:textSize="18dp"
+                    android:textSize="16dp"
                     android:textStyle="bold"
                     android:textColor="@color/color_7E828B"/>
 
@@ -99,7 +99,7 @@
                         android:textColor="@color/black"
                         android:textColorHint="@color/color_B1B4BB"
                         android:textCursorDrawable="@drawable/color_cursor"
-                        android:textSize="16dp" />
+                        android:textSize="14dp" />
 
                     <EditText
                         android:id="@+id/etPw"
@@ -116,7 +116,7 @@
                         android:textColor="@color/black"
                         android:textColorHint="@color/color_B1B4BB"
                         android:textCursorDrawable="@drawable/color_cursor"
-                        android:textSize="16dp"/>
+                        android:textSize="14dp"/>
 
                     <LinearLayout
                         android:id="@+id/llCheck"
@@ -151,7 +151,7 @@
                         android:text="@string/loginBtn"
                         android:textColor="@color/color_F6F9FE"
                         android:textStyle="bold"
-                        android:textSize="16dp"
+                        android:textSize="14dp"
                         android:background="@drawable/bt_round_c9cbd0"
                         style="?android:attr/borderlessButtonStyle"/>
                 </LinearLayout>
