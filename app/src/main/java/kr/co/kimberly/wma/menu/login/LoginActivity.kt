@@ -188,10 +188,10 @@ class LoginActivity : AppCompatActivity() {
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
 
         val call = service.postLogin(body)
-        call.enqueue(object : retrofit2.Callback<ResultModel<List<LoginResponseModel>>> {
+        call.enqueue(object : retrofit2.Callback<ResultModel<LoginResponseModel>> {
             override fun onResponse(
-                call: Call<ResultModel<List<LoginResponseModel>>>,
-                response: Response<ResultModel<List<LoginResponseModel>>>
+                call: Call<ResultModel<LoginResponseModel>>,
+                response: Response<ResultModel<LoginResponseModel>>
             ) {
                 loading.hideDialog()
                 if (response.isSuccessful) {
@@ -218,7 +218,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<ResultModel<List<LoginResponseModel>>>, t: Throwable) {
+            override fun onFailure(call: Call<ResultModel<LoginResponseModel>>, t: Throwable) {
                 loading.hideDialog()
                 Utils.log("login failed ====> ${t.message}")
                 Utils.popupNotice(mContext, "잠시 후 다시 시도해주세요")
