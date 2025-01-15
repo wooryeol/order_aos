@@ -200,10 +200,12 @@ object Utils {
         )
 
         //return Gson().fromJson(json, LoginResponseModel::class.java)
-        val listType = object : TypeToken<List<LoginResponseModel>>() {}.type
-        val dataList: List<LoginResponseModel> = Gson().fromJson(json, listType)
+        val listType = object : TypeToken<LoginResponseModel>() {}.type
+        //val dataList: List<LoginResponseModel> = Gson().fromJson(json, listType)
+        val dataList: LoginResponseModel = Gson().fromJson(json, listType)
 
-        return dataList.firstOrNull() ?: LoginResponseModel()
+        // return dataList.firstOrNull() ?: LoginResponseModel()
+        return dataList ?: LoginResponseModel()
     }
 
     // 날짜 가져오기

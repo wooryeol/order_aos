@@ -327,21 +327,27 @@ class InformationActivity : AppCompatActivity() {
                             val gson = Gson()
                             when(mSearchType) {
                                 Define.TYPE_CUSTOMER -> {
-                                    Utils.log("customer info search success ====> ${Gson().toJson(item.data.customerList)}")
+                                    if (item.data.customerList == null) {
+                                        Utils.log("customer info search success ====> ${Gson().toJson(item.data)}")
+                                        mBinding.tvProductName.text = item.data.customerNm.toString()
+                                        accountName = item.data.customerNm.toString()
+                                        getDetailInfo(item.data.customerCd.toString())
+                                    } else {
+                                        Utils.log("customer info search success ====> ${Gson().toJson(item.data.customerList)}")
+                                        // customerList를 JSON 문자열로 변환 후 다시 List<Customer>로 변환
+                                        val jsonElement = gson.toJsonTree(item.data.customerList)
+                                        val jsonString = gson.toJson(jsonElement)
+                                        val customerListType = object : TypeToken<ArrayList<SlipOrderListModel>>() {}.type
+                                        val customerList: ArrayList<SlipOrderListModel> = gson.fromJson(jsonString, customerListType)
 
-                                    // customerList를 JSON 문자열로 변환 후 다시 List<Customer>로 변환
-                                    val jsonElement = gson.toJsonTree(item.data.customerList)
-                                    val jsonString = gson.toJson(jsonElement)
-                                    val customerListType = object : TypeToken<ArrayList<SlipOrderListModel>>() {}.type
-                                    val customerList: ArrayList<SlipOrderListModel> = gson.fromJson(jsonString, customerListType)
-
-                                    popupInformation = PopupAccountInformation(mContext, customerList, null  )
-                                    popupInformation?.onAccountSelect = {
-                                        mBinding.tvProductName.text = it.customerNm
-                                        accountName = it.customerNm.toString()
-                                        getDetailInfo(it.customerCd.toString())
+                                        popupInformation = PopupAccountInformation(mContext, customerList, null  )
+                                        popupInformation?.onAccountSelect = {
+                                            mBinding.tvProductName.text = it.customerNm
+                                            accountName = it.customerNm.toString()
+                                            getDetailInfo(it.customerCd.toString())
+                                        }
+                                        popupInformation?.show()
                                     }
-                                    popupInformation?.show()
                                 }
 
                                 Define.TYPE_ITEM -> {

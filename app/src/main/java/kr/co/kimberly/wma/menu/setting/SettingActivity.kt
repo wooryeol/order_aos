@@ -99,8 +99,8 @@ class SettingActivity : AppCompatActivity() {
         //대리점 코드 및 전화번호, 기기 사용 여부 세팅
         getInfoSetting()
 
-        if (!BuildConfig.DEBUG) {
-            mBinding.mobileNumber.text = "01029812904"
+        if (Define.IS_TEST) {
+            mBinding.mobileNumber.text = "01062872123"
             mBinding.accountCode.setText("C000000")
         }
 

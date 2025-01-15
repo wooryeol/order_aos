@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.SapListAdapter
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
@@ -41,6 +42,13 @@ class PopupSAP(mContext: Context, val dataList: ArrayList<SapModel>, private val
         // corner radius 가 보이지 않음
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+
+        if (returnCd == "90"){
+            mBinding.title.text = context.getString(R.string.sapCode)
+        } else {
+            mBinding.title.text = context.getString(R.string.purchaseAddress)
+        }
 
         if(dataList.size > 6) {
             Utils.dialogResize(context, window)

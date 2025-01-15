@@ -34,14 +34,16 @@ object Define {
     const val TODAY = "today"
 
     // 주소
-    private const val DEV_URL = "https://192.168.110.42" /*개발*/
-    private const val PRO_URL = "https://m2.ykwma.co.kr" /*운영*/
+    private const val DEV_URL = "https://m2.ykwma.co.kr" /*개발*/
+    private const val PRO_URL = "https://m.ykwma.co.kr" /*운영*/
 
     const val URL = PRO_URL
 
     // 품목 검색 유형
     const val SEARCH = "T"
     const val BARCODE = "B"
+    const val PURCHASE_SEARCH = "ST"
+    const val PURCHASE_BARCODE = "SB"
 
     // 주문 유형
     const val ORDER = "NN" // 주문

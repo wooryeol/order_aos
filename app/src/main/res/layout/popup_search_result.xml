@@ -26,7 +26,7 @@
                 android:layout_marginStart="16dp"
                 android:lineSpacingExtra="2dp"
                 android:scrollbars="vertical"
-                android:text="@string/productName"
+                android:text="@string/account"
                 android:textStyle="bold"
                 android:textColor="@color/black"
                 android:textSize="18dp"/>

@@ -95,6 +95,10 @@ class PrinterOptionActivity : AppCompatActivity() {
 
         mBinding.header.headerTitle.text = title
 
+        if (title == getString(R.string.titleReturn)){
+            mBinding.title.text = getString(R.string.returnRegSendingSuccess)
+        }
+
         // 인쇄수량 처음에 1개로 설정
         mBinding.printQuantity.setText("1")
 
