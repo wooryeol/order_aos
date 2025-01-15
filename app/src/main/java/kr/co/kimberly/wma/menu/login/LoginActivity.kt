@@ -100,8 +100,8 @@ class LoginActivity : AppCompatActivity() {
 
         // 테트스 환경 로그인 정보 자동 기입
         if(Define.IS_TEST) {
-            mBinding.etId.setText("c000000")
-            mBinding.etPw.setText("@mirae2024")
+            mBinding.etId.setText("C000000")
+            mBinding.etPw.setText("Hh12345678")
         }
 
         val loginTextWatcher = object : TextWatcher {
@@ -184,6 +184,8 @@ class LoginActivity : AppCompatActivity() {
             addProperty("mobileNo", mPhoneNumber)
         }
 
+        Utils.log("login data ====> $json")
+
         val obj = json.toString()
         val body = obj.toRequestBody("application/json".toMediaTypeOrNull())
 
@@ -194,6 +196,7 @@ class LoginActivity : AppCompatActivity() {
                 response: Response<ResultModel<LoginResponseModel>>
             ) {
                 loading.hideDialog()
+                Utils.log("response ====> ${response.body()}")
                 if (response.isSuccessful) {
                     val item = response.body()
                     when (item?.returnCd) {
@@ -206,6 +209,7 @@ class LoginActivity : AppCompatActivity() {
                         }
                         "01" -> {
                             Utils.popupNotice(mContext, "아이디, 비밀번호, 대리점코드 또는 전화번호를 다시 확인해주세요")
+                            Utils.log(item.returnMsg)
 
                         }
                         else -> {

@@ -73,7 +73,7 @@ class ReturnRegActivity : AppCompatActivity() {
         mLoginInfo = Utils.getLoginData()
 
         mBinding.header.headerTitle.text = getString(R.string.menu03)
-        mBinding.bottom.bottomButton.text = getString(R.string.titleOrder)
+        mBinding.bottom.bottomButton.text = getString(R.string.titleReturn)
 
         setAdapter()
 
@@ -88,7 +88,7 @@ class ReturnRegActivity : AppCompatActivity() {
 
         mBinding.bottom.bottomButton.setOnClickListener(object: OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val popupDoubleMessage = PopupDoubleMessage(mContext, "주문 전송", "거래처 : $accountName\n총금액: ${Utils.decimalLong(totalAmount)}원", "위와 같이 승인을 요청합니다.\n주문전표 전송을 하시겠습니까?")
+                val popupDoubleMessage = PopupDoubleMessage(mContext, "반품 전송", "거래처 : $accountName\n총금액: ${Utils.decimalLong(totalAmount)}원", "위와 같이 승인을 요청합니다.\n반품전표 전송을 하시겠습니까?")
                 if (returnAdapter?.dataList!!.isEmpty()) {
                     Utils.popupNotice(mContext, "제품이 등록되지 않았습니다.")
                 } else {
@@ -351,7 +351,7 @@ class ReturnRegActivity : AppCompatActivity() {
     private fun goBack() {
         // 주문 도중 나갈 경우
         if (!returnAdapter?.dataList.isNullOrEmpty()) {
-            PopupNoticeV2(mContext, "기존 주문이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
+            PopupNoticeV2(mContext, "기존 반품이 완료되지 않았습니다.\n전표를 저장하시겠습니까?",
                 object : Handler(Looper.getMainLooper()) {
                     @SuppressLint("NotifyDataSetChanged")
                     override fun handleMessage(msg: Message) {

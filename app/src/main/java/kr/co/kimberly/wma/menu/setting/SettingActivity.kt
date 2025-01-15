@@ -100,7 +100,7 @@ class SettingActivity : AppCompatActivity() {
         getInfoSetting()
 
         if (Define.IS_TEST) {
-            mBinding.mobileNumber.text = "01035792523"
+            mBinding.mobileNumber.text = "01062872123"
             mBinding.accountCode.setText("C000000")
         }
 

@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.AccountSearchAdapter
 import kr.co.kimberly.wma.adapter.InformationAdapter
 import kr.co.kimberly.wma.common.Utils
@@ -49,6 +50,10 @@ class PopupAccountInformation(mContext: Context, private val accountList: ArrayL
         // corner radius 가 보이지 않음
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+        if (itemList != null) {
+            mBinding.title.text = context.getString(R.string.productName)
+        }
 
         adapter = InformationAdapter(context)
         if (accountList == null) {

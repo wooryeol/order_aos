@@ -60,15 +60,15 @@ class LedgerActivity : AppCompatActivity() {
             }
         })
 
+        val today = LocalDate.now()
+        val formatted = today.format(DateTimeFormatter.ofPattern("yyyy-MM"))
+        setDate(formatted)
 
         // 날짜 선택
         mBinding.dateArea.setOnClickListener {
             val popupDatePicker = PopupDatePicker02(mContext, isDate = true, isStartDate = false)
             popupDatePicker.onSelectedDate = {
-                mBinding.tvDate.text = it
-                searchMonth = it
-
-                custCd?.let { getLedgerList(it) }
+                setDate(it)
             }
             popupDatePicker.show()
         }
@@ -126,6 +126,13 @@ class LedgerActivity : AppCompatActivity() {
                 mBinding.btEmpty.visibility = View.VISIBLE
             }
         }
+    }
+
+    // 날짜 설정
+    private fun setDate ( date: String) {
+        mBinding.tvDate.text = date
+        searchMonth = date
+        custCd?.let { getLedgerList(date) }
     }
 
     // 어댑터 설정

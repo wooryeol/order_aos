@@ -274,7 +274,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                         Utils.popupNotice(context, "제품명을 입력해주세요")
                     } else {
                         // 아이템 리스트 검색
-                        searchItem(binding.etProductName.text.toString(), binding.root.context, Define.SEARCH)
+                        searchItem(binding.etProductName.text.toString(), binding.root.context, Define.PURCHASE_SEARCH)
                     }
                 }
             })
@@ -414,7 +414,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                 } else {
                     // 아이템 리스트 검색
                     Utils.log("adapter barcode data ====> $it")
-                    searchItem(it, binding.root.context, Define.BARCODE)
+                    searchItem(it, binding.root.context, Define.PURCHASE_BARCODE)
                 }
             }
 
@@ -449,6 +449,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                 if (response.isSuccessful) {
                         val item = response.body()
                         val mSapList = item?.data as ArrayList<SapModel>
+                    Utils.log("item ====> $item")
                         popupSAP = PopupSAP(context, mSapList, item.returnCd)
                         when(item.returnCd) {
                             // SAP코드 1개 & 배송처 코드 1개

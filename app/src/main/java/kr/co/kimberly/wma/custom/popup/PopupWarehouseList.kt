@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import kr.co.kimberly.wma.R
 import kr.co.kimberly.wma.adapter.WarehouseListAdapter
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
@@ -35,6 +36,8 @@ class PopupWarehouseList(mContext: Context, val list: ArrayList<WarehouseListMod
         // corner radius 가 보이지 않음
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+
+        mBinding.title.text = context.getString(R.string.branchHouse)
 
         val adapter = WarehouseListAdapter(context)
         adapter.dataList = list

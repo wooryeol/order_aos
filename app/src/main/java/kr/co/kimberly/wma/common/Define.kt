@@ -42,6 +42,8 @@ object Define {
     // 품목 검색 유형
     const val SEARCH = "T"
     const val BARCODE = "B"
+    const val PURCHASE_SEARCH = "ST"
+    const val PURCHASE_BARCODE = "SB"
 
     // 주문 유형
     const val ORDER = "NN" // 주문
