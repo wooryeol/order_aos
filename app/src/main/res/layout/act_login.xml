@@ -52,6 +52,7 @@
                     android:textColor="@color/color_7E828B"/>
 
                 <LinearLayout
+                    android:id="@+id/mainTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"

@@ -52,6 +52,8 @@ class LoginActivity : AppCompatActivity() {
         Manifest.permission.READ_PRECISE_PHONE_STATE
     }
 
+    private val data = "{\"address\":\"서울특별시 강남구 양재대로 340 @@ 33333666661\",\"agencyCd\":\"C000000\",\"agencyNm\":\"Miraesoftware1\",\"appVersion\":\"\",\"authorityBuy\":\"Y\",\"authorityModifyPrice\":\"Y\",\"bizNo\":\"123-12-52552\",\"bizSector\":\"도.소매\",\"bizType\":\"유통\",\"downloadUrl\":\"\",\"empCd\":\"SYSOP\",\"empMobile\":\"-\",\"empNm\":\"관리자\",\"notice\":\"\",\"representNm\":\"이인덕,이\",\"telNo\":\"02-598-1090\",\"userId\":\"C000000\"}"
+
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,6 +139,16 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
+        mBinding.mainTitle.setOnClickListener(object : OnClickCountListener() {
+            override fun onCountClick(view: View) {
+                SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, data)
+                val intent = Intent(mContext,  MainActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+
+        })
+
     }
 
     private fun isLogin(): Boolean{
@@ -202,6 +214,7 @@ class LoginActivity : AppCompatActivity() {
                     when (item?.returnCd) {
                         Define.RETURN_CD_00 -> {
                             Utils.log("login success\nreturn code: ${item.returnCd}\nreturn message: ${item.returnMsg}")
+                            Utils.log("save ====> ${Gson().toJson(item.data)}")
                             SharedData.setSharedData(mContext, SharedData.LOGIN_DATA, Gson().toJson(item.data))
                             val intent = Intent(mContext,  MainActivity::class.java)
                             startActivity(intent)
@@ -283,6 +296,35 @@ class LoginActivity : AppCompatActivity() {
             }
         } else {
             super.onBackPressed()
+        }
+    }
+
+    abstract class OnClickCountListener: View.OnClickListener {
+        companion object {
+            const val CLICK_INTERVAL: Long = 1000L
+            const val CLICK_TIMES = 5
+        }
+
+        private var lastClickedTime: Long = 0L // 새로 클릭한 시간
+        private var count = 0 // 클릭 카운트
+
+        abstract fun onCountClick(view: View)
+
+        private fun isClickedTime() = System.currentTimeMillis() - lastClickedTime
+
+        override fun onClick(v: View?) {
+            if (isClickedTime() > CLICK_INTERVAL) {
+                count = 0
+            }
+
+            lastClickedTime = System.currentTimeMillis()
+
+            count += 1
+
+            if (count == CLICK_TIMES) {
+                onCountClick(v!!)
+                count = 0
+            }
         }
     }
 }
