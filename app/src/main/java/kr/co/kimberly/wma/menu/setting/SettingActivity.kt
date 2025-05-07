@@ -164,6 +164,7 @@ class SettingActivity : AppCompatActivity() {
     private fun getInfoSetting() {
         mAgencyCode = SharedData.getSharedData(mContext, "agencyCode", "")
         mPhoneNumber = SharedData.getSharedData(mContext, "phoneNumber", "")
+
         isPrinterConnected = SharedData.getSharedData(mContext, "isPrinterConnected", false)
         isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
 
@@ -172,7 +173,7 @@ class SettingActivity : AppCompatActivity() {
         }
 
         if (mPhoneNumber != "") {
-            mBinding.mobileNumber.text = mPhoneNumber.toString()
+            mBinding.mobileNumber.text = mPhoneNumber.toString().replace("+82", "0")
         }
 
         if (isPrinterConnected) mBinding.checkBoxPrint.isChecked = true

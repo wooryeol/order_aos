@@ -149,6 +149,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun loginCheck() {
+        if (mPhoneNumber == "") {
+            mPhoneNumber = "01011111111"
+        }
+
         if (mAgencyCode == null || mPhoneNumber == null || mAgencyCode == "" || mPhoneNumber == "") {
             Utils.popupNotice(this, "환경설정에서 대리점코드 혹은 휴대폰 번호를 확인해주세요")
         } else {

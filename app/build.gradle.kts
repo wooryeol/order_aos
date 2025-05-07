@@ -1,6 +1,14 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+}
+
+val keystorePropertiesFile = rootProject.file("app/keystore.properties")
+val keystoreProperties = Properties().apply {
+    load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -11,22 +19,34 @@ android {
         applicationId = "kr.co.kimberly.wma"
         minSdk = 28
         targetSdk = 34
-        versionCode = 25011501
-        versionName = "1.0.1"
+        versionCode = 25042301
+        versionName = "1.0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -74,7 +94,7 @@ dependencies {
     implementation ("com.google.code.gson:gson:2.10.1")
 
     //retrofit2 로그 확인을 위한 라이브러리
-    implementation ("com.squareup.okhttp3:okhttp:4.9.2")
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.2")
 
     //multidex
