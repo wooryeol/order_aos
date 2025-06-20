@@ -138,7 +138,6 @@ class SlipInquiryDetailActivity : AppCompatActivity() {
     private fun moveToEditPage() {
         val data = db.slipList
 
-
         dataList.clear()
         data.forEach {
             if (it.slipNo == slipNo) {

@@ -22,7 +22,7 @@ class ConnectThread(private val myUUID: UUID, private val device: BluetoothDevic
         device.createRfcommSocketToServiceRecord(myUUID)
     }
 
-    override fun run() {
+    /*override fun run() {
         try {
             // 연결 수행
             connectSocket?.connect()
@@ -34,6 +34,23 @@ class ConnectThread(private val myUUID: UUID, private val device: BluetoothDevic
             connectSocket?.close()
             Utils.log("$TAG run error ====> $e")
         }
+    }*/
+
+    fun customRun():Boolean {
+        try {
+            // 연결 수행
+            connectSocket?.connect()
+            connectSocket?.let {
+                val connectedThread = ConnectedThread(bluetoothSocket = it)
+                connectedThread.start()
+                return true
+            }
+        } catch (e: IOException) { // 기기와의 연결이 실패할 경우 호출
+            connectSocket?.close()
+            Utils.log("$TAG run error ====> $e")
+            return false
+        }
+        return false
     }
 
     fun cancel() {

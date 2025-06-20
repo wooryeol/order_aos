@@ -3,6 +3,7 @@ package kr.co.kimberly.wma.menu.order
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,6 +16,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import koamtac.kdc.sdk.KDCBarcodeDataReceivedListener
+import koamtac.kdc.sdk.KDCConnectionListenerEx
+import koamtac.kdc.sdk.KDCConstants
+import koamtac.kdc.sdk.KDCData
+import koamtac.kdc.sdk.KDCDevice
+import koamtac.kdc.sdk.KDCErrorListener
+import koamtac.kdc.sdk.KDCReader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -47,7 +55,7 @@ import java.util.UUID
 
 
 @SuppressLint("SetTextI18n", "UnspecifiedRegisterReceiverFlag","HardwareIds", "MissingPermission", "UseCompatLoadingForDrawables")
-class OrderRegActivity : AppCompatActivity() {
+class OrderRegActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErrorListener, KDCBarcodeDataReceivedListener {
     private lateinit var mBinding: ActOrderRegBinding
     private lateinit var mContext: Context
     private lateinit var mActivity: Activity
@@ -57,6 +65,7 @@ class OrderRegActivity : AppCompatActivity() {
     private var totalAmount: Long = 0
     private var orderAdapter: RegAdapter? = null
     private var thread : ConnectThread? = null
+    private var kdcReader: KDCReader? = null
 
     private val db : DBHelper by lazy {
         DBHelper.getInstance(applicationContext)
@@ -123,10 +132,8 @@ class OrderRegActivity : AppCompatActivity() {
                     popupNotice.show()
                     return
                 }
-                if (thread != null) {
-                    thread?.cancel()
-                    thread = null
-                    mBinding.header.scanBtn.setColorFilter(getColor(R.color.trans))
+                if (kdcReader != null && kdcReader!!.IsConnected()) {
+                    disconnectScanner()
                 } else {
                     checkScanner()
                 }
@@ -137,82 +144,58 @@ class OrderRegActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         orderAdapter?.cleanup()
-        thread?.cancel()
+        disconnectScanner()
+        super.onDestroy()
     }
 
     override fun onPause() {
+        disconnectScanner()
         super.onPause()
-        thread?.cancel()
     }
 
     private fun checkScanner(){
         val isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
         if (isScannerConnected) {
-            mBinding.header.scanBtn.setColorFilter(getColor(R.color.black))
             val scanner = SharedData.getSharedData(mContext, SharedData.SCANNER_ADDR, "")
             if (scanner.isNotBlank()){
-                Utils.toast(mContext, "기기를 연결 중입니다.")
-                connectDevice(scanner)
+                //connectDevice(scanner)
+                connectScanner(scanner)
             }
         }
     }
 
-    // 디바이스에 연결
+    /*// 디바이스에 연결
     private fun connectDevice(deviceAddress: String) {
         val bluetoothAdapter: BluetoothAdapter  = BluetoothAdapter.getDefaultAdapter()
-        /**
-         * 기기의 UUID를 가져와야 할 떄 사용하는 코드
-         **/
-        /*val device: BluetoothDevice = bluetoothAdapter.getRemoteDevice(scanner)
-
-        // UUID 요청
-        device.fetchUuidsWithSdp()
-
-        // BroadcastReceiver 설정
-        val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val action = intent.action
-                if (BluetoothDevice.ACTION_UUID == action) {
-                    val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    val uuids: Array<out Parcelable>? = intent.getParcelableArrayExtra(BluetoothDevice.EXTRA_UUID)
-
-                    // UUID 목록을 로그에 출력하거나 사용
-                    uuids?.forEach { uuid ->
-                        Utils.log("Device UUID: ${uuid}")
-                    }
-                }
-            }
-        }
-
-        // IntentFilter 설정 및 리시버 등록
-        val filter = IntentFilter(BluetoothDevice.ACTION_UUID)
-        registerReceiver(receiver, filter)*/
-
+        val handler = Handler(Looper.getMainLooper())
         bluetoothAdapter.let { adapter ->
             // 기기 검색을 수행중이라면 취소
             if (adapter.isDiscovering) {
                 adapter.cancelDiscovery()
             }
-
             // 서버의 역할을 수행 할 Device 획득
             val device = adapter.getRemoteDevice(deviceAddress)
             // UUID 선언
-            val uuid = UUID.fromString(Define.UUID)
+            val scannerName = SharedData.getSharedData(mContext, SharedData.SCANNER_NAME, "")
+            val uuid = if (scannerName.contains("270")) {UUID.fromString(Define.UUID_270)} else {UUID.fromString(Define.UUID_280)}
             try {
                 GlobalScope.launch(Dispatchers.IO) {
                     thread = ConnectThread(uuid, device, mContext)
-                    thread?.run()
+                    if (thread?.customRun()!!) {
+                        runOnUiThread {
+                            mBinding.header.scanBtn.setColorFilter(getColor(R.color.black))
+                        }
+                        handler.postDelayed(kotlinx.coroutines.Runnable { Utils.toast(mContext, "${device.name}와 연결되었습니다.") }, 0)
+                    } else {
+                        handler.postDelayed(kotlinx.coroutines.Runnable { Utils.toast(mContext, "스캐너의 전원이 꺼져 있습니다. 기기를 확인해주세요.") }, 0)
+                    }
                 }
-
-                Utils.toast(mContext, "${device.name}과 연결되었습니다.")
             } catch (e: Exception) { // 연결에 실패할 경우 호출됨
-                Utils.log("스캐너의 전원이 꺼져 있습니다. 기기를 확인해주세요.")
                 return
             }
         }
-    }
+    }*/
 
     // 주문 확인 팝업
     private fun checkOrderPopup(deliveryDate: String) {
@@ -396,6 +379,99 @@ class OrderRegActivity : AppCompatActivity() {
         } else {
             deleteData()
             finish()
+        }
+    }
+
+    private fun connectScanner(address: String) {
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        val pairedDevices: Set<BluetoothDevice> = bluetoothAdapter.bondedDevices
+        var targetDevice: BluetoothDevice? = null
+
+        for (device in pairedDevices) {
+            if (device.address == address) {
+                targetDevice = device
+                break
+            }
+        }
+
+        if (targetDevice == null) {
+            return
+        }
+
+        val kdcDevice: KDCDevice<*> = KDCDevice(targetDevice)
+        connectToDevice(kdcDevice)
+    }
+
+    private fun connectToDevice(kdcDevice: KDCDevice<*>) {
+        if (kdcReader == null) {
+            kdcReader = KDCReader()
+            initKdcReader()
+        }
+        val result = kdcReader?.ConnectEx(kdcDevice)
+        Utils.log("ConnectEx 호출됨, result = $result")
+    }
+
+    private fun initKdcReader() {
+        kdcReader = KDCReader()
+        kdcReader!!.SetContext(this)
+        kdcReader!!.SetKDCConnectionListenerEx(this)
+        kdcReader!!.SetKDCErrorListener(this)
+        kdcReader!!.SetBarcodeDataReceivedListener(this)
+    }
+
+    override fun ConnectionChangedEx(device: KDCDevice<*>, state: Int) {
+        runOnUiThread {
+            when (state) {
+                KDCConstants.CONNECTION_STATE_CONNECTED -> {
+                    mBinding.header.scanBtn.setColorFilter(getColor(R.color.black))
+                    val deviceName = device.GetDeviceName()
+                    var address = ""
+
+                    try {
+                        val btDevice = device.GetDevice() as BluetoothDevice
+                        address = btDevice.address
+                    } catch (e: Exception) {
+                        Utils.log("주소 추출 실패")
+                    }
+
+                    Utils.toast(mContext, "${deviceName}와 연결되었습니다.")
+                    Utils.log("연결 성공: $deviceName (${address})")
+                }
+
+                KDCConstants.CONNECTION_STATE_CONNECTING -> Utils.toast(mContext, "${device.GetDeviceName()}와 연결중..")
+
+                KDCConstants.CONNECTION_STATE_LOST -> {
+                    mBinding.header.scanBtn.setColorFilter(R.color.trans)
+                    Utils.toast(mContext, "${device.GetDeviceName()}와 연결이 종료되었습니다.")
+                }
+
+                KDCConstants.CONNECTION_STATE_FAILED -> {
+                    Utils.toast(mContext, "${device.GetDeviceName()}와 연결에 실패하였습니다.")
+                }
+
+                else -> {
+                    Utils.log("연결 상태 변경됨: $state")
+                }
+            }
+        }
+    }
+
+    override fun ErrorReceived(p0: KDCDevice<*>?, p1: Int) {
+        Utils.log("KDC 연결 에러: $p1")
+    }
+
+    override fun BarcodeDataReceived(p0: KDCData) {
+        val barcode: String = p0.GetData()
+        val intent = Intent("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+        intent.putExtra("data", barcode)
+        mContext.sendBroadcast(intent)
+        Utils.log("바코드 스캔 데이터: $barcode")
+    }
+
+    private fun disconnectScanner(){
+        if (kdcReader != null) {
+            kdcReader!!.Disconnect()
+            mBinding.header.scanBtn.setColorFilter(getColor(R.color.trans))
         }
     }
 }

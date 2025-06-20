@@ -204,9 +204,8 @@
     <string name="purchaseAddress">배송처</string>
     <string name="NoAddress">배송처 정보가 없습니다.</string>
     <string name="purchaseAddressHint">배송처를 선택해주세요.</string>
-    <string name="purchasePostMsg01">위와 같이 승인을 요청하였습니다.</string>
-    <string name="purchasePostMsg02">본사 전송 이후 전송된 전표는 수정이 불가능합니다.</string>
-    <string name="purchasePostMsg03">전송을 하시겠습니까?</string>
+    <string name="purchasePostMsg01">위와 같이 구매를 요청하였습니다.</string>
+    <string name="purchasePostMsg03">구매요청 전송을 하시겠습니까?</string>
     <string name="purchaseSlip">구매전표 :</string>
     <string name="distributorCode">대리점코드 :</string>
     <string name="msg_same_product">동일한 제품이 주문 리스트에 있습니다.</string>

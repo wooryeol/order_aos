@@ -23,5 +23,5 @@ data class SearchItemModel (
     var vat: Int? = null, // 부가세
     var itemSeq: Int? = null, // 순번
     var getBoxQty: Int? = null, // 박스 입수량
-    var kanCode: String? = null // 바코드
+    var kanCode: String? = null, // 바코드
 ):Serializable

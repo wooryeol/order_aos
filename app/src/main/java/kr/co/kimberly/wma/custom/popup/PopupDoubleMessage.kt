@@ -44,12 +44,9 @@ class PopupDoubleMessage(mContext: Context, private var title: String, private v
         if (purchase != null) {
             if (purchase) {
                 mBinding.tvMsg04.visibility = View.VISIBLE
-                mBinding.tvMsg05.visibility = View.VISIBLE
-                mBinding.tvMsg05.paintFlags = Paint.UNDERLINE_TEXT_FLAG
             }
         } else {
             mBinding.tvMsg04.visibility = View.GONE
-            mBinding.tvMsg05.visibility = View.GONE
         }
 
         mBinding.cancel.setOnClickListener(object: OnSingleClickListener() {

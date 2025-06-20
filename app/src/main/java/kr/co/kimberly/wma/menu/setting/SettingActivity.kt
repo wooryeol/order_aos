@@ -30,6 +30,7 @@ import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
 import kr.co.kimberly.wma.custom.popup.PopupSearchDevices
 import kr.co.kimberly.wma.databinding.ActSettingBinding
+import kr.co.kimberly.wma.menu.login.LoginActivity
 
 @SuppressLint("MissingPermission")
 class SettingActivity : AppCompatActivity() {
@@ -309,6 +310,16 @@ class SettingActivity : AppCompatActivity() {
             } else {
                 Utils.toast(this, "블루투스가 비활성화되어 있습니다")
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (mAgencyCode != mBinding.accountCode.text.toString() && mAgencyCode != "") {
+            Utils.toast(mContext, "대리점코드가 변경 되어 로그인 화면으로 이동합니다.")
+            val intent = Intent(mContext, LoginActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
         }
     }
 }

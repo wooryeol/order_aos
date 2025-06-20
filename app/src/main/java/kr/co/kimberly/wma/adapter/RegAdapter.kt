@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -168,8 +169,8 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
         }
     }
 
+    @SuppressLint("SetTextI18n", "WrongConstant", "UseCompatLoadingForDrawables")
     inner class HeaderViewHolder(val binding: HeaderRegBinding) : RecyclerView.ViewHolder(binding.root) {
-        @SuppressLint("SetTextI18n", "WrongConstant")
         fun bind() {
             if (accountName?.isNotEmpty() == true) {
                 binding.accountName.text = accountName
@@ -222,6 +223,21 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
                     true
                 } else {
                     false
+                }
+            }
+
+            // 가격 조정 권한 세팅
+            if (mLoginInfo.authorityModifyPrice == "N") {
+                binding.etPrice.isFocusable = false
+                binding.etPrice.background = context.getDrawable(R.drawable.et_round_f6f9fe)
+
+                binding.etEach.setOnEditorActionListener { _, actionId, _ ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        true
+                    } else {
+                        binding.btAddOrder.performClick()
+                        false
+                    }
                 }
             }
 
@@ -476,6 +492,74 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
             })
         }
 
+        fun setSearchedItem(it:SearchItemModel) {
+            // 검색어 DB 저장
+            if (!db.searchList.contains(it.itemNm)) {
+                db.insertSearchData(it.itemNm ?: "")
+                searchListAdapter.notifyDataSetChanged()
+            }
+
+            if (dataList.isEmpty()) {
+                binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                binding.etProductName.visibility = View.GONE
+                binding.tvProductName.visibility = View.VISIBLE
+                binding.tvProductName.isSelected = true
+                binding.etProductName.setText(it.itemNm)
+                binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                binding.etPrice.setText(it.netPrice!!.toString())
+                selectedItem = SearchItemModel(
+                    it.itemCd,
+                    it.itemNm,
+                    it.whStock,
+                    it.getBox,
+                    it.vatYn,
+                    it.netPrice
+                )
+            } else {
+                dataList.forEach {item ->
+                    if (item.itemCd == it.itemCd) {
+                        val popupNotice = PopupNotice(context, context.getString(R.string.msg_same_product))
+                        popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+                            override fun onOkClick() {
+                                binding.etProductName.setText("")
+                                binding.btProductNameEmpty.visibility = View.GONE
+                                binding.etProductName.hint = context.getString(R.string.productNameHint)
+                                binding.tvProductName.visibility = View.GONE
+                                binding.etProductName.visibility = View.VISIBLE
+                                binding.searchResult.text = context.getString(R.string.searchResult)
+                            }
+                        }
+                        popupNotice.show()
+                    } else {
+                        binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                        binding.etProductName.visibility = View.GONE
+                        binding.tvProductName.visibility = View.VISIBLE
+                        binding.tvProductName.isSelected = true
+                        binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                        binding.etPrice.setText(it.netPrice!!.toString())
+                        selectedItem = SearchItemModel(
+                            it.itemCd,
+                            it.itemNm,
+                            it.whStock,
+                            it.getBox,
+                            it.vatYn,
+                            it.netPrice
+                        )
+                        if (!binding.etBox.text.isNullOrEmpty()){
+                            binding.etBox.setText("0")
+                        }
+                        if (!binding.etEach.text.isNullOrEmpty()){
+                            binding.etEach.setText("0")
+                        }
+                        if (!binding.etPrice.text.isNullOrEmpty()){
+                            binding.etPrice.setText("0")
+                        }
+                        Utils.log("RegAdapter selected item 222 ====> ${Gson().toJson(selectedItem)}")
+                    }
+                }
+            }
+        }
+
         // 검색 아이템 리스트 조회
         fun searchItem(searchCondition: String, searchType: String) {
             val loading = PopupLoading(context)
@@ -500,73 +584,15 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
                                 popupResultNothing?.show()
                             } else {
                                 val itemList = item.data.itemList
-                                popupSearchResult = PopupSearchResult(context, itemList)
-                                popupSearchResult?.show()
+                                if (searchType == Define.BARCODE && itemList.size == 1) {
+                                    setSearchedItem(itemList[0])
+                                } else {
+                                    popupSearchResult = PopupSearchResult(context, itemList)
+                                    popupSearchResult?.show()
 
-                                // 팝업 선택 시
-                                popupSearchResult?.onItemSelect = {
-                                    // 검색어 DB 저장
-                                    if (!db.searchList.contains(it.itemNm)) {
-                                        db.insertSearchData(it.itemNm ?: "")
-                                        searchListAdapter.notifyDataSetChanged()
-                                    }
-
-                                    if (dataList.isEmpty()) {
-                                        binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                        binding.etProductName.visibility = View.GONE
-                                        binding.tvProductName.visibility = View.VISIBLE
-                                        binding.tvProductName.isSelected = true
-                                        binding.etProductName.setText(it.itemNm)
-                                        binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                        selectedItem = SearchItemModel(
-                                            it.itemCd,
-                                            it.itemNm,
-                                            it.whStock,
-                                            it.getBox,
-                                            it.vatYn,
-                                            it.netPrice
-                                        )
-                                    } else {
-                                        dataList.forEach {item ->
-                                            if (item.itemCd == it.itemCd) {
-                                                val popupNotice = PopupNotice(context, context.getString(R.string.msg_same_product))
-                                                popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
-                                                    override fun onOkClick() {
-                                                        binding.etProductName.setText("")
-                                                        binding.btProductNameEmpty.visibility = View.GONE
-                                                        binding.etProductName.hint = context.getString(R.string.productNameHint)
-                                                        binding.tvProductName.visibility = View.GONE
-                                                        binding.etProductName.visibility = View.VISIBLE
-                                                        binding.searchResult.text = context.getString(R.string.searchResult)
-                                                    }
-                                                }
-                                                popupNotice.show()
-                                            } else {
-                                                binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                                binding.etProductName.visibility = View.GONE
-                                                binding.tvProductName.visibility = View.VISIBLE
-                                                binding.tvProductName.isSelected = true
-                                                binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                                selectedItem = SearchItemModel(
-                                                    it.itemCd,
-                                                    it.itemNm,
-                                                    it.whStock,
-                                                    it.getBox,
-                                                    it.vatYn,
-                                                    it.netPrice
-                                                )
-                                                if (!binding.etBox.text.isNullOrEmpty()){
-                                                    binding.etBox.setText("0")
-                                                }
-                                                if (!binding.etEach.text.isNullOrEmpty()){
-                                                    binding.etEach.setText("0")
-                                                }
-                                                if (!binding.etPrice.text.isNullOrEmpty()){
-                                                    binding.etPrice.setText("0")
-                                                }
-                                                Utils.log("RegAdapter selected item 222 ====> ${Gson().toJson(selectedItem)}")
-                                            }
-                                        }
+                                    // 팝업 선택 시
+                                    popupSearchResult?.onItemSelect = {
+                                        setSearchedItem(it)
                                     }
                                 }
                             }

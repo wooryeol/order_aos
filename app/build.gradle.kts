@@ -19,8 +19,8 @@ android {
         applicationId = "kr.co.kimberly.wma"
         minSdk = 28
         targetSdk = 34
-        versionCode = 25051602
-        versionName = "1.0.8"
+        versionCode = 25062001
+        versionName = "1.0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -80,8 +80,8 @@ dependencies {
     // TSC 프린터
     implementation(files("libs/bluetooth.jar"))
     // SM-F711N 모델 스캔 라이브러리
-    implementation(files("libs/device.sdk.jar"))
-    implementation(files("libs/kdclib.jar"))
+    /*implementation(files("libs/device.sdk.jar"))
+    implementation(files("libs/kdclib.jar"))*/
 
     //lottie 라이브러리
     implementation ("com.airbnb.android:lottie:3.7.0")
@@ -111,4 +111,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation ("androidx.lifecycle:lifecycle-livedata-ktx:2.8.7")
     implementation ("androidx.activity:activity-ktx:1.9.3")
+
+    //KDC 스캐너 라이브러리
+    implementation(mapOf("name" to "kdcreader-release", "ext" to "aar"))
 }

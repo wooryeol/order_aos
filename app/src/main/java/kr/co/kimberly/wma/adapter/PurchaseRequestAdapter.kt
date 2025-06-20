@@ -158,7 +158,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                 onItemSelect?.invoke(item)
             }
 
-            Utils.log("item ====> ${Gson().toJson(item)}")
+            Utils.log("item 111 ====> ${Gson().toJson(item)}")
 
             binding.orderName.text = item.itemNm
             binding.tvBoxEach.text = "BOX(${item.getBox}EA): "
@@ -362,6 +362,8 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                                     saleQty = saleQty,
                                     supplyPrice = supplyPrice,
                                     vat = vat,
+                                    netPrice = selectedItem?.netPrice,
+                                    vatYn = selectedItem?.vatYn,
                                     amount = amount
                                 )
 
@@ -629,6 +631,80 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
             })
         }
 
+        fun setSearchedItem(it: SearchItemModel) {
+            // 검색어 DB 저장
+            if (!db.searchList.contains(it.itemNm)) {
+                db.insertSearchData(it.itemNm ?: "")
+                searchListAdapter.notifyDataSetChanged()
+            }
+
+            if (itemList.isEmpty()) {
+                //본사 발주 가능 시
+                if (it.enableOrderYn == "Y") {
+                    binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                    binding.etProductName.visibility = View.GONE
+                    binding.tvProductName.visibility = View.VISIBLE
+                    binding.tvProductName.isSelected = true
+                    binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                    binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
+                    selectedItem = SearchItemModel(
+                        itemCd = it.itemCd,
+                        itemNm = it.itemNm,
+                        whStock = it.whStock,
+                        getBox = it.getBox,
+                        vatYn = it.vatYn,
+                        netPrice = it.netPrice,
+                        enableOrderYn = it.enableOrderYn,
+                        orderPrice = it.orderPrice
+                    )
+                } else {
+                    Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.", binding.etProductName)
+                }
+            } else {
+                itemList.forEach { item ->
+                    if (item.itemCd == it.itemCd) {
+                        val popupNotice = PopupNotice(context, context.getString(R.string.msg_same_product))
+                        popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
+                            override fun onOkClick() {
+                                binding.etProductName.setText("")
+                                binding.btProductNameEmpty.visibility = View.GONE
+                                binding.etProductName.hint = context.getString(R.string.productNameHint)
+                                binding.tvProductName.visibility = View.GONE
+                                binding.etProductName.visibility = View.VISIBLE
+                                binding.searchResult.text = context.getString(R.string.searchResult)
+                            }
+                        }
+                        popupNotice.show()
+                    } else {
+                        //본사 발주 가능 시
+                        if (it.enableOrderYn == "Y") {
+                            binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                            binding.etProductName.visibility = View.GONE
+                            binding.tvProductName.visibility = View.VISIBLE
+                            binding.tvProductName.isSelected = true
+                            binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                            binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
+                            selectedItem = SearchItemModel(
+                                itemCd = it.itemCd,
+                                itemNm = it.itemNm,
+                                whStock = it.whStock,
+                                getBox = it.getBox,
+                                vatYn = it.vatYn,
+                                netPrice = it.netPrice,
+                                enableOrderYn = it.enableOrderYn,
+                                orderPrice = it.orderPrice
+                            )
+                            if (!binding.etBox.text.isNullOrEmpty()){
+                                binding.etBox.setText("0")
+                            }
+                        } else {
+                            Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.", binding.etProductName)
+                        }
+                    }
+                }
+            }
+        }
+
         // 검색 아이템 리스트 조회
         fun searchItem(searchCondition: String, context: Context, searchType: String) {
             val loading = PopupLoading(context)
@@ -646,88 +722,24 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                 ) {
                     loading.hideDialog()
                 if (response.isSuccessful) {
-                        val item = response.body()
+                    val item = response.body()
                         if (item?.returnCd == Define.RETURN_CD_00 || item?.returnCd == Define.RETURN_CD_90 || item?.returnCd == Define.RETURN_CD_91) {
                             //Utils.log("item search success ====> ${Gson().toJson(item.data)}")
 
                             if (item.data.itemList.isNullOrEmpty()) {
                                 Utils.popupNotice(context, context.getString(R.string.error))
                             } else {
-                                popupSearchResult = PopupSearchResult(context, item.data.itemList)
-                                popupSearchResult?.show()
+                                val itemList = item.data.itemList
+                                if (searchType == Define.PURCHASE_BARCODE && itemList.size == 1) {
+                                    setSearchedItem(itemList[0])
+                                } else {
+                                    popupSearchResult = PopupSearchResult(context, itemList)
+                                    popupSearchResult?.show()
 
-                                // 팝업 선택 시
-                                popupSearchResult?.onItemSelect = {
-                                    // 검색어 DB 저장
-                                    if (!db.searchList.contains(it.itemNm)) {
-                                        db.insertSearchData(it.itemNm ?: "")
-                                        searchListAdapter.notifyDataSetChanged()
-                                    }
-
-                                    if (itemList.isEmpty()) {
-                                        //본사 발주 가능 시
-                                        if (it.enableOrderYn == "Y") {
-                                            binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                            binding.etProductName.visibility = View.GONE
-                                            binding.tvProductName.visibility = View.VISIBLE
-                                            binding.tvProductName.isSelected = true
-                                            binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                            binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
-                                            selectedItem = SearchItemModel(
-                                                itemCd = it.itemCd,
-                                                itemNm = it.itemNm,
-                                                whStock = it.whStock,
-                                                getBox = it.getBox,
-                                                vatYn = it.vatYn,
-                                                netPrice = it.netPrice,
-                                                enableOrderYn = it.enableOrderYn,
-                                                orderPrice = it.orderPrice
-                                            )
-                                        } else {
-                                            Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.", binding.etProductName)
-                                        }
-                                    } else {
-                                        itemList.forEach { item ->
-                                            if (item.itemCd == it.itemCd) {
-                                                val popupNotice = PopupNotice(context, context.getString(R.string.msg_same_product))
-                                                popupNotice.itemClickListener = object : PopupNotice.ItemClickListener{
-                                                    override fun onOkClick() {
-                                                        binding.etProductName.setText("")
-                                                        binding.btProductNameEmpty.visibility = View.GONE
-                                                        binding.etProductName.hint = context.getString(R.string.productNameHint)
-                                                        binding.tvProductName.visibility = View.GONE
-                                                        binding.etProductName.visibility = View.VISIBLE
-                                                        binding.searchResult.text = context.getString(R.string.searchResult)
-                                                    }
-                                                }
-                                                popupNotice.show()
-                                            } else {
-                                                //본사 발주 가능 시
-                                                if (it.enableOrderYn == "Y") {
-                                                    binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                                    binding.etProductName.visibility = View.GONE
-                                                    binding.tvProductName.visibility = View.VISIBLE
-                                                    binding.tvProductName.isSelected = true
-                                                    binding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                                    binding.tvPrice.text = Utils.decimal(it.orderPrice!!)
-                                                    selectedItem = SearchItemModel(
-                                                        itemCd = it.itemCd,
-                                                        itemNm = it.itemNm,
-                                                        whStock = it.whStock,
-                                                        getBox = it.getBox,
-                                                        vatYn = it.vatYn,
-                                                        netPrice = it.netPrice,
-                                                        enableOrderYn = it.enableOrderYn,
-                                                        orderPrice = it.orderPrice
-                                                    )
-                                                    if (!binding.etBox.text.isNullOrEmpty()){
-                                                        binding.etBox.setText("0")
-                                                    }
-                                                } else {
-                                                    Utils.popupNotice(context, "현재 본사 발주가 불가능한 제품입니다.", binding.etProductName)
-                                                }
-                                            }
-                                        }
+                                    // 팝업 선택 시
+                                    popupSearchResult?.onItemSelect = {
+                                        Utils.log("purchase item ====> ${Gson().toJson(it)}")
+                                        setSearchedItem(it)
                                     }
                                 }
                             }

@@ -171,7 +171,7 @@ class SlipInquiryModifyAdapter(private var mContext :Context,val slipList: Array
     }
 
     inner class HeaderViewHolder(private val headerBinding: HeaderRegBinding) : RecyclerView.ViewHolder(headerBinding.root) {
-        @SuppressLint("SetTextI18n", "WrongConstant")
+        @SuppressLint("SetTextI18n", "WrongConstant", "UseCompatLoadingForDrawables")
         fun bind() {
 
             headerBinding.accountName.text = "($customerCd) $customerNm"
@@ -263,6 +263,21 @@ class SlipInquiryModifyAdapter(private var mContext :Context,val slipList: Array
                 }
             })
 
+            // 가격 조정 권한 세팅
+            if (mLoginInfo?.authorityModifyPrice == "N") {
+                headerBinding.etPrice.isFocusable = false
+                headerBinding.etPrice.background = mContext.getDrawable(R.drawable.et_round_f6f9fe)
+
+                headerBinding.etEach.setOnEditorActionListener { _, actionId, _ ->
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        true
+                    } else {
+                        headerBinding.btAddOrder.performClick()
+                        false
+                    }
+                }
+            }
+
             headerBinding.etPrice.setOnEditorActionListener{_, actionId, _ ->
                 if (actionId == EditorInfo.IME_ACTION_DONE){
                     headerBinding.btAddOrder.performClick()
@@ -324,6 +339,7 @@ class SlipInquiryModifyAdapter(private var mContext :Context,val slipList: Array
                                         saleQty = saleQty,
                                         supplyPrice = supplyPrice,
                                         vat = vat,
+                                        vatYn = selectedItem?.vatYn,
                                         amount = amount
                                     )
 
@@ -402,6 +418,50 @@ class SlipInquiryModifyAdapter(private var mContext :Context,val slipList: Array
             })
         }
 
+        fun setSearchedItem(it: SearchItemModel) {
+            // 검색어 DB 저장
+            if (!db.searchList.contains(it.itemNm)) {
+                db.insertSearchData(it.itemNm ?: "")
+                searchListAdapter.notifyDataSetChanged()
+            }
+
+            slipList.forEach { data ->
+                clearButton()
+                if (data.itemCd == it.itemCd ) {
+                    Utils.popupNotice(mContext, mContext.getString(R.string.msg_same_product))
+                    headerBinding.etProductName.setText("")
+                    headerBinding.btProductNameEmpty.visibility = View.GONE
+                    headerBinding.etProductName.hint = mContext.getString(R.string.productNameHint)
+                } else {
+                    if (!headerBinding.etBox.text.isNullOrEmpty()){
+                        headerBinding.etBox.setText("0")
+                    }
+                    if (!headerBinding.etEach.text.isNullOrEmpty()){
+                        headerBinding.etEach.setText("0")
+                    }
+                    if (!headerBinding.etPrice.text.isNullOrEmpty()){
+                        headerBinding.etPrice.setText("0")
+                    }
+                    headerBinding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
+                    headerBinding.etProductName.visibility = View.GONE
+                    headerBinding.btProductNameEmpty.visibility = View.VISIBLE
+                    headerBinding.tvProductName.visibility = View.VISIBLE
+                    headerBinding.tvProductName.isSelected = true
+                    headerBinding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
+                    headerBinding.etPrice.setText(it.netPrice.toString())
+                    selectedItem = SearchItemModel(
+                        it.itemCd,
+                        it.itemNm,
+                        it.whStock,
+                        it.getBox,
+                        it.vatYn,
+                        it.netPrice
+                    )
+                    Utils.log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
+                }
+            }
+        }
+
         // 검색 아이템 리스트 조회
         fun searchItem(searchCondition: String, searchType: String) {
             val loading = PopupLoading(mContext)
@@ -426,51 +486,15 @@ class SlipInquiryModifyAdapter(private var mContext :Context,val slipList: Array
                                 Utils.popupNotice(mContext, mContext.getString(R.string.error))
                             } else {
                                 val itemList = item.data.itemList
-                                popupSearchResult = PopupSearchResult(mContext, itemList)
-                                popupSearchResult?.show()
+                                if (searchType == Define.BARCODE && itemList.size == 1) {
+                                    setSearchedItem(itemList[0])
+                                } else {
+                                    popupSearchResult = PopupSearchResult(mContext, itemList)
+                                    popupSearchResult?.show()
 
-                                // 팝업 선택 시
-                                popupSearchResult?.onItemSelect = {
-
-                                    // 검색어 DB 저장
-                                    if (!db.searchList.contains(it.itemNm)) {
-                                        db.insertSearchData(it.itemNm ?: "")
-                                        searchListAdapter.notifyDataSetChanged()
-                                    }
-
-                                    slipList.forEach { data ->
-                                        clearButton()
-                                        if (data.itemCd == it.itemCd ) {
-                                            Utils.popupNotice(mContext, mContext.getString(R.string.msg_same_product))
-                                            headerBinding.etProductName.setText("")
-                                            headerBinding.btProductNameEmpty.visibility = View.GONE
-                                            headerBinding.etProductName.hint = mContext.getString(R.string.productNameHint)
-                                        } else {
-                                            headerBinding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
-                                            headerBinding.etProductName.visibility = View.GONE
-                                            headerBinding.btProductNameEmpty.visibility = View.VISIBLE
-                                            headerBinding.tvProductName.visibility = View.VISIBLE
-                                            headerBinding.tvProductName.isSelected = true
-                                            headerBinding.tvProductName.text = "(${it.itemCd}) ${it.itemNm}"
-                                            selectedItem = SearchItemModel(
-                                                it.itemCd,
-                                                it.itemNm,
-                                                it.whStock,
-                                                it.getBox,
-                                                it.vatYn,
-                                                it.netPrice
-                                            )
-                                            if (!headerBinding.etBox.text.isNullOrEmpty()){
-                                                headerBinding.etBox.setText("0")
-                                            }
-                                            if (!headerBinding.etEach.text.isNullOrEmpty()){
-                                                headerBinding.etEach.setText("0")
-                                            }
-                                            if (!headerBinding.etPrice.text.isNullOrEmpty()){
-                                                headerBinding.etPrice.setText("0")
-                                            }
-                                            Utils.log("RegAdapter selected item ====> ${Gson().toJson(selectedItem)}")
-                                        }
+                                    // 팝업 선택 시
+                                    popupSearchResult?.onItemSelect = {
+                                        setSearchedItem(it)
                                     }
                                 }
                             }

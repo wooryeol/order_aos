@@ -32,6 +32,7 @@ class DBHelper private constructor(
         const val ORDER_SUPPLY_PRICE = "SUPPLY_PRICE"
         const val ORDER_UNIT_QTY = "UNIT_QTY"
         const val ORDER_VAT = "VAT"
+        const val ORDER_VAT_YN = "VAT_YN"
 
         // 반품
         const val TABLE_RETURN = "RETURN_LIST"
@@ -46,6 +47,7 @@ class DBHelper private constructor(
         const val RETURN_SUPPLY_PRICE = "SUPPLY_PRICE"
         const val RETURN_UNIT_QTY = "UNIT_QTY"
         const val RETURN_VAT = "VAT"
+        const val RETURN_VAT_YN = "VAT_YN"
 
         // 구매
         const val TABLE_PURCHASE = "PURCHASE_LIST"
@@ -59,6 +61,7 @@ class DBHelper private constructor(
         const val PURCHASE_SALE_QTY = "SALE_QTY"
         const val PURCHASE_SUPPLY_PRICE = "SUPPLY_PRICE"
         const val PURCHASE_VAT = "VAT"
+        const val PURCHASE_VAT_YN = "VAT_YN"
 
         // 전표수정
         const val TABLE_SLIP = "SLIP_LIST"
@@ -109,7 +112,8 @@ class DBHelper private constructor(
                 "$ORDER_SALE_QTY INTEGER, " +
                 "$ORDER_SUPPLY_PRICE INTEGER, " +
                 "$ORDER_UNIT_QTY INTEGER, " +
-                "$ORDER_VAT INTEGER)"
+                "$ORDER_VAT INTEGER, " +
+                "$ORDER_VAT_YN TEXT)"
 
         val returnItem = "CREATE TABLE $TABLE_RETURN (" +
                 "$RETURN_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -122,7 +126,8 @@ class DBHelper private constructor(
                 "$RETURN_SALE_QTY INTEGER, " +
                 "$RETURN_SUPPLY_PRICE INTEGER, " +
                 "$RETURN_UNIT_QTY INTEGER, " +
-                "$RETURN_VAT INTEGER)"
+                "$RETURN_VAT INTEGER, " +
+                "$RETURN_VAT_YN TEXT)"
 
         val purchaseItem = "CREATE TABLE $TABLE_PURCHASE (" +
                 "$PURCHASE_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -134,7 +139,8 @@ class DBHelper private constructor(
                 "$PURCHASE_ORDER_PRICE INTEGER, " +
                 "$PURCHASE_SALE_QTY INTEGER, " +
                 "$PURCHASE_SUPPLY_PRICE INTEGER, " +
-                "$PURCHASE_VAT INTEGER)"
+                "$PURCHASE_VAT INTEGER, " +
+                "$PURCHASE_VAT_YN TEXT)"
 
         val slipItem = "CREATE TABLE $TABLE_SLIP (" +
                 "$SLIP_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -225,6 +231,7 @@ class DBHelper private constructor(
                     item.supplyPrice = cursor.getInt(cursor.getColumnIndex(ORDER_SUPPLY_PRICE))
                     item.unitQty = cursor.getInt(cursor.getColumnIndex(ORDER_UNIT_QTY))
                     item.vat = cursor.getInt(cursor.getColumnIndex(ORDER_VAT))
+                    item.vatYn = cursor.getString(cursor.getColumnIndex(ORDER_VAT_YN))
                     items.add(item)
                 } while (cursor.moveToNext())
             }
@@ -246,6 +253,7 @@ class DBHelper private constructor(
             put(ORDER_SUPPLY_PRICE, item.supplyPrice)
             put(ORDER_UNIT_QTY, item.unitQty)
             put(ORDER_VAT, item.vat)
+            put(ORDER_VAT_YN, item.vatYn)
         }
 
         db.insert(TABLE_ORDER, null, values)
@@ -278,6 +286,7 @@ class DBHelper private constructor(
                     item.supplyPrice = cursor.getInt(cursor.getColumnIndex(RETURN_SUPPLY_PRICE))
                     item.unitQty = cursor.getInt(cursor.getColumnIndex(RETURN_UNIT_QTY))
                     item.vat = cursor.getInt(cursor.getColumnIndex(RETURN_VAT))
+                    item.vatYn = cursor.getString(cursor.getColumnIndex(RETURN_VAT_YN))
                     items.add(item)
                 } while (cursor.moveToNext())
             }
@@ -299,6 +308,7 @@ class DBHelper private constructor(
             put(RETURN_SUPPLY_PRICE, item.supplyPrice)
             put(RETURN_UNIT_QTY, item.unitQty)
             put(RETURN_VAT, item.vat)
+            put(RETURN_VAT_YN, item.vatYn)
         }
 
         db.insert(TABLE_RETURN, null, values)
@@ -330,6 +340,7 @@ class DBHelper private constructor(
                     item.saleQty = cursor.getInt(cursor.getColumnIndex(PURCHASE_SALE_QTY))
                     item.supplyPrice = cursor.getInt(cursor.getColumnIndex(PURCHASE_SUPPLY_PRICE))
                     item.vat = cursor.getInt(cursor.getColumnIndex(PURCHASE_VAT))
+                    item.vatYn = cursor.getString(cursor.getColumnIndex(PURCHASE_VAT_YN))
                     items.add(item)
                 } while (cursor.moveToNext())
             }
@@ -350,6 +361,7 @@ class DBHelper private constructor(
             put(PURCHASE_SALE_QTY, item.saleQty)
             put(PURCHASE_SUPPLY_PRICE, item.supplyPrice)
             put(PURCHASE_VAT, item.vat)
+            put(PURCHASE_VAT_YN, item.vatYn)
         }
 
         db.insert(TABLE_PURCHASE, null, values)

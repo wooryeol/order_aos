@@ -23,29 +23,7 @@ class SearchResultAdapter(context: Context): RecyclerView.Adapter<SearchResultAd
 
             itemView.setOnClickListener {
                 Utils.log("clicked item ====> ${Gson().toJson(itemModel)}")
-                // 본사 발주 가능일 때
-                /*if(itemModel.enableOrderYn == "N") {
-                    itemClickListener?.onItemClick(itemModel)
-                } else {
-                    //본사 발주 불가능일 때
-                    val item = SpannableString("(${itemModel.itemCd}) ${itemModel.itemNm}")
-                    item.setSpan(UnderlineSpan(), 0, item.length, 0)
-                    PopupNotice(mContext, "(${itemModel.itemCd}) ${itemModel.itemNm}\n해당 제품은 현재 본사 발주가 불가능합니다.").show()
-                }*/
-
                 itemClickListener?.onItemClick(itemModel)
-                /*val intent = Intent(itemView.context, MessageActivity::class.java)
-                intent.putExtra(Define.UNIQUE, itemModel.name)
-                intent.putExtra(Define.D_COUNT, binding.dCount.text.toString())
-                intent.putExtra(Define.MEMBER_TYPE, itemModel.type)
-                intent.putExtra(Define.MAIN_COLOR, itemModel.color)
-                intent.putExtra(Define.MAIN_NAME, itemModel.name_kor)
-                intent.putExtra(Define.TOP_THUMB, itemModel.top_thumbnail)
-                intent.putExtra(Define.TOP_THUMB_LINK, itemModel.top_thumbnail_link)
-                intent.putExtra(Define.CHANGE_THUMB, itemModel.change_thumb)
-                intent.putExtra(Define.MENU_SW, isMenuSw)
-                itemView.context.startActivity(intent)
-                mActivity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right)*/
             }
         }
     }

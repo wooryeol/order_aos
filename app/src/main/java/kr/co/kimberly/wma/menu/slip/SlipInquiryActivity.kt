@@ -356,6 +356,7 @@ class SlipInquiryActivity : AppCompatActivity() {
         val agencyCd = mLoginInfo?.agencyCd!!
         val userId = mLoginInfo?.userId!!
         val slipType = if (mBinding.radioOrder.isChecked) Define.ORDER else Define.RETURN
+        Utils.log("slipType ====> $slipType")
 
         val loading = PopupLoading(mContext)
         loading.show()

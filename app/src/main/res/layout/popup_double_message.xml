@@ -48,17 +48,6 @@
             tools:ignore="HardcodedText,SpUsage" />
 
         <TextView
-            android:visibility="gone"
-            android:id="@+id/tvMsg05"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/purchasePostMsg02"
-            android:textSize="14dp"
-            android:textColor="@color/color_1A1A1A"
-            android:gravity="center"
-            tools:ignore="HardcodedText,SpUsage" />
-
-        <TextView
             android:id="@+id/tvMsg02"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

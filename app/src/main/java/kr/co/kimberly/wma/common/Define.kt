@@ -69,7 +69,8 @@ object Define {
     const val BOTH = "CB"
 
     // 스캐너
-    const val UUID = "00001101-0000-1000-8000-00805f9b34fb"
+    const val UUID_280 = "00001101-0000-1000-8000-00805f9b34fb"
+    const val UUID_270 = "00001800-0000-1000-8000-00805f9b34fb"
     const val PRINTER_UUID = "00000000-deca-fade-deca-deafdecacaff"
 
     // 프린트 유형
