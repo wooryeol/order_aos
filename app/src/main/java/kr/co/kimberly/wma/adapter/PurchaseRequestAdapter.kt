@@ -62,7 +62,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
     var onItemDelete: ((SearchItemModel) -> Unit)? = null // 선택된 제품 삭제
     var onItemScan: ((String) -> Unit)? = null // 아이템 스캔
 
-    private var barcodeReceiver = object : BroadcastReceiver() {
+    var barcodeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             when (val barcode = intent?.getStringExtra("data")) {
                 null -> {
@@ -419,9 +419,6 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
                     searchItem(it, binding.root.context, Define.PURCHASE_BARCODE)
                 }
             }
-
-            val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
-            context.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
         }
 
         // SAP Code 조회

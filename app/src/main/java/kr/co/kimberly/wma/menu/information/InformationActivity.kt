@@ -151,7 +151,7 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
 
         mBinding.header.scanBtn.setOnClickListener(object : OnSingleClickListener() {
             override fun onSingleClick(v: View) {
-                val isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
+                /*val isScannerConnected = SharedData.getSharedData(mContext, "isScannerConnected", false)
                 // 사용 여부 확인
                 if (!isScannerConnected) {
                     val popupNotice = PopupNotice(mContext, mContext.getString(R.string.msg_scan_connect_error))
@@ -168,7 +168,11 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
                     disconnectScanner()
                 } else {
                     checkScanner()
-                }
+                }*/
+
+                val intent = Intent("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+                intent.putExtra("data", "8801166376686")
+                mContext.sendBroadcast(intent)
             }
         })
 
@@ -178,17 +182,16 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
             mBinding.etSearch.hint = getString(R.string.productHint)
             mBinding.productInfoLayout.visibility = View.VISIBLE
             mBinding.accountInfoLayout.visibility = View.GONE
-            mSearchType = Define.TYPE_ITEM
-            getDetailInfo(it, Define.BARCODE)
+            mSearchType = Define.BARCODE
+            getInfo(it)
         }
 
-        val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
-        mContext.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         disconnectScanner()
+        unregisterReceiver(barcodeReceiver)
     }
 
     override fun onPause() {
@@ -199,6 +202,8 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
     override fun onResume() {
         super.onResume()
         checkScanner()
+        val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+        mContext.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
     }
 
     private fun checkScanner(){
@@ -284,6 +289,8 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
         loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.masterInfo(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, mSearchType!!, searchCondition)
+        Utils.log("mSearchType ====> $mSearchType")
+        Utils.log("searchCondition ====> $searchCondition")
         //test
         //val call = service.masterInfo("C000000", "mb2004", mSearchType!!, searchCondition)
 
@@ -298,7 +305,7 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item != null) {
-                        Utils.log("item ====> $item")
+                        Utils.log("item 111 ====> ${Gson().toJson(item)}")
                         if (item.returnCd == Define.RETURN_CD_90 || item.returnCd == Define.RETURN_CD_91 || item.returnCd == Define.RETURN_CD_00) {
                             val gson = Gson()
                             when(mSearchType) {
@@ -342,6 +349,28 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
                                     popupAccountInformation.show()
                                 }
 
+                                Define.BARCODE -> {
+                                    Utils.log("item barcode info search success ====> ${Gson().toJson(item.data.itemList)}")
+                                    // itemList를 JSON 문자열로 변환 후 다시 List<Customer>로 변환
+                                    val jsonElement = gson.toJsonTree(item.data.itemList)
+                                    val jsonString = gson.toJson(jsonElement)
+                                    val itemListType = object : TypeToken<ArrayList<SearchItemModel>>() {}.type
+                                    val itemList: ArrayList<SearchItemModel> = gson.fromJson(jsonString, itemListType)
+
+                                    if (itemList.size == 1) {
+                                        itemName = itemList[0].itemNm.toString()
+                                        getDetailInfo(itemList[0].itemCd.toString())
+                                    } else {
+                                        val popupAccountInformation = PopupAccountInformation(mContext, null, itemList)
+                                        popupAccountInformation.onItemSelect = {
+                                            mSearchType = Define.TYPE_ITEM
+                                            itemName = it.itemNm.toString()
+                                            getDetailInfo(it.itemCd.toString(), Define.SEARCH)
+                                        }
+                                        popupAccountInformation.show()
+                                    }
+                                }
+
                                 else -> {
                                     Utils.popupNotice(mContext, item.returnMsg, mBinding.etSearch)
                                 }
@@ -372,6 +401,11 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
         loading.show()
         val service = ApiClientService.retrofit.create(ApiClientService::class.java)
         val call = service.masterInfoDetail(mLoginInfo.agencyCd!!, mLoginInfo.userId!!, mSearchType!!, subSearchType , searchCd)
+        Utils.log("mLoginInfo.agencyCd!! ====> ${mLoginInfo.agencyCd!!}")
+        Utils.log("mLoginInfo.userId!! ====> ${mLoginInfo.userId!!}")
+        Utils.log("mSearchType!! ====> $mSearchType")
+        Utils.log("subSearchType ====> $subSearchType")
+        Utils.log("searchCd ====> $searchCd")
 
         //test
         //val call = service.masterInfoDetail("C000000", "mb2004", mSearchType!!, searchCd)
@@ -386,7 +420,7 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
                 if (response.isSuccessful) {
                     val item = response.body()
                     if (item != null) {
-                        Utils.log("item ====> $item")
+                        Utils.log("item 222 ====> $item")
                         if (item.returnCd == Define.RETURN_CD_90 || item.returnCd == Define.RETURN_CD_91 || item.returnCd == Define.RETURN_CD_00) {
                             val data = item.data
                             when(mSearchType) {
@@ -428,7 +462,6 @@ class InformationActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCErr
                                     )
                                     mBinding.tvProductName.text = detailInfoModel?.itemNm
                                     setInfo(detailInfoModel!!)
-
                                 }
 
                                 else -> {

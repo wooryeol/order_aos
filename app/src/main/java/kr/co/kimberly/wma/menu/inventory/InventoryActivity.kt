@@ -200,14 +200,12 @@ class InventoryActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCError
             warehouseStock(it, Define.BARCODE)
             //warehouseStock("8801166011747", Define.BARCODE)
         }
-
-        val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
-        mContext.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         disconnectScanner()
+        unregisterReceiver(barcodeReceiver)
     }
 
     override fun onPause() {
@@ -218,6 +216,8 @@ class InventoryActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCError
     override fun onResume() {
         super.onResume()
         checkScanner()
+        val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+        mContext.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
     }
 
     private fun checkScanner(){

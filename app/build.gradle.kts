@@ -13,14 +13,14 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "kr.co.kimberly.wma"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "kr.co.kimberly.wma"
         minSdk = 28
-        targetSdk = 34
-        versionCode = 25062001
-        versionName = "1.0.9"
+        targetSdk = 35
+        versionCode = 25070301
+        versionName = "1.0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

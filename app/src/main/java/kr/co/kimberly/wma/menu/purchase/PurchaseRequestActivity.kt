@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,6 +14,7 @@ import android.os.Message
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -151,6 +153,8 @@ class PurchaseRequestActivity: AppCompatActivity(), KDCConnectionListenerEx, KDC
     override fun onResume() {
         super.onResume()
         checkScanner()
+        val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+        mContext.registerReceiver(purchaseAdapter?.barcodeReceiver, filter, RECEIVER_EXPORTED)
     }
 
     private fun checkScanner(){

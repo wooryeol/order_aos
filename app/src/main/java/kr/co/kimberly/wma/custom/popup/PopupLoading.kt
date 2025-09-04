@@ -17,7 +17,6 @@ import kr.co.kimberly.wma.menu.setting.SettingActivity
 
 class PopupLoading(mContext: Context): Dialog(mContext) {
     private lateinit var mBinding: PopupLoadingBinding
-    private val context = mContext
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

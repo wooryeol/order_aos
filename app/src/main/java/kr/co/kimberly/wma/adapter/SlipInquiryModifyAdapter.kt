@@ -49,7 +49,7 @@ class SlipInquiryModifyAdapter(private var mContext :Context,val slipList: Array
     var onItemDelete: ((SearchItemModel) -> Unit)? = null // 제품 삭제 시
     var onItemScan: ((String) -> Unit)? = null // 제품 스캔 시
 
-    private var barcodeReceiver = object : BroadcastReceiver() {
+    var barcodeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             when (val barcode = intent?.getStringExtra("data")) {
                 null -> {
@@ -375,9 +375,6 @@ class SlipInquiryModifyAdapter(private var mContext :Context,val slipList: Array
                     searchItem(it, Define.BARCODE)
                 }
             }
-
-            val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
-            mContext.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
         }
 
         // 단가 정보 조회

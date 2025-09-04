@@ -22,7 +22,7 @@ object Define {
     const val EVENT_RETRY = 888
 
     // 테스트
-    const val IS_TEST = false
+    const val IS_TEST = true
 
     // provider
     const val fileProvider = "kr.co.kimberly.wma.fileprovider"

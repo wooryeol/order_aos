@@ -1,29 +1,21 @@
 package kr.co.kimberly.wma.adapter
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import androidx.core.content.ContextCompat.RECEIVER_EXPORTED
-import androidx.core.content.ContextCompat.registerReceiver
 import androidx.core.widget.addTextChangedListener
-import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import kr.co.kimberly.wma.GlobalApplication
 import kr.co.kimberly.wma.R
-import kr.co.kimberly.wma.common.BarcodeViewModel
 import kr.co.kimberly.wma.common.Define
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.custom.OnSingleClickListener
@@ -37,7 +29,6 @@ import kr.co.kimberly.wma.custom.popup.PopupSearchResult
 import kr.co.kimberly.wma.databinding.CellOrderRegBinding
 import kr.co.kimberly.wma.databinding.HeaderRegBinding
 import kr.co.kimberly.wma.db.DBHelper
-import kr.co.kimberly.wma.menu.setting.SettingActivity
 import kr.co.kimberly.wma.network.ApiClientService
 import kr.co.kimberly.wma.network.model.DataModel
 import kr.co.kimberly.wma.network.model.LoginResponseModel
@@ -62,7 +53,7 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
     var onItemScan: ((String) -> Unit)? = null // 제품 스캔 시
     var customerCd: String ? = null
 
-    private var barcodeReceiver = object : BroadcastReceiver() {
+    var barcodeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             when (val barcode = intent?.getStringExtra("data")) {
                 null -> {
@@ -449,9 +440,6 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
                     searchItem(it, Define.BARCODE)
                 }
             }
-
-            val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
-            context.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
         }
 
         // 단가 정보 조회
