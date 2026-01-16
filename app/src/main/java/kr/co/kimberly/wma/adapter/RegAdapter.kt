@@ -519,6 +519,15 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
                         }
                         popupNotice.show()
                     } else {
+                        if (!binding.etBox.text.isNullOrEmpty()){
+                            binding.etBox.setText("0")
+                        }
+                        if (!binding.etEach.text.isNullOrEmpty()){
+                            binding.etEach.setText("0")
+                        }
+                        if (!binding.etPrice.text.isNullOrEmpty()){
+                            binding.etPrice.setText("0")
+                        }
                         binding.searchResult.text = "(${it.itemCd}) ${it.itemNm}"
                         binding.etProductName.visibility = View.GONE
                         binding.tvProductName.visibility = View.VISIBLE
@@ -533,15 +542,7 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
                             it.vatYn,
                             it.netPrice
                         )
-                        if (!binding.etBox.text.isNullOrEmpty()){
-                            binding.etBox.setText("0")
-                        }
-                        if (!binding.etEach.text.isNullOrEmpty()){
-                            binding.etEach.setText("0")
-                        }
-                        if (!binding.etPrice.text.isNullOrEmpty()){
-                            binding.etPrice.setText("0")
-                        }
+
                         Utils.log("RegAdapter selected item 222 ====> ${Gson().toJson(selectedItem)}")
                     }
                 }

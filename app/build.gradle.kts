@@ -19,8 +19,8 @@ android {
         applicationId = "kr.co.kimberly.wma"
         minSdk = 28
         targetSdk = 35
-        versionCode = 25070301
-        versionName = "1.0.10"
+        versionCode = 26011601
+        versionName = "1.0.11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true

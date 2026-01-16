@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -71,6 +73,25 @@ class ReturnRegActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCError
         DBHelper.getInstance(applicationContext)
     }
     private var isSave = true // 액티비티가 종료 될 때 이 값을 통해 저장 여부 선택
+
+    var onItemScan: ((String) -> Unit)? = null // 제품 삭제 시
+
+    private var barcodeReceiver = object : BroadcastReceiver() { // 스캐너 값 읽어오는 부분
+        override fun onReceive(context: Context, intent: Intent?) {
+            when (val barcode = intent?.getStringExtra("data")) {
+                null -> {
+                    // 데이터가 null일 때 아무것도 하지 않음
+                    Utils.popupNotice(context, "바코드를 다시 스캔해주세요")
+                }
+                else -> {
+                    if (barcode.isNotEmpty()) {
+                        Utils.log("adapter barcode data ====> $barcode")
+                        onItemScan?.invoke(barcode)
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -141,8 +162,8 @@ class ReturnRegActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCError
 
     override fun onDestroy() {
         super.onDestroy()
-        returnAdapter?.cleanup()
         disconnectScanner()
+        unregisterReceiver(barcodeReceiver)
     }
 
     override fun onPause() {
@@ -153,6 +174,8 @@ class ReturnRegActivity : AppCompatActivity(), KDCConnectionListenerEx, KDCError
     override fun onResume() {
         super.onResume()
         checkScanner()
+        val filter = IntentFilter("kr.co.kimberly.wma.ACTION_BARCODE_SCANNED")
+        mContext.registerReceiver(barcodeReceiver, filter, RECEIVER_EXPORTED)
     }
 
     private fun checkScanner(){

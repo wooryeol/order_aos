@@ -5,6 +5,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import kr.co.kimberly.wma.common.Utils
 import kr.co.kimberly.wma.databinding.CellProductPriceHistoryBinding
 import kr.co.kimberly.wma.network.model.ProductPriceHistoryModel
@@ -18,7 +19,7 @@ class ProductPriceHistoryAdapter(context: Context): RecyclerView.Adapter<Product
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: ProductPriceHistoryModel) {
             binding.date.text = itemModel.saleDate
-            binding.price.text = "${Utils.decimal(itemModel.salePrice.toInt())}원"
+            binding.price.text = "${Utils.decimal(itemModel.salePrice.toDouble().toInt())}원"
 
             itemView.setOnClickListener {
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
