@@ -822,7 +822,7 @@ class PurchaseRequestAdapter(mContext: Context, mActivity: Activity, list: Array
     @SuppressLint("NotifyDataSetChanged")
     fun addItem(item: SearchItemModel, sapModel: SapModel) {
         itemList.removeAll{ it.itemCd == item.itemCd}
-        itemList.add(item)
+        itemList.add(0, item)
         Utils.log("updateData dataList ====> ${Gson().toJson(itemList)}")
         notifyDataSetChanged()
         updateData(itemList, sapModel)

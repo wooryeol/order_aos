@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.core.widget.addTextChangedListener
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import kr.co.kimberly.wma.GlobalApplication
@@ -612,7 +613,7 @@ class RegAdapter(mContext: Context, list: ArrayList<SearchItemModel>, private va
     @SuppressLint("NotifyDataSetChanged")
     fun addItem(item: SearchItemModel, accountName: String) {
         dataList.removeAll{ it.itemCd == item.itemCd}
-        dataList.add(item)
+        dataList.add(0,item)
         Utils.log("updateData dataList ====> ${Gson().toJson(dataList)}")
         notifyDataSetChanged()
         updateData(dataList, accountName)
