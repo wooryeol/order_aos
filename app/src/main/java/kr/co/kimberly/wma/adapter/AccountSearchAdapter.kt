@@ -20,10 +20,10 @@ class AccountSearchAdapter(context: Context): RecyclerView.Adapter<AccountSearch
 
         @SuppressLint("SetTextI18n")
         fun bind(itemModel: CustomerModel) {
-            binding.accountSearchName.text = "(${itemModel.custCd}) ${itemModel.custNm} [${itemModel.remainAmt}원]"
+            binding.accountSearchName.text = "(${itemModel.custCd}) ${itemModel.custNm} [${Utils.decimalLong(itemModel.remainAmt!!)}원]"
 
             itemView.setOnClickListener {
-                Utils.log("selected account ====> (${itemModel.custCd}) ${itemModel.custNm} [${itemModel.remainAmt}원]")
+                Utils.log("selected account ====> (${itemModel.custCd}) ${itemModel.custNm} [${Utils.decimalLong(itemModel.remainAmt)}원]")
                 itemClickListener?.onItemClick(itemModel)
                 /*val intent = Intent(itemView.context, MessageActivity::class.java)
                 intent.putExtra(Define.UNIQUE, itemModel.name)

@@ -7,7 +7,7 @@ data class CustomerModel (
     val customerCd: String, // 거래처 코드
     val custNm: String, // 거래처 명
     val customerNm: String, // 거래처 코드
-    val remainAmt: Int? = null, // 채권잔액
+    val remainAmt: Long? = null, // 채권잔액
     val slipNo: String? = null, // 전표 번호
     val totalAmount: Int? = null // 금액
 ): Serializable
