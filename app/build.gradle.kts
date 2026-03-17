@@ -1,4 +1,8 @@
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import java.io.FileInputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.Properties
 
 plugins {
@@ -19,8 +23,8 @@ android {
         applicationId = "kr.co.kimberly.wma"
         minSdk = 28
         targetSdk = 35
-        versionCode = 26012603
-        versionName = "1.0.15"
+        versionCode = 26031701
+        versionName = "1.0.16"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -36,14 +40,39 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+
         release {
             isMinifyEnabled = false
+            isDebuggable = false
             isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        applicationVariants.all {
+            val variant  = this
+            variant.outputs.all {
+                val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+
+                val flavor = variant.buildType.name
+                val versionName = variant.versionName
+                val formattedDate = SimpleDateFormat("yyMMdd-HHmm", Locale.getDefault()).format(Date())
+                val finalName = "wma-v$versionName-$flavor-$formattedDate.apk"
+
+                output.outputFileName = finalName
+            }
         }
     }
 
