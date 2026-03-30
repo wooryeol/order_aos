@@ -100,8 +100,10 @@ class LoginActivity : AppCompatActivity() {
 
         // 테트스 환경 로그인 정보 자동 기입
         if(Define.IS_TEST) {
-            mBinding.etId.setText("C000000")
-            mBinding.etPw.setText("Hh12345678")
+            /*mBinding.etId.setText("C000000")
+            mBinding.etPw.setText("Hh12345678")*/
+            mBinding.etId.setText("C000065")
+            mBinding.etPw.setText("@mirae2024")
         }
 
         val loginTextWatcher = object : TextWatcher {

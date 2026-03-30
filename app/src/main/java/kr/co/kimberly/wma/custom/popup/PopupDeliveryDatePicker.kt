@@ -184,7 +184,7 @@ class PopupDeliveryDatePicker(val mContext: Context): Dialog(mContext) {
         today.set(year, month - 1, date)
 
         val currentDate = Calendar.getInstance()
-        currentDate.add(Calendar.DAY_OF_YEAR, 1)
+        currentDate.add(Calendar.DAY_OF_YEAR, 0)
         if (today.before(currentDate)) {
             today.time = currentDate.time
             year = today.get(Calendar.YEAR)
