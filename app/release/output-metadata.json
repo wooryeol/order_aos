@@ -11,9 +11,9 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 26011601,
-      "versionName": "1.0.11",
-      "outputFile": "app-release.apk"
+      "versionCode": 26012603,
+      "versionName": "1.0.15",
+      "outputFile": "wma-v1.0.15-release-260317-1118.apk"
     }
   ],
   "elementType": "File"
